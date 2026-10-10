@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { logoutAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { isSuperAdmin, requireAdmin } from "@/lib/auth";
-import { tenantThemeStyle } from "@/lib/branding";
+import { adminThemeStyle } from "@/lib/branding";
 
 export default async function AdminPanelLayout({
   children,
@@ -14,17 +14,17 @@ export default async function AdminPanelLayout({
   if (!admin) redirect("/admin/login");
 
   const superAdmin = isSuperAdmin(admin);
-  const theme = tenantThemeStyle(admin.tenant);
+  const theme = adminThemeStyle();
 
   return (
-    <div style={theme} className="min-h-screen bg-[#f3f7f6]">
-      <header className="border-b border-[#c5d8d2] bg-white">
+    <div style={theme} className="min-h-screen bg-[#f7fbfd]">
+      <header className="border-b border-[#d5e3ec] bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4">
           <div>
             <p className="font-[family-name:var(--font-display)] text-lg text-[var(--brand-deep)]">
               {admin.tenant.name}
             </p>
-            <p className="text-xs text-[#4a655f]">
+            <p className="text-xs text-[#5a6578]">
               {superAdmin ? "Super-admin plataforma" : "Admin empresa"} ·{" "}
               {admin.email}
             </p>
@@ -34,13 +34,13 @@ export default async function AdminPanelLayout({
               <>
                 <Link
                   href="/admin/plataforma"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Empresas
                 </Link>
                 <Link
                   href="/admin/plataforma/nueva"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Nueva
                 </Link>
@@ -49,29 +49,32 @@ export default async function AdminPanelLayout({
               <>
                 <Link
                   href="/admin"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Resumen
                 </Link>
                 <Link
                   href="/admin/productos"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Productos
                 </Link>
                 <Link
                   href="/admin/pedidos"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Pedidos
                 </Link>
                 <Link
                   href="/admin/marca"
-                  className="text-[var(--brand-deep)] hover:underline"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
                 >
                   Marca
                 </Link>
-                <Link href="/" className="text-[#4a655f] hover:underline">
+                <Link
+                  href="/"
+                  className="text-[#5a6578] hover:text-[var(--brand)] hover:underline"
+                >
                   Ver tienda
                 </Link>
               </>

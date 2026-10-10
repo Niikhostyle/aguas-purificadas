@@ -31,7 +31,7 @@ export default async function AdminProductsPage() {
           <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
             Productos
           </h1>
-          <p className="mt-2 text-sm text-[#4a655f]">
+          <p className="mt-2 text-sm text-[#5a6578]">
             Listá y editá el catálogo del tenant. Los cambios se reflejan en la
             tienda.
           </p>
@@ -45,12 +45,12 @@ export default async function AdminProductsPage() {
       </div>
 
       {products.length === 0 ? (
-        <p className="mt-10 rounded-lg border border-dashed border-[#b7cdc6] bg-white px-6 py-12 text-center text-[#4a655f]">
+        <p className="mt-10 rounded-lg border border-dashed border-[#d5e3ec] bg-white px-6 py-12 text-center text-[#5a6578]">
           No hay productos. Creá el primero o volvé a correr{" "}
-          <code className="rounded bg-[#eef5f3] px-1">npm run db:seed</code>.
+          <code className="rounded bg-[#e8f7fc] px-1">npm run db:seed</code>.
         </p>
       ) : (
-        <div className="mt-8 overflow-hidden rounded-lg border border-[#c5d8d2] bg-white">
+        <div className="mt-8 overflow-hidden rounded-lg border border-[#d5e3ec] bg-white">
           <Table>
             <TableHeader>
               <TableRow>
@@ -65,7 +65,7 @@ export default async function AdminProductsPage() {
                 <TableRow key={product.id}>
                   <TableCell>
                     <p className="font-medium">{product.name}</p>
-                    <p className="text-xs text-[#4a655f]">{product.slug}</p>
+                    <p className="text-xs text-[#5a6578]">{product.slug}</p>
                   </TableCell>
                   <TableCell>{formatClp(product.priceClp)}</TableCell>
                   <TableCell>

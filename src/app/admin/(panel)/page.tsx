@@ -26,35 +26,35 @@ export default async function AdminHomePage() {
       <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
         Resumen
       </h1>
-      <p className="mt-2 text-[#4a655f]">
+      <p className="mt-2 text-[#5a6578]">
         Panel de {admin.tenant.name}. Catálogo, carrito y WebPay (sandbox/mock).
       </p>
 
       <dl className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-[#c5d8d2] bg-white p-5">
-          <dt className="text-sm text-[#4a655f]">Productos</dt>
+        <div className="rounded-lg border border-[#d5e3ec] bg-white p-5">
+          <dt className="text-sm text-[#5a6578]">Productos</dt>
           <dd className="mt-1 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
             {productCount}
           </dd>
-          <p className="mt-1 text-xs text-[#4a655f]">{activeCount} activos</p>
+          <p className="mt-1 text-xs text-[#5a6578]">{activeCount} activos</p>
         </div>
-        <div className="rounded-lg border border-[#c5d8d2] bg-white p-5">
-          <dt className="text-sm text-[#4a655f]">Zonas</dt>
+        <div className="rounded-lg border border-[#d5e3ec] bg-white p-5">
+          <dt className="text-sm text-[#5a6578]">Zonas</dt>
           <dd className="mt-1 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
             {zoneCount}
           </dd>
         </div>
-        <div className="rounded-lg border border-[#c5d8d2] bg-white p-5">
-          <dt className="text-sm text-[#4a655f]">Pedidos</dt>
+        <div className="rounded-lg border border-[#d5e3ec] bg-white p-5">
+          <dt className="text-sm text-[#5a6578]">Pedidos</dt>
           <dd className="mt-1 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
             {orderCount}
           </dd>
-          <p className="mt-1 text-xs text-[#4a655f]">
+          <p className="mt-1 text-xs text-[#5a6578]">
             {pendingCount} pendientes
           </p>
         </div>
-        <div className="rounded-lg border border-[#c5d8d2] bg-white p-5">
-          <dt className="text-sm text-[#4a655f]">Slug tenant</dt>
+        <div className="rounded-lg border border-[#d5e3ec] bg-white p-5">
+          <dt className="text-sm text-[#5a6578]">Slug tenant</dt>
           <dd className="mt-1 font-[family-name:var(--font-display)] text-2xl text-[var(--brand-deep)]">
             {admin.tenant.slug}
           </dd>
@@ -70,7 +70,7 @@ export default async function AdminHomePage() {
         </Link>
         <Link
           href="/admin/productos"
-          className="inline-flex rounded-md border border-[#c5d8d2] bg-white px-4 py-2 text-sm font-medium text-[var(--brand-deep)]"
+          className="inline-flex rounded-md border border-[#d5e3ec] bg-white px-4 py-2 text-sm font-medium text-[var(--brand-deep)]"
         >
           Productos
         </Link>

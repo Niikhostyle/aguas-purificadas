@@ -27,7 +27,7 @@ export default async function NewTenantPage({
       <h1 className="mt-3 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
         Nueva empresa
       </h1>
-      <p className="mt-2 text-sm text-[#4a655f]">
+      <p className="mt-2 text-sm text-[#5a6578]">
         Crea tenant, admin de empresa, catálogo demo, zonas y credenciales
         WebPay sandbox.
       </p>
@@ -72,7 +72,7 @@ export default async function NewTenantPage({
             <Input
               id="primaryColor"
               name="primaryColor"
-              defaultValue="#0B4F6C"
+              defaultValue="#00B1E2"
             />
           </div>
           <div className="space-y-2">
@@ -80,7 +80,7 @@ export default async function NewTenantPage({
             <Input
               id="secondaryColor"
               name="secondaryColor"
-              defaultValue="#01BAEF"
+              defaultValue="#12326E"
             />
           </div>
           <div className="space-y-2">
@@ -101,7 +101,7 @@ export default async function NewTenantPage({
           </div>
         </div>
 
-        <fieldset className="space-y-3 border-t border-[#c5d8d2] pt-5">
+        <fieldset className="space-y-3 border-t border-[#d5e3ec] pt-5">
           <legend className="text-sm font-medium text-[var(--brand-deep)]">
             Admin de la empresa
           </legend>
