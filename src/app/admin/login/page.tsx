@@ -23,12 +23,12 @@ export default async function AdminLoginPage({
   const isPlatform = tenantSlug === "plataforma";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f4f1_0%,#f3f7f6_50%,#dce8e4_100%)] px-5">
+    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] px-5">
       <div className="w-full max-w-md">
         <p className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
           {isPlatform ? "Panel plataforma" : "Panel empresa"}
         </p>
-        <p className="mt-2 text-sm text-[#4a655f]">
+        <p className="mt-2 text-sm text-[#5a6578]">
           {isPlatform
             ? "Super-admin: gestiona el alta de empresas."
             : "Ingresá con el admin de la empresa (slug del tenant)."}
@@ -36,7 +36,7 @@ export default async function AdminLoginPage({
 
         <form
           action={loginAction}
-          className="mt-8 space-y-4 rounded-lg border border-[#c5d8d2] bg-white p-6 shadow-sm"
+          className="mt-8 space-y-4 rounded-lg border border-[#d5e3ec] bg-white p-6 shadow-sm"
         >
           <div className="space-y-2">
             <Label htmlFor="tenantSlug">Slug empresa</Label>
@@ -82,7 +82,7 @@ export default async function AdminLoginPage({
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-[#4a655f]">
+        <p className="mt-6 text-center text-sm text-[#5a6578]">
           <Link
             href={isPlatform ? "/admin/login?tenant=rio-claro" : "/admin/login?tenant=plataforma"}
             className="text-[var(--brand)] hover:underline"

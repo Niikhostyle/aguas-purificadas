@@ -158,16 +158,16 @@ async function main() {
     update: {
       name: "Aguas Purificadas Plataforma",
       tagline: "Operación multi-empresa",
-      primaryColor: "#1B4332",
-      secondaryColor: "#2D6A4F",
+      primaryColor: "#00B1E2",
+      secondaryColor: "#12326E",
       active: true,
     },
     create: {
       slug: "plataforma",
       name: "Aguas Purificadas Plataforma",
       tagline: "Operación multi-empresa",
-      primaryColor: "#1B4332",
-      secondaryColor: "#2D6A4F",
+      primaryColor: "#00B1E2",
+      secondaryColor: "#12326E",
       active: true,
       adminUsers: {
         create: {

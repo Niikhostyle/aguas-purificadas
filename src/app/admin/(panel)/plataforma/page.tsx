@@ -34,7 +34,7 @@ export default async function PlatformAdminPage() {
           <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
             Plataforma
           </h1>
-          <p className="mt-2 text-sm text-[#4a655f]">
+          <p className="mt-2 text-sm text-[#5a6578]">
             Alta y supervisión de empresas (tenants). No opera el día a día del
             negocio del cliente.
           </p>
@@ -47,7 +47,7 @@ export default async function PlatformAdminPage() {
         </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-lg border border-[#c5d8d2] bg-white">
+      <div className="mt-8 overflow-hidden rounded-lg border border-[#d5e3ec] bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -67,7 +67,7 @@ export default async function PlatformAdminPage() {
                 <TableCell className="font-mono text-xs">{t.slug}</TableCell>
                 <TableCell>{t._count.products}</TableCell>
                 <TableCell>{t._count.orders}</TableCell>
-                <TableCell className="text-xs text-[#4a655f]">
+                <TableCell className="text-xs text-[#5a6578]">
                   {t.webpayCredential?.active
                     ? t.webpayCredential.environment
                     : "—"}

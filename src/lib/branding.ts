@@ -22,9 +22,14 @@ export function lightenHex(hex: string, amount = 0.85): string {
   return `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`;
 }
 
-export function tenantThemeStyle(tenant: Tenant): CSSProperties {
-  const primary = tenant.primaryColor || "#00B1E2";
-  const secondary = tenant.secondaryColor || "#12326E";
+/** Storefront / aguasrioclaro.cl reference — used for all admin chrome. */
+export const STOREFRONT_PRIMARY = "#00B1E2";
+export const STOREFRONT_SECONDARY = "#12326E";
+
+export function themeFromColors(
+  primary: string,
+  secondary: string,
+): CSSProperties {
   const deep = secondary;
   const mist = lightenHex(primary, 0.9);
   const accent = lightenHex(primary, 0.82);
@@ -43,6 +48,18 @@ export function tenantThemeStyle(tenant: Tenant): CSSProperties {
     ["--accent" as string]: accent,
     ["--accent-foreground" as string]: deep,
   } as CSSProperties;
+}
+
+export function tenantThemeStyle(tenant: Tenant): CSSProperties {
+  return themeFromColors(
+    tenant.primaryColor || STOREFRONT_PRIMARY,
+    tenant.secondaryColor || STOREFRONT_SECONDARY,
+  );
+}
+
+/** Admin panels always match the main storefront cyan/navy family. */
+export function adminThemeStyle(): CSSProperties {
+  return themeFromColors(STOREFRONT_PRIMARY, STOREFRONT_SECONDARY);
 }
 
 export function isValidHexColor(value: string): boolean {

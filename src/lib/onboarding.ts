@@ -55,11 +55,11 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
   const primaryColor =
     input.primaryColor && isValidHexColor(input.primaryColor)
       ? input.primaryColor.trim()
-      : "#0A6B5C";
+      : "#00B1E2";
   const secondaryColor =
     input.secondaryColor && isValidHexColor(input.secondaryColor)
       ? input.secondaryColor.trim()
-      : "#1A8A9A";
+      : "#12326E";
 
   const passwordHash = hashSync(input.adminPassword, 10);
 

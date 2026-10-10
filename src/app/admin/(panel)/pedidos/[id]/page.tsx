@@ -35,7 +35,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           {ORDER_STATUS_LABEL[order.status] ?? order.status}
         </Badge>
       </div>
-      <p className="mt-2 text-sm text-[#4a655f]">
+      <p className="mt-2 text-sm text-[#5a6578]">
         {order.createdAt.toLocaleString("es-CL", {
           dateStyle: "long",
           timeStyle: "short",
@@ -50,7 +50,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
       <dl className="mt-8 grid gap-4 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-[#4a655f]">Cliente</dt>
+          <dt className="text-[#5a6578]">Cliente</dt>
           <dd className="mt-1 text-[var(--brand-deep)]">
             {order.customerName}
             <br />
@@ -58,15 +58,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </dd>
         </div>
         <div>
-          <dt className="text-[#4a655f]">Entrega</dt>
+          <dt className="text-[#5a6578]">Entrega</dt>
           <dd className="mt-1 text-[var(--brand-deep)]">
             {order.customerAddress}
             <br />
             {order.deliveryZoneName}
           </dd>
         </div>
-        <div className="sm:col-span-2 rounded-md border border-[#c5d8d2] bg-white p-4">
-          <dt className="text-[#4a655f]">Pago WebPay</dt>
+        <div className="sm:col-span-2 rounded-md border border-[#d5e3ec] bg-white p-4">
+          <dt className="text-[#5a6578]">Pago WebPay</dt>
           <dd className="mt-2 grid gap-1 text-[var(--brand-deep)] sm:grid-cols-2">
             <span>Estado: {ORDER_STATUS_LABEL[order.status] ?? order.status}</span>
             <span>Proveedor: {order.paymentProvider ?? "—"}</span>
@@ -83,7 +83,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         </div>
         {order.customerNotes ? (
           <div className="sm:col-span-2">
-            <dt className="text-[#4a655f]">Notas</dt>
+            <dt className="text-[#5a6578]">Notas</dt>
             <dd className="mt-1 text-[var(--brand-deep)]">
               {order.customerNotes}
             </dd>
@@ -91,7 +91,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         ) : null}
       </dl>
 
-      <ul className="mt-8 space-y-2 border-t border-[#c5d8d2] pt-6 text-sm">
+      <ul className="mt-8 space-y-2 border-t border-[#d5e3ec] pt-6 text-sm">
         {order.items.map((item) => (
           <li key={item.id} className="flex justify-between gap-4">
             <span>
@@ -101,12 +101,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </li>
         ))}
       </ul>
-      <div className="mt-4 space-y-1 border-t border-[#c5d8d2] pt-4 text-sm">
-        <div className="flex justify-between text-[#4a655f]">
+      <div className="mt-4 space-y-1 border-t border-[#d5e3ec] pt-4 text-sm">
+        <div className="flex justify-between text-[#5a6578]">
           <span>Subtotal</span>
           <span>{formatClp(order.subtotalClp)}</span>
         </div>
-        <div className="flex justify-between text-[#4a655f]">
+        <div className="flex justify-between text-[#5a6578]">
           <span>Despacho</span>
           <span>
             {order.shippingClp === 0 ? "Gratis" : formatClp(order.shippingClp)}
