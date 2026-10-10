@@ -37,6 +37,12 @@ export default async function AdminPanelLayout({
             >
               Productos
             </Link>
+            <Link
+              href="/admin/pedidos"
+              className="text-[var(--brand-deep)] hover:underline"
+            >
+              Pedidos
+            </Link>
             <Link href="/" className="text-[#4a655f] hover:underline">
               Ver tienda
             </Link>

@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Tenant resolution uses headers/cookies; keep classic dynamic rendering for Phase 1.
+  // Tenant resolution uses headers/cookies; keep classic dynamic rendering for Phase 1–2.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   images: {
     remotePatterns: [
       {

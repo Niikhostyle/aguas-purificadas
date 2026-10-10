@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AddToCartForm } from "@/components/storefront/add-to-cart-form";
 import { prisma } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
@@ -26,7 +27,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="bg-[linear-gradient(180deg,#dceee9_0%,#f3f7f6_40%)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-20 pt-28 md:grid-cols-2 md:px-8">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-20 pt-12 md:grid-cols-2 md:px-8">
         <div className="aspect-square bg-[linear-gradient(145deg,#d7ebe6_0%,#9ec9c2_100%)]" />
         <div className="flex flex-col justify-center">
           <Link
@@ -46,30 +47,35 @@ export default async function ProductDetailPage({ params }: Props) {
               {product.description}
             </p>
           ) : null}
-          <p className="mt-8 rounded-md border border-[#c5d8d2] bg-white/70 px-4 py-3 text-sm text-[#4a655f]">
-            El carrito y el pago WebPay se habilitan en la siguiente fase. Por
-            ahora podés pedir por WhatsApp o teléfono.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {tenant.whatsapp ? (
-              <a
-                href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`}
-                className="inline-flex items-center justify-center rounded-md bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-deep)]"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Consultar por WhatsApp
-              </a>
-            ) : null}
-            {tenant.phone ? (
-              <a
-                href={`tel:${tenant.phone}`}
-                className="inline-flex items-center justify-center rounded-md border border-[#c5d8d2] bg-white px-5 py-2.5 text-sm font-medium text-[var(--brand-deep)]"
-              >
-                Llamar {tenant.phone}
-              </a>
-            ) : null}
+          <div className="mt-8">
+            <AddToCartForm productId={product.id} />
           </div>
+          <p className="mt-6 text-sm text-[#4a655f]">
+            El pago WebPay se suma en la siguiente fase. Por ahora el pedido queda
+            registrado como pendiente para coordinación.
+          </p>
+          {tenant.whatsapp || tenant.phone ? (
+            <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              {tenant.whatsapp ? (
+                <a
+                  href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`}
+                  className="text-[var(--brand)] underline-offset-4 hover:underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WhatsApp
+                </a>
+              ) : null}
+              {tenant.phone ? (
+                <a
+                  href={`tel:${tenant.phone}`}
+                  className="text-[var(--brand)] underline-offset-4 hover:underline"
+                >
+                  {tenant.phone}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

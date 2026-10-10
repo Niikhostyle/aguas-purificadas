@@ -1,5 +1,5 @@
-// Multi-tenant ecommerce — Phase 1 foundations
-// Future: Order, CartItem, WebPayCredential, Customer
+// Multi-tenant ecommerce — Phase 1–2
+// Future: WebPayCredential, Customer accounts
 
 generator client {
   provider = "prisma-client-js"
@@ -33,6 +33,7 @@ model Tenant {
   adminUsers    AdminUser[]
   products      Product[]
   deliveryZones DeliveryZone[]
+  orders        Order[]
 
   @@map("tenants")
 }
@@ -70,14 +71,14 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
 
   @@unique([tenantId, slug])
   @@index([tenantId, active])
   @@map("products")
 }
 
-/// Stub for Phase 2 cart/checkout coverage
 model DeliveryZone {
   id          String   @id @default(cuid())
   tenantId    String
@@ -90,8 +91,54 @@ model DeliveryZone {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
 
   @@index([tenantId])
   @@map("delivery_zones")
+}
+
+/// pending → paid/failed/cancelled (WebPay in Phase 3)
+model Order {
+  id               String   @id @default(cuid())
+  tenantId         String
+  deliveryZoneId   String?
+  status           String   @default("pending") // pending | paid | failed | cancelled
+  customerName     String
+  customerPhone    String
+  customerAddress  String
+  customerNotes    String?
+  /// Snapshot of zone name at order time
+  deliveryZoneName String?
+  subtotalClp      Int
+  shippingClp      Int      @default(0)
+  totalClp         Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveryZone DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  productId    String?
+  /// Snapshot fields so catalog edits don't rewrite history
+  productName  String
+  productSlug  String
+  unitPriceClp Int
+  quantity     Int
+  lineTotalClp Int
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_items")
 }

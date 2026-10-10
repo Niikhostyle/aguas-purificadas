@@ -40,7 +40,7 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:px-8 md:pb-24">
+        <div className="relative mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-6xl flex-col justify-end px-5 pb-16 pt-16 md:px-8 md:pb-24">
           <p className="animate-hero-rise font-[family-name:var(--font-display)] text-4xl leading-none tracking-tight text-white md:text-6xl lg:text-7xl">
             {tenant.name}
           </p>
@@ -77,8 +77,8 @@ export default async function HomePage() {
             Catálogo
           </h2>
           <p className="mt-3 text-[#4a655f]">
-            Precios en pesos chilenos. El carrito y WebPay llegan en la siguiente
-            fase; por ahora podés revisar el listado completo.
+            Precios en pesos chilenos. Agregá al carrito y confirmá el pedido con
+            despacho a tu comuna.
           </p>
         </div>
         <div className="mt-10">
