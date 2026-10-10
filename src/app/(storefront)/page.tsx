@@ -48,7 +48,10 @@ export default async function HomePage() {
             {tenant.tagline ?? "Agua purificada a domicilio"}
           </h1>
           <p className="animate-hero-rise-delay-2 mt-4 max-w-md text-base text-white/80">
-            Pedí bidones, packs y dispensadores con despacho en tu comuna.
+            {[tenant.city, tenant.region].filter(Boolean).length
+              ? `Despacho en ${[tenant.city, tenant.region].filter(Boolean).join(", ")}. `
+              : ""}
+            Elegí bidones y packs, pagá online y coordinamos la entrega.
           </p>
           <div className="animate-hero-rise-delay-2 mt-8 flex flex-wrap gap-3">
             <Link

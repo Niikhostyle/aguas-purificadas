@@ -108,3 +108,15 @@ export async function requireAdmin() {
   if (!admin) return null;
   return admin;
 }
+
+export async function requireSuperAdmin() {
+  const admin = await getAdminSession();
+  if (!admin || admin.role !== "super_admin") return null;
+  return admin;
+}
+
+export function isSuperAdmin(
+  admin: { role: string } | null | undefined,
+): boolean {
+  return admin?.role === "super_admin";
+}

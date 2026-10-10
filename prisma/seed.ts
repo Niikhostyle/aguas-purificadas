@@ -24,38 +24,30 @@ function encryptSecret(plain: string): string {
 async function main() {
   const passwordHash = hashSync("admin123", 10);
 
+  const rioClaroBrand = {
+    name: "Aguas Río Claro",
+    tagline: "Agua de manantial, ruta a tu puerta en el Maule",
+    about:
+      "Desde Talca llevamos más de una década purificando y repartiendo agua en bidón. Cada carga pasa por filtración, ozono y sellado en planta propia. Atendemos hogares, oficinas y comercio del Maule con rutas diarias y trato cercano — la misma agua que tomamos en casa.",
+    primaryColor: "#0A6B5C",
+    secondaryColor: "#1A8A9A",
+    logoUrl:
+      "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=128&h=128&q=80",
+    phone: "+56 71 234 5678",
+    email: "contacto@aguasrioclaro.demo",
+    whatsapp: "+56912345678",
+    address: "Av. Circunvalación 1250",
+    city: "Talca",
+    region: "Maule",
+    active: true as const,
+  };
+
   const tenant = await prisma.tenant.upsert({
     where: { slug: "rio-claro" },
-    update: {
-      name: "Aguas Río Claro",
-      tagline: "Agua purificada a domicilio en el Maule",
-      about:
-        "Somos una empresa familiar de Talca dedicada a llevar agua purificada de calidad a hogares y oficinas. Filtramos, ozonizamos y envasamos cada bidón con estándares de higiene exigentes, y despachamos en rutas diarias por la región del Maule.",
-      primaryColor: "#0A6B5C",
-      secondaryColor: "#1A8A9A",
-      phone: "+56 71 234 5678",
-      email: "contacto@aguasrioclaro.demo",
-      whatsapp: "+56912345678",
-      address: "Av. Circunvalación 1250",
-      city: "Talca",
-      region: "Maule",
-      active: true,
-    },
+    update: rioClaroBrand,
     create: {
       slug: "rio-claro",
-      name: "Aguas Río Claro",
-      tagline: "Agua purificada a domicilio en el Maule",
-      about:
-        "Somos una empresa familiar de Talca dedicada a llevar agua purificada de calidad a hogares y oficinas. Filtramos, ozonizamos y envasamos cada bidón con estándares de higiene exigentes, y despachamos en rutas diarias por la región del Maule.",
-      primaryColor: "#0A6B5C",
-      secondaryColor: "#1A8A9A",
-      phone: "+56 71 234 5678",
-      email: "contacto@aguasrioclaro.demo",
-      whatsapp: "+56912345678",
-      address: "Av. Circunvalación 1250",
-      city: "Talca",
-      region: "Maule",
-      active: true,
+      ...rioClaroBrand,
       adminUsers: {
         create: {
           email: "admin@rio-claro.demo",
@@ -236,10 +228,121 @@ async function main() {
     },
   });
 
-  console.log("Seed OK — tenant:", tenant.slug);
-  console.log("Admin: admin@rio-claro.demo / admin123");
+  // Platform tenant + super-admin
+  const platform = await prisma.tenant.upsert({
+    where: { slug: "plataforma" },
+    update: {
+      name: "Aguas Purificadas Plataforma",
+      tagline: "Operación multi-empresa",
+      primaryColor: "#1B4332",
+      secondaryColor: "#2D6A4F",
+      active: true,
+    },
+    create: {
+      slug: "plataforma",
+      name: "Aguas Purificadas Plataforma",
+      tagline: "Operación multi-empresa",
+      primaryColor: "#1B4332",
+      secondaryColor: "#2D6A4F",
+      active: true,
+      adminUsers: {
+        create: {
+          email: "super@plataforma.demo",
+          passwordHash,
+          name: "Super Admin",
+          role: "super_admin",
+        },
+      },
+    },
+  });
+
+  await prisma.adminUser.upsert({
+    where: {
+      tenantId_email: {
+        tenantId: platform.id,
+        email: "super@plataforma.demo",
+      },
+    },
+    update: { passwordHash, role: "super_admin", name: "Super Admin" },
+    create: {
+      tenantId: platform.id,
+      email: "super@plataforma.demo",
+      passwordHash,
+      name: "Super Admin",
+      role: "super_admin",
+    },
+  });
+
+  // Second company for isolation demos
+  const { createTenantOnboarding } = await import("../src/lib/onboarding");
+  const existingSecond = await prisma.tenant.findUnique({
+    where: { slug: "manantial-andes" },
+  });
+  if (!existingSecond) {
+    await createTenantOnboarding({
+      slug: "manantial-andes",
+      name: "Manantial Andes",
+      tagline: "Bidones frescos para el Biobío",
+      about:
+        "Planta en Concepción con rutas a San Pedro, Chiguayante y Talcahuano. Enfocados en oficinas y edificios con suscripción semanal.",
+      primaryColor: "#0B4F6C",
+      secondaryColor: "#01BAEF",
+      logoUrl:
+        "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=128&h=128&q=80",
+      phone: "+56 41 234 1000",
+      email: "hola@manantialandes.demo",
+      whatsapp: "+56987654321",
+      address: "Av. Los Carrera 880",
+      city: "Concepción",
+      region: "Biobío",
+      adminName: "Admin Manantial",
+      adminEmail: "admin@manantial-andes.demo",
+      adminPassword: "admin123",
+      withSampleCatalog: true,
+      withSandboxWebpay: true,
+    });
+
+    // Distinct catalog prices vs Río Claro
+    const andes = await prisma.tenant.findUniqueOrThrow({
+      where: { slug: "manantial-andes" },
+    });
+    await prisma.product.deleteMany({ where: { tenantId: andes.id } });
+    await prisma.product.createMany({
+      data: [
+        {
+          tenantId: andes.id,
+          name: "Bidón 12 L",
+          slug: "bidon-12l",
+          description: "Formato liviano para departamentos.",
+          priceClp: 2800,
+          sortOrder: 1,
+        },
+        {
+          tenantId: andes.id,
+          name: "Bidón 20 L premium",
+          slug: "bidon-20l-premium",
+          description: "Agua mineralizada suave, sello de seguridad.",
+          priceClp: 4200,
+          sortOrder: 2,
+        },
+        {
+          tenantId: andes.id,
+          name: "Plan oficina semanal",
+          slug: "plan-oficina-semanal",
+          description: "4 bidones/semana con ruta fija en Concepción.",
+          priceClp: 14990,
+          sortOrder: 3,
+        },
+      ],
+    });
+  }
+
+  console.log("Seed OK");
+  console.log("  rio-claro admin: admin@rio-claro.demo / admin123");
+  console.log("  manantial-andes admin: admin@manantial-andes.demo / admin123");
+  console.log("  plataforma super: super@plataforma.demo / admin123");
   console.log(
-    "WebPay sandbox commerce:",
+    "  WebPay sandbox commerce:",
     IntegrationCommerceCodes.WEBPAY_PLUS,
   );
 }

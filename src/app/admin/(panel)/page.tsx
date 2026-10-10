@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
+import { isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 
 export default async function AdminHomePage() {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin/login");
+  if (isSuperAdmin(admin)) redirect("/admin/plataforma");
 
   const [productCount, zoneCount, activeCount, orderCount, pendingCount] =
     await Promise.all([

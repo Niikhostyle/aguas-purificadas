@@ -23,7 +23,14 @@ export async function loginAction(formData: FormData) {
 
   const result = await loginAdmin(tenantSlug, email, password);
   if (!result.ok) {
-    redirect(`/admin/login?error=${encodeURIComponent(result.error)}`);
+    redirect(
+      `/admin/login?tenant=${encodeURIComponent(tenantSlug)}&error=${encodeURIComponent(result.error)}`,
+    );
+  }
+
+  const admin = await requireAdmin();
+  if (admin?.role === "super_admin") {
+    redirect("/admin/plataforma");
   }
   redirect("/admin");
 }

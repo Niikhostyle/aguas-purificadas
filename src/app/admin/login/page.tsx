@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/auth";
+import { getAdminSession, isSuperAdmin } from "@/lib/auth";
 import { getTenantSlugFromHeaders } from "@/lib/tenant";
 import { loginAction } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -10,30 +10,44 @@ import { Label } from "@/components/ui/label";
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; tenant?: string }>;
 }) {
   const session = await getAdminSession();
-  if (session) redirect("/admin");
+  if (session) {
+    redirect(isSuperAdmin(session) ? "/admin/plataforma" : "/admin");
+  }
 
-  const { error } = await searchParams;
-  const tenantSlug = (await getTenantSlugFromHeaders()) || "rio-claro";
+  const { error, tenant: tenantQuery } = await searchParams;
+  const headerSlug = await getTenantSlugFromHeaders();
+  const tenantSlug = (tenantQuery || headerSlug || "rio-claro").toLowerCase();
+  const isPlatform = tenantSlug === "plataforma";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f4f1_0%,#f3f7f6_50%,#dce8e4_100%)] px-5">
       <div className="w-full max-w-md">
         <p className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-          Panel empresa
+          {isPlatform ? "Panel plataforma" : "Panel empresa"}
         </p>
         <p className="mt-2 text-sm text-[#4a655f]">
-          Ingresá con las credenciales del tenant demo (
-          <code className="rounded bg-white px-1">{tenantSlug}</code>).
+          {isPlatform
+            ? "Super-admin: gestiona el alta de empresas."
+            : "Ingresá con el admin de la empresa (slug del tenant)."}
         </p>
 
         <form
           action={loginAction}
           className="mt-8 space-y-4 rounded-lg border border-[#c5d8d2] bg-white p-6 shadow-sm"
         >
-          <input type="hidden" name="tenantSlug" value={tenantSlug} />
+          <div className="space-y-2">
+            <Label htmlFor="tenantSlug">Slug empresa</Label>
+            <Input
+              id="tenantSlug"
+              name="tenantSlug"
+              required
+              defaultValue={tenantSlug}
+              placeholder="rio-claro"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Correo</Label>
             <Input
@@ -41,7 +55,9 @@ export default async function AdminLoginPage({
               name="email"
               type="email"
               required
-              defaultValue="admin@rio-claro.demo"
+              defaultValue={
+                isPlatform ? "super@plataforma.demo" : "admin@rio-claro.demo"
+              }
               autoComplete="username"
             />
           </div>
@@ -67,8 +83,15 @@ export default async function AdminLoginPage({
         </form>
 
         <p className="mt-6 text-center text-sm text-[#4a655f]">
+          <Link
+            href={isPlatform ? "/admin/login?tenant=rio-claro" : "/admin/login?tenant=plataforma"}
+            className="text-[var(--brand)] hover:underline"
+          >
+            {isPlatform ? "Login empresa demo" : "Login super-admin"}
+          </Link>
+          {" · "}
           <Link href="/" className="text-[var(--brand)] hover:underline">
-            ← Volver a la tienda
+            Tienda
           </Link>
         </p>
       </div>
