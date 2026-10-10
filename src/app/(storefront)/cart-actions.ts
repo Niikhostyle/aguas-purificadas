@@ -12,6 +12,7 @@ import {
   writeCartCookie,
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
+import { startPaymentForOrder } from "@/lib/payments";
 import { requireTenant } from "@/lib/tenant";
 
 function revalidateStorefront() {
@@ -145,5 +146,7 @@ export async function placeOrderAction(formData: FormData) {
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin");
   revalidateStorefront();
-  redirect(`/pedido/${order.id}`);
+
+  const payment = await startPaymentForOrder(order.id, tenant.id);
+  redirect(payment.redirectTo);
 }

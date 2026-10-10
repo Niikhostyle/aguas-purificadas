@@ -51,8 +51,7 @@ export default async function ProductDetailPage({ params }: Props) {
             <AddToCartForm productId={product.id} />
           </div>
           <p className="mt-6 text-sm text-[#4a655f]">
-            El pago WebPay se suma en la siguiente fase. Por ahora el pedido queda
-            registrado como pendiente para coordinación.
+            Al checkout pagás con WebPay (sandbox Transbank o modo mock local).
           </p>
           {tenant.whatsapp || tenant.phone ? (
             <div className="mt-4 flex flex-wrap gap-3 text-sm">

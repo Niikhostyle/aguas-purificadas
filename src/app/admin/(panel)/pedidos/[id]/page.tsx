@@ -3,14 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ORDER_STATUS_LABEL } from "@/lib/order-status";
 import { formatClp } from "@/lib/utils";
-
-const statusLabel: Record<string, string> = {
-  pending: "Pendiente",
-  paid: "Pagado",
-  failed: "Fallido",
-  cancelled: "Cancelado",
-};
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -37,8 +31,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
           Pedido {order.id.slice(-8).toUpperCase()}
         </h1>
-        <Badge variant="secondary">
-          {statusLabel[order.status] ?? order.status}
+        <Badge variant={order.status === "paid" ? "default" : "secondary"}>
+          {ORDER_STATUS_LABEL[order.status] ?? order.status}
         </Badge>
       </div>
       <p className="mt-2 text-sm text-[#4a655f]">
@@ -46,6 +40,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           dateStyle: "long",
           timeStyle: "short",
         })}
+        {order.paidAt
+          ? ` · pagado ${order.paidAt.toLocaleString("es-CL", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })}`
+          : ""}
       </p>
 
       <dl className="mt-8 grid gap-4 text-sm sm:grid-cols-2">
@@ -63,6 +63,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             {order.customerAddress}
             <br />
             {order.deliveryZoneName}
+          </dd>
+        </div>
+        <div className="sm:col-span-2 rounded-md border border-[#c5d8d2] bg-white p-4">
+          <dt className="text-[#4a655f]">Pago WebPay</dt>
+          <dd className="mt-2 grid gap-1 text-[var(--brand-deep)] sm:grid-cols-2">
+            <span>Estado: {ORDER_STATUS_LABEL[order.status] ?? order.status}</span>
+            <span>Proveedor: {order.paymentProvider ?? "—"}</span>
+            <span>WebPay status: {order.webpayStatus ?? "—"}</span>
+            <span>Buy order: {order.buyOrder ?? "—"}</span>
+            <span>Auth: {order.webpayAuthorizationCode ?? "—"}</span>
+            <span>Resp. code: {order.webpayResponseCode ?? "—"}</span>
+            <span>Tipo: {order.webpayPaymentTypeCode ?? "—"}</span>
+            <span>
+              Tarjeta:{" "}
+              {order.webpayCardLast4 ? `****${order.webpayCardLast4}` : "—"}
+            </span>
           </dd>
         </div>
         {order.customerNotes ? (

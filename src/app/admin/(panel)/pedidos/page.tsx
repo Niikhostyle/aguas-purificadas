@@ -11,14 +11,8 @@ import {
 } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ORDER_STATUS_LABEL } from "@/lib/order-status";
 import { formatClp } from "@/lib/utils";
-
-const statusLabel: Record<string, string> = {
-  pending: "Pendiente",
-  paid: "Pagado",
-  failed: "Fallido",
-  cancelled: "Cancelado",
-};
 
 export default async function AdminOrdersPage() {
   const admin = await requireAdmin();
@@ -36,12 +30,13 @@ export default async function AdminOrdersPage() {
         Pedidos
       </h1>
       <p className="mt-2 text-sm text-[#4a655f]">
-        Pedidos del tenant. En Fase 3 se conectará WebPay y los estados de pago.
+        Incluye estado de pago WebPay (sandbox o mock).
       </p>
 
       {orders.length === 0 ? (
         <p className="mt-10 rounded-lg border border-dashed border-[#b7cdc6] bg-white px-6 py-12 text-center text-[#4a655f]">
-          Aún no hay pedidos. Probá el flujo tienda → carrito → checkout.
+          Aún no hay pedidos. Probá el flujo tienda → carrito → checkout →
+          WebPay.
         </p>
       ) : (
         <div className="mt-8 overflow-hidden rounded-lg border border-[#c5d8d2] bg-white">
@@ -50,9 +45,9 @@ export default async function AdminOrdersPage() {
               <TableRow>
                 <TableHead>Ref.</TableHead>
                 <TableHead>Cliente</TableHead>
-                <TableHead>Zona</TableHead>
                 <TableHead>Total</TableHead>
-                <TableHead>Estado</TableHead>
+                <TableHead>Pago</TableHead>
+                <TableHead>WebPay</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead className="text-right">Detalle</TableHead>
               </TableRow>
@@ -69,14 +64,21 @@ export default async function AdminOrdersPage() {
                       {order.customerPhone}
                     </p>
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {order.deliveryZoneName ?? "—"}
-                  </TableCell>
                   <TableCell>{formatClp(order.totalClp)}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">
-                      {statusLabel[order.status] ?? order.status}
+                    <Badge
+                      variant={
+                        order.status === "paid" ? "default" : "secondary"
+                      }
+                    >
+                      {ORDER_STATUS_LABEL[order.status] ?? order.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs text-[#4a655f]">
+                    {order.webpayStatus ?? "—"}
+                    {order.paymentProvider ? (
+                      <span className="block">{order.paymentProvider}</span>
+                    ) : null}
                   </TableCell>
                   <TableCell className="text-sm text-[#4a655f]">
                     {order.createdAt.toLocaleString("es-CL", {

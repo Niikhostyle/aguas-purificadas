@@ -32,8 +32,8 @@ export default async function CheckoutPage({
           Checkout
         </h1>
         <p className="mt-2 max-w-xl text-[#4a655f]">
-          Completá tus datos y la zona de despacho. El pedido queda pendiente;
-          WebPay llega en la Fase 3.
+          Completá tus datos y la zona de despacho. Al confirmar te llevamos a
+          WebPay (sandbox o mock) para pagar.
         </p>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
@@ -128,7 +128,7 @@ export default async function CheckoutPage({
             ) : null}
             <div className="flex flex-wrap gap-3">
               <Button type="submit" disabled={zones.length === 0}>
-                Confirmar pedido
+                Pagar con WebPay
               </Button>
               <Link
                 href="/carrito"

@@ -26,8 +26,7 @@ export default async function AdminHomePage() {
         Resumen
       </h1>
       <p className="mt-2 text-[#4a655f]">
-        Panel de {admin.tenant.name}. Catálogo, carrito y pedidos pending listos;
-        WebPay en Fase 3.
+        Panel de {admin.tenant.name}. Catálogo, carrito y WebPay (sandbox/mock).
       </p>
 
       <dl className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

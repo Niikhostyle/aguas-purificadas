@@ -1,5 +1,5 @@
-// Multi-tenant ecommerce — Phase 1–2
-// Future: WebPayCredential, Customer accounts
+// Multi-tenant ecommerce — Phase 1–3
+// Future: Customer accounts, production WebPay hardening
 
 generator client {
   provider = "prisma-client-js"
@@ -30,12 +30,31 @@ model Tenant {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  adminUsers    AdminUser[]
-  products      Product[]
-  deliveryZones DeliveryZone[]
-  orders        Order[]
+  adminUsers        AdminUser[]
+  products          Product[]
+  deliveryZones     DeliveryZone[]
+  orders            Order[]
+  webpayCredential  WebPayCredential?
 
   @@map("tenants")
+}
+
+/// Per-tenant WebPay Plus credentials (API key encrypted at rest)
+model WebPayCredential {
+  id              String   @id @default(cuid())
+  tenantId        String   @unique
+  commerceCode    String
+  /// AES-GCM ciphertext (base64url)
+  apiKeyEncrypted String
+  /// integration | production
+  environment     String   @default("integration")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("webpay_credentials")
 }
 
 model AdminUser {
@@ -98,7 +117,7 @@ model DeliveryZone {
   @@map("delivery_zones")
 }
 
-/// pending → paid/failed/cancelled (WebPay in Phase 3)
+/// pending → paid/failed/cancelled via WebPay commit
 model Order {
   id               String   @id @default(cuid())
   tenantId         String
@@ -113,6 +132,17 @@ model Order {
   subtotalClp      Int
   shippingClp      Int      @default(0)
   totalClp         Int
+  /// Transbank buy_order (≤26 chars, unique per commerce)
+  buyOrder         String?
+  webpayToken      String?
+  webpayStatus     String?
+  webpayResponseCode Int?
+  webpayAuthorizationCode String?
+  webpayPaymentTypeCode   String?
+  webpayCardLast4  String?
+  /// mock | sandbox
+  paymentProvider  String?
+  paidAt           DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -120,8 +150,10 @@ model Order {
   deliveryZone DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
   items        OrderItem[]
 
+  @@unique([tenantId, buyOrder])
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
+  @@index([webpayToken])
   @@map("orders")
 }
 

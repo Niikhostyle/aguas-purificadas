@@ -1,7 +1,25 @@
 import { PrismaClient } from "@prisma/client";
 import { hashSync } from "bcryptjs";
+import { createCipheriv, createHash, randomBytes } from "crypto";
+import {
+  IntegrationApiKeys,
+  IntegrationCommerceCodes,
+} from "transbank-sdk";
 
 const prisma = new PrismaClient();
+
+function encryptSecret(plain: string): string {
+  const raw =
+    process.env.WEBPAY_CREDENTIALS_KEY ||
+    process.env.ADMIN_SESSION_SECRET ||
+    "dev-webpay-credentials-key";
+  const key = createHash("sha256").update(raw).digest();
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const enc = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, enc]).toString("base64url");
+}
 
 async function main() {
   const passwordHash = hashSync("admin123", 10);
@@ -200,8 +218,30 @@ async function main() {
     });
   }
 
+  // Transbank WebPay Plus integration commerce defaults (sandbox)
+  await prisma.webPayCredential.upsert({
+    where: { tenantId: tenant.id },
+    update: {
+      commerceCode: IntegrationCommerceCodes.WEBPAY_PLUS,
+      apiKeyEncrypted: encryptSecret(IntegrationApiKeys.WEBPAY),
+      environment: "integration",
+      active: true,
+    },
+    create: {
+      tenantId: tenant.id,
+      commerceCode: IntegrationCommerceCodes.WEBPAY_PLUS,
+      apiKeyEncrypted: encryptSecret(IntegrationApiKeys.WEBPAY),
+      environment: "integration",
+      active: true,
+    },
+  });
+
   console.log("Seed OK — tenant:", tenant.slug);
   console.log("Admin: admin@rio-claro.demo / admin123");
+  console.log(
+    "WebPay sandbox commerce:",
+    IntegrationCommerceCodes.WEBPAY_PLUS,
+  );
 }
 
 main()

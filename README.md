@@ -1,112 +1,116 @@
 # Aguas Purificadas
 
-Plataforma ecommerce white-label para empresas de agua purificada (bidones, packs, despacho). Cada empresa es un **tenant** con su propia tienda, catálogo, branding y panel admin.
+Plataforma ecommerce white-label para empresas de agua purificada. Cada empresa es un **tenant** con tienda, catálogo, carrito, WebPay y panel admin.
 
-Entrega actual: **Fase 1 + Fase 2** (fundaciones, catálogo, carrito, checkout → pedido `pending`). Sin WebPay aún (Fase 3).
+Entrega actual: **Fases 1–3** (fundaciones, carrito/checkout, WebPay Plus sandbox + mock).
 
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
 - PostgreSQL + Prisma
-- Carrito en cookie HTTP-only (`aguas_cart`)
-- Resolución de tenant por subdominio, query, header o default de entorno
-
-## Requisitos
-
-- Node.js 20+
-- PostgreSQL 16 (local o Docker)
+- Carrito cookie HTTP-only (`aguas_cart`)
+- Transbank WebPay Plus REST (`transbank-sdk`) por tenant
 
 ## Arranque local
 
-### 1. Base de datos
-
-Con Docker (recomendado):
-
 ```bash
-docker compose up -d
-```
-
-Sin Docker, creá una DB compatible con la URL del `.env.example`.
-
-### 2. Variables de entorno
-
-```bash
+docker compose up -d   # o Postgres local
 cp .env.example .env
-```
-
-| Variable | Valor demo |
-|----------|------------|
-| `DATABASE_URL` | `postgresql://aguas:aguas_dev@localhost:5432/aguas_purificadas?schema=public` |
-| `DEFAULT_TENANT_SLUG` | `rio-claro` |
-| `ADMIN_SESSION_SECRET` | secreto de sesión local |
-
-### 3. Migraciones, seed y app
-
-```bash
 npm install
 npx prisma migrate dev
 npm run db:seed
-npm run dev
+npm run dev            # http://127.0.0.1:43123
 ```
 
-La app queda en **[http://127.0.0.1:43123](http://127.0.0.1:43123)**.
+## Variables de entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `DATABASE_URL` | Postgres |
+| `DEFAULT_TENANT_SLUG` | `rio-claro` en local |
+| `ADMIN_SESSION_SECRET` | Sesión admin |
+| `APP_URL` | Base pública para `return_url` WebPay (`http://127.0.0.1:43123`) |
+| `WEBPAY_MODE` | `auto` (default) · `sandbox` · `mock` |
+| `WEBPAY_CREDENTIALS_KEY` | Material AES para cifrar API keys en DB |
+| `WEBPAY_COMMERCE_CODE` / `WEBPAY_API_KEY` | Override opcional (si no, usa credenciales del tenant o defaults del SDK) |
+
+### Modos WebPay
+
+- **`auto` / `sandbox`:** crea transacción real en ambiente Integration de Transbank. Credenciales: DB del tenant (seed) → env → defaults del SDK.
+- **`mock`:** no llama a Transbank; tras el checkout vas a `/pago/mock/[orderId]` y simulás aprobado / rechazado / anulado.
+
+Si `create` de sandbox falla (red, etc.), hay fallback automático a mock.
 
 ## Tenant demo
 
 | Campo | Valor |
 |-------|--------|
 | Slug | `rio-claro` |
-| Nombre | Aguas Río Claro |
-| Admin | `admin@rio-claro.demo` |
-| Contraseña | `admin123` |
+| Admin | `admin@rio-claro.demo` / `admin123` |
+| WebPay commerce (sandbox) | `597055555532` (`IntegrationCommerceCodes.WEBPAY_PLUS`) |
+| WebPay API key | la de integración del SDK (`IntegrationApiKeys.WEBPAY`), cifrada en DB |
 
-Productos con precios CLP y zonas: Talca centro (gratis), Gran Talca ($1.500), Curicó y Linares ($2.500).
+## Probar pago end-to-end
 
-## Probar carrito → pedido
+### A) Mock (sin Transbank)
 
-1. Abrí [http://127.0.0.1:43123/productos](http://127.0.0.1:43123/productos)
-2. Entrá a un producto → **Agregar al carrito**
-3. En `/carrito` ajustá cantidades o quitá ítems
-4. **Ir al checkout** → nombre, teléfono, dirección y zona de despacho
-5. **Confirmar pedido** → pantalla `/pedido/[id]` con total CLP (estado `pending`)
-6. Admin: [http://127.0.0.1:43123/admin/login](http://127.0.0.1:43123/admin/login) → **Pedidos**
+```bash
+# en .env
+WEBPAY_MODE=mock
+```
 
-## Cómo se resuelve el tenant (local)
+1. Reiniciá `npm run dev`
+2. [http://127.0.0.1:43123/productos](http://127.0.0.1:43123/productos) → agregar al carrito → checkout → **Pagar con WebPay**
+3. En `/pago/mock/...` elegí **Simular pago aprobado**
+4. Confirmación `/pedido/[id]` con estado `paid`
+5. Admin → Pedidos → ver auth `MOCK-AUTH`
 
-Orden en `src/middleware.ts`:
+### B) Sandbox real Transbank
 
-1. **Subdominio** — `rio-claro.localhost:43123`
-2. **Query** — `?tenant=rio-claro` (cookie `aguas_tenant`)
-3. **Header** — `x-tenant: rio-claro`
-4. **Cookie** — `aguas_tenant`
-5. **Env** — `DEFAULT_TENANT_SLUG` (default: `rio-claro`)
+```bash
+WEBPAY_MODE=sandbox   # o auto
+APP_URL=http://127.0.0.1:43123
+```
 
-Sin tenant resuelto → 404.
+1. Mismo flujo hasta **Pagar con WebPay** → redirección a `webpay3gint.transbank.cl`
+2. Usá tarjeta de prueba (abajo)
+3. Return a `/pago/retorno` → commit idempotente → `/pedido/[id]`
+4. Admin muestra `AUTHORIZED`, código de autorización, etc.
 
-## Rutas útiles
+#### Tarjetas de prueba (Integración WebPay Plus)
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Home storefront |
-| `/productos` | Catálogo |
-| `/productos/[slug]` | Ficha + agregar al carrito |
-| `/carrito` | Carrito (cookie) |
-| `/checkout` | Datos + zona → Order pending |
-| `/pedido/[id]` | Confirmación |
-| `/admin/login` | Login admin |
-| `/admin/productos` | CRUD productos |
-| `/admin/pedidos` | Listado de pedidos |
+| Resultado | Número | CVV | Fecha |
+|-----------|--------|-----|-------|
+| Aprobada | `4051885600446623` | `123` | cualquier futura |
+| Rechazada | `5180350659385122` | `123` | cualquier futura |
 
-## Fuera de alcance (próxima fase)
+En el formulario de autenticación del banco de prueba, RUT y clave suelen ser genéricos de integración (p. ej. RUT `11.111.111-1` / clave `123`). Si Transbank cambia el flujo del simulador, seguí las indicaciones en pantalla.
 
-WebPay Plus sandbox, cambio de estado de pago, onboarding multi-tenant UI, deploy producción.
+Documentación oficial: [Transbank Developers — WebPay Plus](https://www.transbankdevelopers.cl/documento/webpay).
+
+## Flujo técnico
+
+1. Checkout crea `Order` `pending` y vacía el carrito  
+2. `create` WebPay → `token` + `url` (o mock)  
+3. Return `/pago/retorno` con `token_ws` (o `TBK_TOKEN` si anula)  
+4. `commit` (si ya estaba committed → `status`) → `paid` / `failed` / `cancelled`  
+5. Admin lista estado de pago
+
+## Rutas
+
+| Ruta | Uso |
+|------|-----|
+| `/carrito` `/checkout` | Carrito y datos |
+| `/pago/retorno` | Return URL Transbank |
+| `/pago/mock/[orderId]` | Simulador local |
+| `/pedido/[id]` | Confirmación + reintentar pago |
+| `/admin/pedidos` | Pedidos y estado WebPay |
 
 ## Scripts
 
 ```bash
-npm run dev          # Next en puerto 43123
-npm run db:migrate   # prisma migrate dev
-npm run db:seed      # tenant + productos + admin
-npm run db:studio    # Prisma Studio
-npm run build        # build producción
+npm run dev          # puerto 43123
+npm run db:migrate
+npm run db:seed
+npm run build
 ```
