@@ -1,0 +1,97 @@
+// Multi-tenant ecommerce — Phase 1 foundations
+// Future: Order, CartItem, WebPayCredential, Customer
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  tagline   String?
+  about     String?
+  /// Hex brand color, e.g. #0B6E4F
+  primaryColor   String  @default("#0B6E4F")
+  secondaryColor String  @default("#1B9AAA")
+  logoUrl        String?
+  phone          String?
+  email          String?
+  whatsapp       String?
+  address        String?
+  city           String?
+  region         String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  adminUsers    AdminUser[]
+  products      Product[]
+  deliveryZones DeliveryZone[]
+
+  @@map("tenants")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  name         String
+  role         String   @default("admin") // admin | super_admin (future)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("admin_users")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  description String?
+  /// Price in Chilean pesos (CLP), whole pesos
+  priceClp    Int
+  imageUrl    String?
+  /// Optional stock; null = not tracked
+  stock       Int?
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, active])
+  @@map("products")
+}
+
+/// Stub for Phase 2 cart/checkout coverage
+model DeliveryZone {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  /// Comunas covered, comma-separated stub
+  communes    String
+  /// Delivery cost in CLP; 0 = gratis
+  costClp     Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("delivery_zones")
+}
