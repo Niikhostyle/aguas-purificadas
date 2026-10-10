@@ -26,19 +26,32 @@ async function main() {
 
   const rioClaroBrand = {
     name: "Aguas Río Claro",
-    tagline: "Agua de manantial, ruta a tu puerta en el Maule",
+    tagline: "Agua purificada libre de sodio y de alta pureza",
     about:
-      "Desde Talca llevamos más de una década purificando y repartiendo agua en bidón. Cada carga pasa por filtración, ozono y sellado en planta propia. Atendemos hogares, oficinas y comercio del Maule con rutas diarias y trato cercano — la misma agua que tomamos en casa.",
-    primaryColor: "#0A6B5C",
-    secondaryColor: "#1A8A9A",
-    logoUrl:
-      "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=128&h=128&q=80",
-    phone: "+56 71 234 5678",
+      "El proceso de purificación es por multietapas, comenzando por agua de red domiciliaria que luego de pasar por 5 etapas o procesos de purificación se obtiene como resultado Agua Purificada no mineral y libre de sodio. Desde Curicó y Talca atendemos hogares y empresas del Maule con contacto garantizado semanal (CGS).",
+    primaryColor: "#00B1E2",
+    secondaryColor: "#12326E",
+    logoUrl: "/brand/rio-claro/logo.png",
+    phone: "+56 75 2 544575",
+    phoneSecondary: "+56 75 2 380007",
     email: "contacto@aguasrioclaro.demo",
     whatsapp: "+56912345678",
-    address: "Av. Circunvalación 1250",
-    city: "Talca",
+    address: "Curicó / Talca",
+    city: "Curicó",
     region: "Maule",
+    deliveryBanner:
+      "Despacho para Talca, Curicó, Linares, San Javier, San Clemente, San Rafael, Molina, Lontué, Teno, Rauco, Hualañé, Licantén, San Fernando, Chimbarongo, Sagrada Familia y Romeral.",
+    hoursBanner:
+      "Horario de atención telefónica, Lunes a Viernes de 8:30 a 13:00 hrs y 14:00 a 17:30 hrs. - Sábado de 09:00 a 13:00 hrs.",
+    heroImageUrl: "/brand/rio-claro/hero.jpg",
+    heroHeadline: "Soluciones integrales de agua purificada",
+    heroBody:
+      "El proceso de purificación es por multietapas, comenzando por agua de red domiciliaria que luego de pasar por 5 etapas o procesos de purificación se obtiene como resultado Agua Purificada no mineral y libre de sodio.",
+    coverageText:
+      "Nos esmeramos día a día por nuestros clientes, sabemos que para ellos el agua debe llegar a tiempo. (Contacto garantizado semanal CGS). Despacho a Talca, Curicó, Linares, San Javier, San Clemente, San Rafael, Molina, Lontué, Teno, Rauco, Hualañé, Licantén, San Fernando, Chimbarongo, Sagrada Familia, Romeral.",
+    facebookUrl: "https://www.facebook.com/aguasrioclaro/",
+    instagramUrl: "https://www.instagram.com/aguasrioclaro/",
+    twitterUrl: "https://twitter.com/aguasrioclaro",
     active: true as const,
   };
 
@@ -55,68 +68,6 @@ async function main() {
           name: "Admin Río Claro",
           role: "admin",
         },
-      },
-      products: {
-        create: [
-          {
-            name: "Bidón 20 L",
-            slug: "bidon-20l",
-            description:
-              "Bidón retornable de 20 litros con agua purificada. Ideal para dispensadores de hogar y oficina. Incluye sello de seguridad.",
-            priceClp: 3500,
-            sortOrder: 1,
-            active: true,
-          },
-          {
-            name: "Pack 2 bidones 20 L",
-            slug: "pack-2-bidones-20l",
-            description:
-              "Dos bidones de 20 litros a precio preferente. Perfecto para familias o escritorios con alto consumo.",
-            priceClp: 6500,
-            sortOrder: 2,
-            active: true,
-          },
-          {
-            name: "Dispensador de mesa",
-            slug: "dispensador-mesa",
-            description:
-              "Dispensador manual de mesa para bidón de 20 L. Compacto, fácil de limpiar y listo para usar.",
-            priceClp: 18990,
-            sortOrder: 3,
-            active: true,
-          },
-          {
-            name: "Pack oficina (4 bidones)",
-            slug: "pack-oficina-4-bidones",
-            description:
-              "Cuatro bidones de 20 L con despacho coordinado. Pensado para pymes y oficinas pequeñas del Maule.",
-            priceClp: 12000,
-            sortOrder: 4,
-            active: true,
-          },
-        ],
-      },
-      deliveryZones: {
-        create: [
-          {
-            name: "Talca centro",
-            communes: "Talca",
-            costClp: 0,
-            active: true,
-          },
-          {
-            name: "Gran Talca",
-            communes: "Maule, San Clemente, Pencahue",
-            costClp: 1500,
-            active: true,
-          },
-          {
-            name: "Curicó y Linares",
-            communes: "Curicó, Linares, Villa Alegre",
-            costClp: 2500,
-            active: true,
-          },
-        ],
       },
     },
   });
@@ -139,48 +90,21 @@ async function main() {
     },
   });
 
-  const productCount = await prisma.product.count({
-    where: { tenantId: tenant.id },
+  // Sync catalog from reference site assets
+  const { RIO_CLARO_PRODUCTS } = await import("../scripts/seed-rio-products");
+  await prisma.product.deleteMany({ where: { tenantId: tenant.id } });
+  await prisma.product.createMany({
+    data: RIO_CLARO_PRODUCTS.map((p) => ({
+      tenantId: tenant.id,
+      name: p.name,
+      slug: p.slug,
+      description: p.description,
+      priceClp: p.priceClp,
+      imageUrl: p.imageUrl,
+      sortOrder: p.sortOrder,
+      active: true,
+    })),
   });
-  if (productCount === 0) {
-    await prisma.product.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          name: "Bidón 20 L",
-          slug: "bidon-20l",
-          description:
-            "Bidón retornable de 20 litros con agua purificada. Ideal para dispensadores de hogar y oficina.",
-          priceClp: 3500,
-          sortOrder: 1,
-        },
-        {
-          tenantId: tenant.id,
-          name: "Pack 2 bidones 20 L",
-          slug: "pack-2-bidones-20l",
-          description: "Dos bidones de 20 litros a precio preferente.",
-          priceClp: 6500,
-          sortOrder: 2,
-        },
-        {
-          tenantId: tenant.id,
-          name: "Dispensador de mesa",
-          slug: "dispensador-mesa",
-          description: "Dispensador manual de mesa para bidón de 20 L.",
-          priceClp: 18990,
-          sortOrder: 3,
-        },
-        {
-          tenantId: tenant.id,
-          name: "Pack oficina (4 bidones)",
-          slug: "pack-oficina-4-bidones",
-          description: "Cuatro bidones de 20 L con despacho coordinado.",
-          priceClp: 12000,
-          sortOrder: 4,
-        },
-      ],
-    });
-  }
 
   const zoneCount = await prisma.deliveryZone.count({
     where: { tenantId: tenant.id },

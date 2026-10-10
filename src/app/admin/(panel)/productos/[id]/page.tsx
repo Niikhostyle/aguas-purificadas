@@ -36,16 +36,23 @@ export default async function EditProductPage({ params, searchParams }: Props) {
         Editar producto
       </h1>
 
-      <form action={updateProductAction} className="mt-8 space-y-4">
+      <form
+        action={updateProductAction}
+        className="mt-8 space-y-4"
+        encType="multipart/form-data"
+      >
         <input type="hidden" name="id" value={product.id} />
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.imageUrl}
+            alt=""
+            className="h-32 w-32 object-contain border border-[#d5e3ec] bg-[#f7fbfd]"
+          />
+        ) : null}
         <div className="space-y-2">
           <Label htmlFor="name">Nombre</Label>
-          <Input
-            id="name"
-            name="name"
-            required
-            defaultValue={product.name}
-          />
+          <Input id="name" name="name" required defaultValue={product.name} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="slug">Slug</Label>
@@ -61,6 +68,15 @@ export default async function EditProductPage({ params, searchParams }: Props) {
             step={1}
             required
             defaultValue={product.priceClp}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="image">Nueva imagen (opcional)</Label>
+          <Input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
           />
         </div>
         <div className="space-y-2">

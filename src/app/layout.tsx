@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Fraunces, Source_Sans_3 } from "next/font/google";
+import { Roboto_Condensed, Yanone_Kaffeesatz } from "next/font/google";
 import "./globals.css";
 
-const display = Fraunces({
+const display = Yanone_Kaffeesatz({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const body = Source_Sans_3({
+const body = Roboto_Condensed({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["300", "400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -27,9 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
-        {children}
-      </body>
+      <body className="rc-body min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

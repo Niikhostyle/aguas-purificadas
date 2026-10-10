@@ -22,16 +22,16 @@ export default async function BrandingAdminPage({
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
+      <h1 className="rc-display text-3xl uppercase text-[var(--brand-deep)]">
         Marca y contenido
       </h1>
-      <p className="mt-2 text-sm text-[#4a655f]">
-        Estos datos alimentan la tienda pública (colores, contacto y textos).
+      <p className="mt-2 text-sm text-[#5a6578]">
+        Barras superiores, hero, colores, contacto y textos de la tienda.
       </p>
 
       {ok ? (
         <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          Cambios guardados. Revisá la tienda para verlos.
+          Cambios guardados.
         </p>
       ) : null}
       {error ? (
@@ -42,58 +42,54 @@ export default async function BrandingAdminPage({
 
       <form action={updateBrandingAction} className="mt-8 space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Nombre de la empresa</Label>
+          <Label htmlFor="name">Nombre</Label>
           <Input id="name" name="name" required defaultValue={tenant.name} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="tagline">Frase de la home</Label>
-          <Input
-            id="tagline"
-            name="tagline"
-            defaultValue={tenant.tagline ?? ""}
-            placeholder="Agua purificada a domicilio"
-          />
+          <Label htmlFor="tagline">Tagline</Label>
+          <Input id="tagline" name="tagline" defaultValue={tenant.tagline ?? ""} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="about">Quiénes somos</Label>
-          <Textarea
-            id="about"
-            name="about"
-            rows={5}
-            defaultValue={tenant.about ?? ""}
-          />
+          <Textarea id="about" name="about" rows={4} defaultValue={tenant.about ?? ""} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="primaryColor">Color principal (#RRGGBB)</Label>
-            <Input
-              id="primaryColor"
-              name="primaryColor"
-              defaultValue={tenant.primaryColor}
-              pattern="^#[0-9A-Fa-f]{6}$"
-              required
-            />
+            <Label htmlFor="primaryColor">Color principal</Label>
+            <Input id="primaryColor" name="primaryColor" required defaultValue={tenant.primaryColor} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="secondaryColor">Color secundario (#RRGGBB)</Label>
-            <Input
-              id="secondaryColor"
-              name="secondaryColor"
-              defaultValue={tenant.secondaryColor}
-              pattern="^#[0-9A-Fa-f]{6}$"
-              required
-            />
+            <Label htmlFor="secondaryColor">Color secundario</Label>
+            <Input id="secondaryColor" name="secondaryColor" required defaultValue={tenant.secondaryColor} />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="logoUrl">URL del logo</Label>
-          <Input
-            id="logoUrl"
-            name="logoUrl"
-            type="url"
-            defaultValue={tenant.logoUrl ?? ""}
-            placeholder="https://…"
-          />
+          <Label htmlFor="logoUrl">Logo (ruta o URL)</Label>
+          <Input id="logoUrl" name="logoUrl" defaultValue={tenant.logoUrl ?? ""} placeholder="/brand/… o https://" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="deliveryBanner">Barra despacho</Label>
+          <Textarea id="deliveryBanner" name="deliveryBanner" rows={2} defaultValue={tenant.deliveryBanner ?? ""} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="hoursBanner">Barra horarios</Label>
+          <Textarea id="hoursBanner" name="hoursBanner" rows={2} defaultValue={tenant.hoursBanner ?? ""} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="heroImageUrl">Hero imagen</Label>
+          <Input id="heroImageUrl" name="heroImageUrl" defaultValue={tenant.heroImageUrl ?? ""} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="heroHeadline">Hero titular</Label>
+          <Input id="heroHeadline" name="heroHeadline" defaultValue={tenant.heroHeadline ?? ""} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="heroBody">Hero texto</Label>
+          <Textarea id="heroBody" name="heroBody" rows={3} defaultValue={tenant.heroBody ?? ""} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="coverageText">Cobertura (footer)</Label>
+          <Textarea id="coverageText" name="coverageText" rows={3} defaultValue={tenant.coverageText ?? ""} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -101,29 +97,20 @@ export default async function BrandingAdminPage({
             <Input id="phone" name="phone" defaultValue={tenant.phone ?? ""} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="whatsapp">WhatsApp</Label>
-            <Input
-              id="whatsapp"
-              name="whatsapp"
-              defaultValue={tenant.whatsapp ?? ""}
-            />
+            <Label htmlFor="phoneSecondary">Teléfono 2</Label>
+            <Input id="phoneSecondary" name="phoneSecondary" defaultValue={tenant.phoneSecondary ?? ""} />
           </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="email">Correo de contacto</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              defaultValue={tenant.email ?? ""}
-            />
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Input id="whatsapp" name="whatsapp" defaultValue={tenant.whatsapp ?? ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" defaultValue={tenant.email ?? ""} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="address">Dirección</Label>
-            <Input
-              id="address"
-              name="address"
-              defaultValue={tenant.address ?? ""}
-            />
+            <Input id="address" name="address" defaultValue={tenant.address ?? ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="city">Ciudad</Label>
@@ -131,11 +118,7 @@ export default async function BrandingAdminPage({
           </div>
           <div className="space-y-2">
             <Label htmlFor="region">Región</Label>
-            <Input
-              id="region"
-              name="region"
-              defaultValue={tenant.region ?? ""}
-            />
+            <Input id="region" name="region" defaultValue={tenant.region ?? ""} />
           </div>
         </div>
         <Button type="submit">Guardar marca</Button>

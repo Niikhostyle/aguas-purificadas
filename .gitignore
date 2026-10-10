@@ -50,3 +50,7 @@ next-env.d.ts
 .windsurf/
 skills-lock.json
 AGENTS.md
+
+# uploaded product images (seed copies may be committed under brand/)
+public/uploads/**
+!public/uploads/.gitkeep

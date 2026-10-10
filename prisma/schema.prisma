@@ -16,16 +16,30 @@ model Tenant {
   name      String
   tagline   String?
   about     String?
-  /// Hex brand color, e.g. #0B6E4F
-  primaryColor   String  @default("#0B6E4F")
-  secondaryColor String  @default("#1B9AAA")
+  /// Hex brand color, e.g. #00B1E2
+  primaryColor   String  @default("#00B1E2")
+  secondaryColor String  @default("#12326E")
   logoUrl        String?
   phone          String?
+  phoneSecondary String?
   email          String?
   whatsapp       String?
   address        String?
   city           String?
   region         String?
+  /// Top bar: zonas de despacho
+  deliveryBanner String?
+  /// Top bar: horarios
+  hoursBanner    String?
+  /// Hero
+  heroImageUrl   String?
+  heroHeadline   String?
+  heroBody       String?
+  /// Footer coverage blurb
+  coverageText   String?
+  facebookUrl    String?
+  instagramUrl   String?
+  twitterUrl     String?
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

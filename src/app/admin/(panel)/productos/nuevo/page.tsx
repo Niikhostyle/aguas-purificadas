@@ -28,7 +28,11 @@ export default async function NewProductPage({
         Nuevo producto
       </h1>
 
-      <form action={createProductAction} className="mt-8 space-y-4">
+      <form
+        action={createProductAction}
+        className="mt-8 space-y-4"
+        encType="multipart/form-data"
+      >
         <div className="space-y-2">
           <Label htmlFor="name">Nombre</Label>
           <Input id="name" name="name" required placeholder="Bidón 20 L" />
@@ -48,6 +52,18 @@ export default async function NewProductPage({
             required
             placeholder="3500"
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="image">Imagen del producto</Label>
+          <Input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+          />
+          <p className="text-xs text-[#5a6578]">
+            Se guarda en <code>public/uploads/&lt;slug&gt;/</code> (máx. 5 MB).
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">Descripción</Label>

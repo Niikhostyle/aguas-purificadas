@@ -26,55 +26,68 @@ export default async function ProductDetailPage({ params }: Props) {
   if (!product) notFound();
 
   return (
-    <div className="bg-[linear-gradient(180deg,#dceee9_0%,#f3f7f6_40%)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-20 pt-12 md:grid-cols-2 md:px-8">
-        <div className="aspect-square bg-[linear-gradient(145deg,#d7ebe6_0%,#9ec9c2_100%)]" />
-        <div className="flex flex-col justify-center">
-          <Link
-            href="/productos"
-            className="text-sm text-[var(--brand)] underline-offset-4 hover:underline"
-          >
-            ← Volver al catálogo
+    <div className="bg-white">
+      <div className="bg-[var(--brand)] px-4 py-6 text-white md:px-6">
+        <div className="mx-auto max-w-6xl">
+          <Link href="/productos" className="text-sm text-white/90 hover:underline">
+            ← Productos
           </Link>
-          <h1 className="mt-4 font-[family-name:var(--font-display)] text-4xl text-[var(--brand-deep)]">
+          <h1 className="rc-display mt-2 text-3xl uppercase md:text-4xl">
             {product.name}
           </h1>
-          <p className="mt-4 text-2xl font-medium text-[var(--brand)]">
+        </div>
+      </div>
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:px-6">
+        <div className="aspect-square border border-[#e4eef4] bg-[#f7fbfd]">
+          {product.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="h-full w-full object-contain p-6"
+            />
+          ) : null}
+        </div>
+        <div className="flex flex-col justify-center">
+          <p className="text-3xl font-bold text-[var(--brand)]">
             {formatClp(product.priceClp)}
           </p>
           {product.description ? (
-            <p className="mt-6 max-w-prose leading-relaxed text-[#2f4a44]">
+            <div className="mt-6 space-y-3 text-sm leading-relaxed text-[#5a6578] whitespace-pre-line">
               {product.description}
-            </p>
+            </div>
           ) : null}
           <div className="mt-8">
             <AddToCartForm productId={product.id} />
           </div>
-          <p className="mt-6 text-sm text-[#4a655f]">
-            Al checkout pagás con WebPay (sandbox Transbank o modo mock local).
-          </p>
-          {tenant.whatsapp || tenant.phone ? (
-            <div className="mt-4 flex flex-wrap gap-3 text-sm">
-              {tenant.whatsapp ? (
-                <a
-                  href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`}
-                  className="text-[var(--brand)] underline-offset-4 hover:underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  WhatsApp
-                </a>
-              ) : null}
+          {(tenant.phone || tenant.whatsapp) && (
+            <p className="mt-6 text-sm text-[#5a6578]">
+              También podés pedir por teléfono{" "}
               {tenant.phone ? (
                 <a
+                  className="font-bold text-[var(--brand-deep)]"
                   href={`tel:${tenant.phone}`}
-                  className="text-[var(--brand)] underline-offset-4 hover:underline"
                 >
                   {tenant.phone}
                 </a>
               ) : null}
-            </div>
-          ) : null}
+              {tenant.whatsapp ? (
+                <>
+                  {" "}
+                  o{" "}
+                  <a
+                    className="font-bold text-[var(--brand-deep)]"
+                    href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    WhatsApp
+                  </a>
+                </>
+              ) : null}
+              .
+            </p>
+          )}
         </div>
       </div>
     </div>

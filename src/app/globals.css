@@ -48,42 +48,45 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Defaults aligned with Aguas Río Claro reference */
 :root {
-  --background: #f3f7f6;
-  --foreground: #0f2420;
+  --background: #ffffff;
+  --foreground: #1d243f;
   --card: #ffffff;
-  --card-foreground: #0f2420;
+  --card-foreground: #1d243f;
   --popover: #ffffff;
-  --popover-foreground: #0f2420;
-  --primary: #0a6b5c;
-  --primary-foreground: #f4fffc;
-  --secondary: #d7ebe6;
-  --secondary-foreground: #0a3d36;
-  --muted: #e4eeeb;
-  --muted-foreground: #4a655f;
-  --accent: #c8e4de;
-  --accent-foreground: #0a3d36;
+  --popover-foreground: #1d243f;
+  --primary: #00b1e2;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f7fc;
+  --secondary-foreground: #12326e;
+  --muted: #f2f6f9;
+  --muted-foreground: #5a6578;
+  --accent: #e8f7fc;
+  --accent-foreground: #12326e;
   --destructive: #b42318;
-  --border: #c5d8d2;
-  --input: #c5d8d2;
-  --ring: #1a8a9a;
-  --chart-1: #0a6b5c;
-  --chart-2: #1a8a9a;
-  --chart-3: #2f6f7e;
-  --chart-4: #5a8f7b;
-  --chart-5: #0f3d4a;
-  --radius: 0.5rem;
-  --sidebar: #eef5f3;
-  --sidebar-foreground: #0f2420;
-  --sidebar-primary: #0a6b5c;
-  --sidebar-primary-foreground: #f4fffc;
-  --sidebar-accent: #d7ebe6;
-  --sidebar-accent-foreground: #0a3d36;
-  --sidebar-border: #c5d8d2;
-  --sidebar-ring: #1a8a9a;
-  --brand: #0a6b5c;
-  --brand-deep: #064a40;
-  --mist: #e8f4f1;
+  --border: #d5e3ec;
+  --input: #d5e3ec;
+  --ring: #00b1e2;
+  --chart-1: #00b1e2;
+  --chart-2: #12326e;
+  --chart-3: #30b0d5;
+  --chart-4: #051b3f;
+  --chart-5: #1aa6de;
+  --radius: 0.25rem;
+  --sidebar: #f7fbfd;
+  --sidebar-foreground: #1d243f;
+  --sidebar-primary: #00b1e2;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8f7fc;
+  --sidebar-accent-foreground: #12326e;
+  --sidebar-border: #d5e3ec;
+  --sidebar-ring: #00b1e2;
+  --brand: #00b1e2;
+  --brand-deep: #12326e;
+  --mist: #e8f7fc;
+  --topbar: #00b1e2;
+  --nav-text: #12326e;
 }
 
 @layer base {
@@ -98,26 +101,6 @@
   }
 }
 
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(1.25rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mist-drift {
-  from {
-    transform: translateX(-2%) scale(1.02);
-  }
-  to {
-    transform: translateX(2%) scale(1.05);
-  }
-}
-
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -129,32 +112,21 @@
   }
 }
 
-.animate-hero-rise {
-  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-hero-rise-delay {
-  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
-}
-
-.animate-hero-rise-delay-2 {
-  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
-}
-
-.animate-mist {
-  animation: mist-drift 18s ease-in-out infinite alternate;
-}
-
 .animate-fade-up {
-  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-hero-rise,
-  .animate-hero-rise-delay,
-  .animate-hero-rise-delay-2,
-  .animate-mist,
   .animate-fade-up {
     animation: none;
   }
+}
+
+.rc-display {
+  font-family: var(--font-display), "Yanone Kaffeesatz", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.rc-body {
+  font-family: var(--font-body), "Roboto Condensed", sans-serif;
 }

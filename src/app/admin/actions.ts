@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { loginAdmin, logoutAdmin, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { saveProductImage } from "@/lib/uploads";
 
 function slugify(value: string) {
   return value
@@ -64,6 +65,18 @@ export async function createProductAction(formData: FormData) {
   }
 
   const slug = parsed.data.slug?.trim() || slugify(parsed.data.name);
+  let imageUrl: string | undefined;
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    try {
+      imageUrl = await saveProductImage(admin.tenant.slug, file);
+    } catch (e) {
+      redirect(
+        "/admin/productos/nuevo?error=" +
+          encodeURIComponent(e instanceof Error ? e.message : "Error de imagen"),
+      );
+    }
+  }
 
   await prisma.product.create({
     data: {
@@ -72,6 +85,7 @@ export async function createProductAction(formData: FormData) {
       slug,
       description: parsed.data.description,
       priceClp: parsed.data.priceClp,
+      imageUrl,
       active: parsed.data.active ?? true,
       sortOrder: 99,
     },
@@ -105,6 +119,18 @@ export async function updateProductAction(formData: FormData) {
   if (!existing) redirect("/admin/productos");
 
   const slug = parsed.data.slug?.trim() || existing.slug;
+  let imageUrl = existing.imageUrl;
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    try {
+      imageUrl = await saveProductImage(admin.tenant.slug, file);
+    } catch (e) {
+      redirect(
+        `/admin/productos/${id}?error=` +
+          encodeURIComponent(e instanceof Error ? e.message : "Error de imagen"),
+      );
+    }
+  }
 
   await prisma.product.update({
     where: { id },
@@ -113,6 +139,7 @@ export async function updateProductAction(formData: FormData) {
       slug,
       description: parsed.data.description,
       priceClp: parsed.data.priceClp,
+      imageUrl,
       active: parsed.data.active ?? false,
     },
   });

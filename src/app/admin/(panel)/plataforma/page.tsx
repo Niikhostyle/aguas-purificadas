@@ -77,12 +77,18 @@ export default async function PlatformAdminPage() {
                     {t.active ? "Activa" : "Suspendida"}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="space-x-3 text-right">
                   <Link
-                    href={`/?tenant=${t.slug}`}
+                    href={`/admin/plataforma/${t.id}`}
                     className="text-sm text-[var(--brand)] hover:underline"
                   >
-                    Ver
+                    Gestionar
+                  </Link>
+                  <Link
+                    href={`/?tenant=${t.slug}`}
+                    className="text-sm text-[#5a6578] hover:underline"
+                  >
+                    Tienda
                   </Link>
                 </TableCell>
               </TableRow>

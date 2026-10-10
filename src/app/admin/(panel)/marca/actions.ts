@@ -13,13 +13,20 @@ const schema = z.object({
   about: z.string().trim().max(4000).optional(),
   primaryColor: z.string().trim(),
   secondaryColor: z.string().trim(),
-  logoUrl: z.string().trim().url().optional().or(z.literal("")),
+  logoUrl: z.string().trim().max(500).optional(),
   phone: z.string().trim().max(40).optional(),
+  phoneSecondary: z.string().trim().max(40).optional(),
   email: z.string().trim().email().optional().or(z.literal("")),
   whatsapp: z.string().trim().max(40).optional(),
   address: z.string().trim().max(200).optional(),
   city: z.string().trim().max(80).optional(),
   region: z.string().trim().max(80).optional(),
+  deliveryBanner: z.string().trim().max(500).optional(),
+  hoursBanner: z.string().trim().max(500).optional(),
+  heroImageUrl: z.string().trim().max(500).optional(),
+  heroHeadline: z.string().trim().max(200).optional(),
+  heroBody: z.string().trim().max(1000).optional(),
+  coverageText: z.string().trim().max(1000).optional(),
 });
 
 export async function updateBrandingAction(formData: FormData) {
@@ -29,19 +36,28 @@ export async function updateBrandingAction(formData: FormData) {
     redirect("/admin/plataforma");
   }
 
+  const str = (key: string) => String(formData.get(key) || "").trim();
+
   const parsed = schema.safeParse({
     name: formData.get("name"),
-    tagline: String(formData.get("tagline") || "").trim() || undefined,
-    about: String(formData.get("about") || "").trim() || undefined,
+    tagline: str("tagline") || undefined,
+    about: str("about") || undefined,
     primaryColor: formData.get("primaryColor"),
     secondaryColor: formData.get("secondaryColor"),
-    logoUrl: String(formData.get("logoUrl") || "").trim(),
-    phone: String(formData.get("phone") || "").trim() || undefined,
-    email: String(formData.get("email") || "").trim(),
-    whatsapp: String(formData.get("whatsapp") || "").trim() || undefined,
-    address: String(formData.get("address") || "").trim() || undefined,
-    city: String(formData.get("city") || "").trim() || undefined,
-    region: String(formData.get("region") || "").trim() || undefined,
+    logoUrl: str("logoUrl") || undefined,
+    phone: str("phone") || undefined,
+    phoneSecondary: str("phoneSecondary") || undefined,
+    email: str("email"),
+    whatsapp: str("whatsapp") || undefined,
+    address: str("address") || undefined,
+    city: str("city") || undefined,
+    region: str("region") || undefined,
+    deliveryBanner: str("deliveryBanner") || undefined,
+    hoursBanner: str("hoursBanner") || undefined,
+    heroImageUrl: str("heroImageUrl") || undefined,
+    heroHeadline: str("heroHeadline") || undefined,
+    heroBody: str("heroBody") || undefined,
+    coverageText: str("coverageText") || undefined,
   });
 
   if (!parsed.success) {
@@ -70,11 +86,18 @@ export async function updateBrandingAction(formData: FormData) {
       secondaryColor: parsed.data.secondaryColor,
       logoUrl: parsed.data.logoUrl || null,
       phone: parsed.data.phone ?? null,
+      phoneSecondary: parsed.data.phoneSecondary ?? null,
       email: parsed.data.email || null,
       whatsapp: parsed.data.whatsapp ?? null,
       address: parsed.data.address ?? null,
       city: parsed.data.city ?? null,
       region: parsed.data.region ?? null,
+      deliveryBanner: parsed.data.deliveryBanner ?? null,
+      hoursBanner: parsed.data.hoursBanner ?? null,
+      heroImageUrl: parsed.data.heroImageUrl ?? null,
+      heroHeadline: parsed.data.heroHeadline ?? null,
+      heroBody: parsed.data.heroBody ?? null,
+      coverageText: parsed.data.coverageText ?? null,
     },
   });
 
