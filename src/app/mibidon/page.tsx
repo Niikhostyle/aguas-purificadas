@@ -103,11 +103,13 @@ export default function MiBidonLandingPage() {
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/rio-claro/hero.jpg"
+            src="/brand/rio-claro/destacado-01.jpg"
             alt=""
-            className="h-full w-full object-cover"
+            className="h-full w-full scale-105 object-cover blur-[1px]"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(18,50,110,0.93)_0%,rgba(0,177,226,0.5)_52%,rgba(18,50,110,0.4)_100%)]" />
+          {/* Heavy wash so source-asset copy never competes with MiBidón brand */}
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,#12326ef5_0%,#00b1e2cc_48%,#12326ee6_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(0,177,226,0.35),transparent_55%)]" />
         </div>
         <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:justify-center md:px-8 md:pb-28">
           <p className="animate-fade-up text-xs font-bold uppercase tracking-[0.22em] text-white/80">
