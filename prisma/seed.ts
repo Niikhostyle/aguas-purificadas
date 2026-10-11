@@ -156,7 +156,7 @@ async function main() {
   const platform = await prisma.tenant.upsert({
     where: { slug: "plataforma" },
     update: {
-      name: "Aguas Purificadas Plataforma",
+      name: "MiBidón",
       tagline: "Operación multi-empresa",
       primaryColor: "#00B1E2",
       secondaryColor: "#12326E",
@@ -164,7 +164,7 @@ async function main() {
     },
     create: {
       slug: "plataforma",
-      name: "Aguas Purificadas Plataforma",
+      name: "MiBidón",
       tagline: "Operación multi-empresa",
       primaryColor: "#00B1E2",
       secondaryColor: "#12326E",

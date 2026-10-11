@@ -20,7 +20,11 @@ function slugify(value: string) {
 export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
-  const tenantSlug = String(formData.get("tenantSlug") || "rio-claro").trim();
+  const loginMode = String(formData.get("loginMode") || "").trim();
+  const tenantSlug =
+    loginMode === "platform"
+      ? "plataforma"
+      : String(formData.get("tenantSlug") || "rio-claro").trim().toLowerCase();
 
   const result = await loginAdmin(tenantSlug, email, password);
   if (!result.ok) {

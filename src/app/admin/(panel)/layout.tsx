@@ -25,7 +25,7 @@ export default async function AdminPanelLayout({
               {admin.tenant.name}
             </p>
             <p className="text-xs text-[#5a6578]">
-              {superAdmin ? "Super-admin plataforma" : "Admin empresa"} ·{" "}
+              {superAdmin ? "MiBidón · super-admin" : "Admin empresa"} ·{" "}
               {admin.email}
             </p>
           </div>

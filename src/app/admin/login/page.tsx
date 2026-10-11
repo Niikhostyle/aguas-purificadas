@@ -26,11 +26,11 @@ export default async function AdminLoginPage({
     <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] px-5">
       <div className="w-full max-w-md">
         <p className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-          {isPlatform ? "Panel plataforma" : "Panel empresa"}
+          {isPlatform ? "Panel MiBidón" : "Panel empresa"}
         </p>
         <p className="mt-2 text-sm text-[#5a6578]">
           {isPlatform
-            ? "Super-admin: gestiona el alta de empresas."
+            ? "Super-admin: gestioná empresas y sus administradores."
             : "Ingresá con el admin de la empresa (slug del tenant)."}
         </p>
 
@@ -38,16 +38,23 @@ export default async function AdminLoginPage({
           action={loginAction}
           className="mt-8 space-y-4 rounded-lg border border-[#d5e3ec] bg-white p-6 shadow-sm"
         >
-          <div className="space-y-2">
-            <Label htmlFor="tenantSlug">Slug empresa</Label>
-            <Input
-              id="tenantSlug"
-              name="tenantSlug"
-              required
-              defaultValue={tenantSlug}
-              placeholder="rio-claro"
-            />
-          </div>
+          {isPlatform ? (
+            <>
+              <input type="hidden" name="loginMode" value="platform" />
+              <input type="hidden" name="tenantSlug" value="plataforma" />
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="tenantSlug">Slug empresa</Label>
+              <Input
+                id="tenantSlug"
+                name="tenantSlug"
+                required
+                defaultValue={tenantSlug === "plataforma" ? "rio-claro" : tenantSlug}
+                placeholder="rio-claro"
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Correo</Label>
             <Input
@@ -84,10 +91,14 @@ export default async function AdminLoginPage({
 
         <p className="mt-6 text-center text-sm text-[#5a6578]">
           <Link
-            href={isPlatform ? "/admin/login?tenant=rio-claro" : "/admin/login?tenant=plataforma"}
+            href={
+              isPlatform
+                ? "/admin/login?tenant=rio-claro"
+                : "/admin/login?tenant=plataforma"
+            }
             className="text-[var(--brand)] hover:underline"
           >
-            {isPlatform ? "Login empresa demo" : "Login super-admin"}
+            {isPlatform ? "Login empresa demo" : "Login MiBidón (super-admin)"}
           </Link>
           {" · "}
           <Link href="/" className="text-[var(--brand)] hover:underline">
