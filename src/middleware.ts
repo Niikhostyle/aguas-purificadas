@@ -74,10 +74,11 @@ export function middleware(request: NextRequest) {
 
   // Apex marketing: keep URL `/` but serve /mibidon landing
   if (platformHost && pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/mibidon";
+    // Path-only rewrite. Cloning request.nextUrl keeps the Docker bind host
+    // (0.0.0.0:3000); if that absolute URL ever diverges from the public Host,
+    // Next treats the rewrite as an external proxy and HTTPS apex returns 500.
     return applySecurityHeaders(
-      NextResponse.rewrite(url, {
+      NextResponse.rewrite("/mibidon", {
         request: { headers: requestHeaders },
       }),
     );
