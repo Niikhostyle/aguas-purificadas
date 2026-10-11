@@ -76,6 +76,8 @@ type Props = {
   siteHref: string;
   siteLabel: string;
   notifications: AdminNotification[];
+  /** Nav hrefs to hide (e.g. modules the tenant has switched off). */
+  hiddenHrefs?: string[];
   children: ReactNode;
 };
 
@@ -499,10 +501,18 @@ export function AdminShell({
   siteHref,
   siteLabel,
   notifications,
+  hiddenHrefs,
   children,
 }: Props) {
   const pathname = usePathname() ?? "";
-  const groups = variant === "platform" ? PLATFORM_NAV : TENANT_NAV;
+  const hiddenKey = (hiddenHrefs ?? []).join("|");
+  const groups = useMemo(() => {
+    const base = variant === "platform" ? PLATFORM_NAV : TENANT_NAV;
+    const hidden = new Set(hiddenKey ? hiddenKey.split("|") : []);
+    return base
+      .map((g) => ({ ...g, items: g.items.filter((i) => !hidden.has(i.href)) }))
+      .filter((g) => g.items.length > 0);
+  }, [variant, hiddenKey]);
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -560,17 +570,17 @@ export function AdminShell({
   }, [drawerOpen, closeDrawer]);
 
   return (
-    <div className="min-h-screen bg-[#f2f6f9] text-[#12233d]">
+    <div className="min-h-screen bg-[#f2f6f9] text-[#12233d] print:bg-white">
       <a
         href="#admin-main"
-        className="sr-only z-[60] rounded-md bg-white px-3 py-2 text-sm font-semibold focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+        className="sr-only z-[60] rounded-md bg-white print:hidden px-3 py-2 text-sm font-semibold focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
       >
         Saltar al contenido
       </a>
 
       <aside
         aria-label="Barra lateral"
-        className={`fixed inset-y-0 left-0 z-30 hidden flex-col bg-[#0b1f3a] transition-[width] duration-200 lg:flex ${
+        className={`fixed inset-y-0 left-0 z-30 hidden flex-col bg-[#0b1f3a] transition-[width] duration-200 lg:flex print:!hidden ${
           collapsed ? "w-[72px]" : "w-64"
         }`}
       >
@@ -634,8 +644,8 @@ export function AdminShell({
         </div>
       ) : null}
 
-      <div className={`transition-[padding] duration-200 ${collapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}>
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[#dde7ee] bg-white/95 px-4 backdrop-blur sm:px-6">
+      <div className={`transition-[padding] duration-200 print:!pl-0 ${collapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}>
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[#dde7ee] bg-white/95 px-4 backdrop-blur sm:px-6 print:hidden">
           <button
             ref={triggerRef}
             type="button"
@@ -660,10 +670,10 @@ export function AdminShell({
             />
           </div>
         </header>
-        <main id="admin-main" tabIndex={-1} className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+        <main id="admin-main" tabIndex={-1} className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8 print:max-w-none print:p-0">
           {children}
         </main>
-        <footer className="mx-auto max-w-[1400px] px-4 pb-8 text-xs text-[#7b8aa0] sm:px-6 lg:px-8">
+        <footer className="mx-auto max-w-[1400px] px-4 pb-8 text-xs text-[#7b8aa0] sm:px-6 lg:px-8 print:hidden">
           © {new Date().getFullYear()} MiBidón · Plataforma para empresas de agua purificada.
         </footer>
       </div>
