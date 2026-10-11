@@ -30,6 +30,17 @@ export type CreateTenantInput = {
   withSandboxWebpay?: boolean;
 };
 
+// Slugs double as subdomains of mibidon.cl; these hosts belong to the platform.
+export const RESERVED_TENANT_SLUGS = new Set([
+  "plataforma",
+  "www",
+  "app",
+  "admin",
+  "api",
+  "mail",
+  "billing",
+]);
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -45,7 +56,7 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
   if (slug.length < 2) {
     throw new Error("El slug debe tener al menos 2 caracteres");
   }
-  if (slug === "plataforma" || slug === "www" || slug === "admin") {
+  if (RESERVED_TENANT_SLUGS.has(slug)) {
     throw new Error("Ese slug está reservado");
   }
 
