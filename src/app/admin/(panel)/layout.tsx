@@ -55,6 +55,12 @@ export default async function AdminPanelLayout({
                 >
                   Nueva
                 </Link>
+                <Link
+                  href="/admin/plataforma/landing"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
+                >
+                  Landing
+                </Link>
               </>
             ) : (
               <>

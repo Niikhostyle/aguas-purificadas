@@ -214,3 +214,14 @@ model OrderItem {
   @@index([orderId])
   @@map("order_items")
 }
+
+/// Apex SaaS landing CMS (mibidon.cl). One row per landing block; content validated by src/lib/landing/schema.ts
+model PlatformLandingSection {
+  key       String   @id
+  enabled   Boolean  @default(true)
+  content   Json
+  updatedBy String?
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("platform_landing_sections")
+}
