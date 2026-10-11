@@ -2,66 +2,115 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const TENANT_HEADER = "x-tenant-slug";
+const PLATFORM_HEADER = "x-platform-host";
+
+/** Hosts that serve the MiBidón marketing site (not a client storefront). */
+function isPlatformHost(hostname: string): boolean {
+  if (!hostname) return true;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return true;
+  if (hostname === "mibidon.cl" || hostname === "www.mibidon.cl") return true;
+  return false;
+}
 
 /**
- * Tenant resolution order (local-friendly):
- * 1. Subdomain: rio-claro.localhost:PORT → rio-claro
- * 2. Query: ?tenant=rio-claro (also set as cookie for subsequent navigations)
- * 3. Header: x-tenant: rio-claro
- * 4. Cookie: aguas_tenant
- * 5. Env default: DEFAULT_TENANT_SLUG (baked via middleware matcher + fallback)
+ * Tenant resolution (storefront only):
+ * 1. Subdomain: rio-claro.mibidon.cl / demo.mibidon.cl → tenant slug
+ * 2. Query: ?tenant=rio-claro
+ * 3. Header: x-tenant
  *
- * For local demo we rely on DEFAULT_TENANT_SLUG=rio-claro so http://127.0.0.1:PORT
- * works without hosts file changes. Override with ?tenant=other-slug anytime.
+ * Apex / www / bare IP never fall back to DEFAULT_TENANT_SLUG or cookie —
+ * they show the MiBidón marketing landing.
  */
 function resolveTenantSlug(request: NextRequest): string | null {
   const host = request.headers.get("host") || "";
-  const hostname = host.split(":")[0] || "";
+  const hostname = (host.split(":")[0] || "").toLowerCase();
 
-  // Subdomain tenant: rio-claro.mibidon.cl or rio-claro.localhost
-  // Apex (mibidon.cl) and www stay on DEFAULT_TENANT_SLUG / ?tenant=
-  if (!/^\d+\.\d+\.\d+\.\d+$/.test(hostname) && hostname !== "localhost") {
+  if (!isPlatformHost(hostname)) {
     const parts = hostname.split(".");
     const isLocalhostSub = hostname.endsWith(".localhost");
     if (isLocalhostSub || parts.length >= 3) {
-      const sub = parts[0];
+      let sub = parts[0];
       if (sub && sub !== "www" && sub !== "app") {
-        return sub.toLowerCase();
+        sub = sub.toLowerCase();
+        // Prospect demo alias
+        if (sub === "demo") return "rio-claro";
+        // Platform admin tenant is not a storefront
+        if (sub === "plataforma") return null;
+        return sub;
       }
     }
   }
 
   const fromQuery = request.nextUrl.searchParams.get("tenant");
-  if (fromQuery) return fromQuery.toLowerCase();
+  if (fromQuery) {
+    const q = fromQuery.toLowerCase();
+    if (q === "demo") return "rio-claro";
+    if (q === "plataforma") return null;
+    return q;
+  }
 
   const fromHeader = request.headers.get("x-tenant");
-  if (fromHeader) return fromHeader.toLowerCase();
-
-  const fromCookie = request.cookies.get("aguas_tenant")?.value;
-  if (fromCookie) return fromCookie.toLowerCase();
-
-  const fromEnv = process.env.DEFAULT_TENANT_SLUG;
-  if (fromEnv) return fromEnv.toLowerCase();
+  if (fromHeader) {
+    const h = fromHeader.toLowerCase();
+    if (h === "demo") return "rio-claro";
+    if (h === "plataforma") return null;
+    return h;
+  }
 
   return null;
 }
 
 export function middleware(request: NextRequest) {
   const slug = resolveTenantSlug(request);
-  const requestHeaders = new Headers(request.headers);
+  const host = request.headers.get("host") || "";
+  const hostname = (host.split(":")[0] || "").toLowerCase();
+  const platformHost = isPlatformHost(hostname) && !slug;
+  const { pathname } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
   if (slug) {
     requestHeaders.set(TENANT_HEADER, slug);
+  }
+  if (platformHost) {
+    requestHeaders.set(PLATFORM_HEADER, "1");
+  }
+
+  // Apex marketing: keep URL `/` but serve /mibidon landing
+  if (platformHost && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/mibidon";
+    return NextResponse.rewrite(url, {
+      request: { headers: requestHeaders },
+    });
+  }
+
+  // Storefront routes without a tenant → back to marketing home
+  const storefrontPrefixes = [
+    "/productos",
+    "/carrito",
+    "/checkout",
+    "/pedido",
+    "/pago",
+  ];
+  if (
+    platformHost &&
+    storefrontPrefixes.some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`),
+    )
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
 
-  // Persist ?tenant= for subsequent page loads
   const fromQuery = request.nextUrl.searchParams.get("tenant");
-  if (fromQuery) {
-    response.cookies.set("aguas_tenant", fromQuery.toLowerCase(), {
+  if (fromQuery && slug) {
+    response.cookies.set("aguas_tenant", slug, {
       path: "/",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 30,
@@ -73,9 +122,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except static assets and Next internals.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

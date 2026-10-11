@@ -7,19 +7,27 @@ export default function NotFound() {
         No encontrado
       </h1>
       <p className="mt-3 max-w-md text-[#5a6578]">
-        No hay un tenant activo para esta solicitud, o la página no existe.
-        Probá con{" "}
+        No hay una tienda activa para este subdominio, o la página no existe.
+        La demo está en{" "}
         <code className="rounded bg-white px-1.5 py-0.5 text-sm">
-          ?tenant=rio-claro
+          rio-claro.mibidon.cl
         </code>
         .
       </p>
-      <Link
-        href="/?tenant=rio-claro"
-        className="mt-8 rounded-md bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white"
-      >
-        Ir a la tienda demo
-      </Link>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <Link
+          href="/"
+          className="rounded-md border border-[#d5e3ec] bg-white px-5 py-2.5 text-sm font-semibold text-[#12326e]"
+        >
+          Ir a MiBidón
+        </Link>
+        <Link
+          href="/?tenant=rio-claro"
+          className="rounded-md bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          Ver demo
+        </Link>
+      </div>
     </div>
   );
 }

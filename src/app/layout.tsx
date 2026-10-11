@@ -16,8 +16,8 @@ const body = Roboto_Condensed({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aguas Purificadas",
-    template: "%s · Aguas Purificadas",
+    default: "MiBidón",
+    template: "%s · MiBidón",
   },
   description:
     "Plataforma white-label para tiendas de agua purificada a domicilio.",
