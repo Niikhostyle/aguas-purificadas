@@ -18,16 +18,16 @@ function resolveTenantSlug(request: NextRequest): string | null {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0] || "";
 
-  // Subdomain: slug.localhost or slug.example.com (ignore www / bare localhost / IPs)
-  const parts = hostname.split(".");
-  if (
-    parts.length >= 2 &&
-    hostname !== "localhost" &&
-    !/^\d+\.\d+\.\d+\.\d+$/.test(hostname)
-  ) {
-    const sub = parts[0];
-    if (sub && sub !== "www" && sub !== "app") {
-      return sub.toLowerCase();
+  // Subdomain tenant: rio-claro.mibidon.cl or rio-claro.localhost
+  // Apex (mibidon.cl) and www stay on DEFAULT_TENANT_SLUG / ?tenant=
+  if (!/^\d+\.\d+\.\d+\.\d+$/.test(hostname) && hostname !== "localhost") {
+    const parts = hostname.split(".");
+    const isLocalhostSub = hostname.endsWith(".localhost");
+    if (isLocalhostSub || parts.length >= 3) {
+      const sub = parts[0];
+      if (sub && sub !== "www" && sub !== "app") {
+        return sub.toLowerCase();
+      }
     }
   }
 

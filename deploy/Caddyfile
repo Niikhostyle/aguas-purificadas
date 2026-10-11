@@ -1,0 +1,16 @@
+# Origin behind Cloudflare (Flexible/Full). Port 80 always on.
+# Named hosts get automatic HTTPS when DNS is ready (HTTP-01).
+{
+  email admin@mibidon.cl
+  auto_https disable_redirects
+}
+
+:80 {
+  encode gzip
+  reverse_proxy app:3000
+}
+
+mibidon.cl, www.mibidon.cl, rio-claro.mibidon.cl, manantial-andes.mibidon.cl, plataforma.mibidon.cl {
+  encode gzip
+  reverse_proxy app:3000
+}

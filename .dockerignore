@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+README.md
+*.md
+/cursor
+internal
+media
+coverage
+.agents
+.claude
+playwright*
+**/aguas-purificadas.bundle

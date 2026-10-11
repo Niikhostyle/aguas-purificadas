@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mibidon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mibidon
+    volumes:
+      - mibidon_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mibidon -d mibidon"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    mem_limit: 384m
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://mibidon:${POSTGRES_PASSWORD}@db:5432/mibidon?schema=public
+      APP_URL: ${APP_URL:-https://mibidon.cl}
+      DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-rio-claro}
+      WEBPAY_MODE: ${WEBPAY_MODE:-mock}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}
+      CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY:-}
+      RUN_SEED: ${RUN_SEED:-true}
+      NODE_OPTIONS: --max-old-space-size=512
+    ports:
+      - "3000:3000"
+    volumes:
+      - mibidon_uploads:/app/public/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    mem_limit: 768m
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 128m
+
+volumes:
+  mibidon_pg_data:
+  mibidon_uploads:
+  caddy_data:
+  caddy_config:
