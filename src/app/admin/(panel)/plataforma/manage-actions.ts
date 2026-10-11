@@ -38,8 +38,38 @@ export async function setTenantActiveAction(formData: FormData) {
   });
 
   revalidatePath("/admin/plataforma");
+  revalidatePath("/admin/plataforma/empresas");
   revalidatePath(`/admin/plataforma/${tenantId}`);
-  redirect("/admin/plataforma");
+  redirect(safeReturnTo(formData));
+}
+
+/** Only allow redirects back into the super-admin area. */
+function safeReturnTo(formData: FormData) {
+  const raw = String(formData.get("returnTo") || "");
+  return /^\/admin\/plataforma(\/[\w-]*)*(\?[\w=&%.+-]*)?$/.test(raw)
+    ? raw
+    : "/admin/plataforma";
+}
+
+export async function bulkSetTenantsActiveAction(formData: FormData) {
+  const admin = await requireSuperAdmin();
+  if (!admin) redirect("/admin/login?tenant=plataforma");
+
+  const op = String(formData.get("op") || "");
+  const ids = formData
+    .getAll("tenantIds")
+    .map((v) => String(v))
+    .filter(Boolean)
+    .slice(0, 500);
+  if ((op === "activate" || op === "suspend") && ids.length) {
+    await prisma.tenant.updateMany({
+      where: { id: { in: ids }, slug: { not: "plataforma" } },
+      data: { active: op === "activate" },
+    });
+    revalidatePath("/admin/plataforma");
+    revalidatePath("/admin/plataforma/empresas");
+  }
+  redirect(safeReturnTo(formData));
 }
 
 export async function updateCompanyAction(formData: FormData) {

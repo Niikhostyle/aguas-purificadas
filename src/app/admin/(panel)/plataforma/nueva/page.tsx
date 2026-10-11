@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTenantAction } from "@/app/admin/(panel)/plataforma/actions";
+import { PageHeader, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,22 +17,19 @@ export default async function NewTenantPage({
   const { error } = await searchParams;
 
   return (
-    <div className="max-w-2xl">
-      <Link
-        href="/admin/plataforma"
-        className="text-sm text-[var(--brand)] hover:underline"
-      >
-        ← Plataforma
-      </Link>
-      <h1 className="mt-3 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-        Nueva empresa
-      </h1>
-      <p className="mt-2 text-sm text-[#5a6578]">
-        Crea tenant, admin de empresa, catálogo demo, zonas y credenciales
-        WebPay sandbox.
-      </p>
-
-      <form action={createTenantAction} className="mt-8 space-y-5">
+    <>
+      <PageHeader
+        title="Nueva empresa"
+        description="Crea tenant, admin de empresa, catálogo demo, zonas y credenciales WebPay sandbox."
+        homeHref="/admin/plataforma"
+        breadcrumbs={[
+          { label: "Plataforma", href: "/admin/plataforma" },
+          { label: "Empresas", href: "/admin/plataforma/empresas" },
+          { label: "Nueva" },
+        ]}
+      />
+      <Panel title="Datos de alta" description="La tienda quedará disponible en slug.mibidon.cl." className="max-w-3xl">
+      <form action={createTenantAction} className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre comercial</Label>
@@ -153,13 +150,16 @@ export default async function NewTenantPage({
         </label>
 
         {error ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
           </p>
         ) : null}
 
-        <Button type="submit">Crear empresa</Button>
+        <div className="flex justify-end border-t border-[#e8f0f5] pt-4">
+          <Button type="submit">Crear empresa</Button>
+        </div>
       </form>
-    </div>
+      </Panel>
+    </>
   );
 }
