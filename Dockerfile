@@ -14,6 +14,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# NEXT_PUBLIC_* is inlined at build time (static pages like the apex landing).
+ARG NEXT_PUBLIC_WHATSAPP_NUMBER=56900000000
+ENV NEXT_PUBLIC_WHATSAPP_NUMBER=$NEXT_PUBLIC_WHATSAPP_NUMBER
 RUN npx prisma generate && npm run build \
   && npm prune --omit=dev
 
