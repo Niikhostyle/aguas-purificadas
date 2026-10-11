@@ -16,7 +16,11 @@ services:
     mem_limit: 384m
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Salts Server Action IDs at build time so they stay stable across builds.
+        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:-}
     restart: unless-stopped
     depends_on:
       db:
@@ -32,6 +36,7 @@ services:
       CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY:-}
       RUN_SEED: ${RUN_SEED:-false}
       NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-56900000000}
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:?set in .env}
       NODE_OPTIONS: --max-old-space-size=512
     ports:
       # 3000 often taken by other apps on shared VPS (e.g. veotv)
@@ -39,6 +44,13 @@ services:
     volumes:
       - mibidon_uploads:/app/public/uploads
     mem_limit: 768m
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null -T 4 http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 60s
 
   # Optional: only if nothing else owns :80/:443 on the host
   # docker compose -f docker-compose.prod.yml --profile edge up -d
