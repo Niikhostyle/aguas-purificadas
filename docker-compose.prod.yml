@@ -31,7 +31,8 @@ services:
       RUN_SEED: ${RUN_SEED:-true}
       NODE_OPTIONS: --max-old-space-size=512
     ports:
-      - "127.0.0.1:3000:3000"
+      # 3000 often taken by other apps on shared VPS (e.g. veotv)
+      - "127.0.0.1:${APP_HOST_PORT:-3001}:3000"
     volumes:
       - mibidon_uploads:/app/public/uploads
     mem_limit: 768m

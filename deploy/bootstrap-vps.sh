@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run ON the VPS as root once SSH is available.
-# Usage: bash bootstrap-vps.sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/Niikhostyle/aguas-purificadas/main/deploy/bootstrap-vps.sh | bash
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/mibidon}"
@@ -14,14 +14,13 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y ca-certificates curl git ufw
+apt-get install -y ca-certificates curl git ufw openssl
 
 if ! command -v docker >/dev/null 2>&1; then
   curl -fsSL https://get.docker.com | sh
 fi
 systemctl enable --now docker
 
-# Compose plugin
 if ! docker compose version >/dev/null 2>&1; then
   apt-get install -y docker-compose-plugin || true
 fi
@@ -55,20 +54,33 @@ WEBPAY_MODE=mock
 RUN_SEED=true
 EOF
   chmod 600 .env
-  echo "Wrote $APP_DIR/.env (secrets generated)"
+  echo "Wrote $APP_DIR/.env"
 fi
 
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
+# App+db on loopback:3001 — reuse host nginx if present (avoid clobbering :3000)
+export APP_HOST_PORT="${APP_HOST_PORT:-3001}"
+docker compose -f docker-compose.prod.yml up -d --build db app
+
+if command -v nginx >/dev/null 2>&1; then
+  cp "$APP_DIR/deploy/nginx-mibidon.conf" /etc/nginx/sites-available/mibidon
+  ln -sfn /etc/nginx/sites-available/mibidon /etc/nginx/sites-enabled/mibidon
+  nginx -t
+  systemctl reload nginx
+  echo "Nginx vhost mibidon installed (coexists with other sites)."
+else
+  docker compose -f docker-compose.prod.yml --profile edge up -d caddy
+  echo "No host nginx — started Caddy edge profile on :80/:443."
+fi
 
 echo "Waiting for app..."
-for i in $(seq 1 60); do
-  if curl -fsS http://127.0.0.1:3000/ >/dev/null 2>&1; then
-    echo "App is up on :3000"
+for i in $(seq 1 90); do
+  if curl -fsS "http://127.0.0.1:${APP_HOST_PORT}/" >/dev/null 2>&1; then
+    echo "App is up on 127.0.0.1:${APP_HOST_PORT}"
     break
   fi
   sleep 5
 done
 
 docker compose -f docker-compose.prod.yml ps
-echo "Done. Open https://mibidon.cl and /admin/login?tenant=plataforma"
+echo "Done. Configure Cloudflare A @/www/* → this host, then open https://mibidon.cl"
+echo "Super-admin: /admin/login?tenant=plataforma  (super@plataforma.demo / admin123)"
