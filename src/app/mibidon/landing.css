@@ -1,37 +1,104 @@
 /* MiBidón apex — premium storefront (Cauquenes) */
 
+html:has(.mb-shell) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
 .mb-shell {
   --mb-primary: #2563eb;
   --mb-primary-dark: #1d4ed8;
   --mb-title: #0f172a;
   --mb-body: #475569;
   --mb-canvas: #f8fafc;
+  --mb-ease: cubic-bezier(0.22, 1, 0.36, 1);
   background-color: var(--mb-canvas);
   color: var(--mb-body);
 }
 
-.mb-reveal {
-  animation: mb-reveal 0.7s ease-out both;
+/* ---------- Navbar ---------- */
+
+.mb-nav {
+  transition:
+    background-color 0.35s var(--mb-ease),
+    box-shadow 0.35s var(--mb-ease),
+    border-color 0.35s var(--mb-ease);
 }
 
-.mb-reveal-delay-1 {
-  animation-delay: 0.12s;
+.mb-nav-inner {
+  transition: height 0.35s var(--mb-ease);
 }
 
-.mb-reveal-delay-2 {
-  animation-delay: 0.24s;
+.mb-nav[data-scrolled="true"] {
+  background-color: rgb(255 255 255 / 0.92);
+  border-color: transparent;
+  box-shadow:
+    0 1px 0 rgb(15 23 42 / 0.04),
+    0 10px 30px -12px rgb(15 23 42 / 0.18);
 }
 
-@keyframes mb-reveal {
+.mb-nav[data-scrolled="true"] .mb-nav-inner {
+  height: 3.5rem;
+}
+
+.mb-progress {
+  transform: scaleX(var(--mb-progress, 0));
+  transform-origin: 0 50%;
+}
+
+/* ---------- Hero entrance ---------- */
+
+.mb-word {
+  display: inline-block;
+  animation: mb-word 0.9s var(--mb-ease) both;
+  animation-delay: calc(var(--i, 0) * 55ms + 120ms);
+}
+
+@keyframes mb-word {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translate3d(0, 0.5em, 0);
+    filter: blur(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+    filter: blur(0);
   }
 }
+
+.mb-enter {
+  animation: mb-enter 0.8s var(--mb-ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes mb-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mb-enter-visual {
+  animation: mb-enter-visual 1.1s var(--mb-ease) 0.25s both;
+}
+
+@keyframes mb-enter-visual {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Hero visual ---------- */
 
 .mb-hero-visual {
   background:
@@ -39,25 +106,380 @@
     linear-gradient(145deg, #dbeafe 0%, #eff6ff 45%, #ffffff 100%);
 }
 
-.mb-fab-pulse {
-  animation: mb-fab-pulse 2.8s ease-in-out infinite;
+.mb-layer {
+  transform: translate3d(
+    calc(var(--px, 0) * var(--depth, 0) * 1px),
+    calc(var(--py, 0) * var(--depth, 0) * 1px),
+    0
+  );
+  will-change: transform;
 }
 
-@keyframes mb-fab-pulse {
+.mb-float {
+  animation: mb-float 6s ease-in-out infinite;
+}
+
+.mb-float-slow {
+  animation: mb-float 8s ease-in-out -2s infinite;
+}
+
+@keyframes mb-float {
   0%,
   100% {
-    box-shadow: 0 12px 28px rgba(34, 197, 94, 0.35);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    box-shadow:
-      0 14px 32px rgba(34, 197, 94, 0.5),
-      0 0 0 10px rgba(34, 197, 94, 0.12);
+    transform: translate3d(0, -12px, 0);
   }
 }
 
+.mb-shadow-pulse {
+  animation: mb-shadow-pulse 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes mb-shadow-pulse {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(0.82);
+    opacity: 0.32;
+  }
+}
+
+.mb-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  border: 1.5px solid rgb(37 99 235 / 0.22);
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  animation: mb-ripple 6s var(--mb-ease) infinite;
+}
+
+.mb-ripple:nth-child(2) {
+  animation-delay: 2s;
+}
+
+.mb-ripple:nth-child(3) {
+  animation-delay: 4s;
+}
+
+@keyframes mb-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.45);
+    opacity: 0;
+  }
+}
+
+.mb-wave {
+  animation: mb-wave 7s linear infinite;
+}
+
+.mb-wave-back {
+  animation: mb-wave 11s linear infinite reverse;
+}
+
+@keyframes mb-wave {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-240px);
+  }
+}
+
+.mb-bubble {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mb-bubble 5s ease-in infinite;
+  animation-delay: var(--d, 0s);
+  opacity: 0;
+}
+
+@keyframes mb-bubble {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate3d(var(--sway, 4px), -150px, 0) scale(1);
+    opacity: 0;
+  }
+}
+
+.mb-glint {
+  animation: mb-glint 5s ease-in-out infinite;
+}
+
+@keyframes mb-glint {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ---------- Scroll reveals ---------- */
+
+@media (scripting: enabled) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition:
+      opacity 0.8s var(--mb-ease),
+      transform 0.8s var(--mb-ease);
+    transition-delay: var(--d, 0ms);
+  }
+
+  [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Product cards ---------- */
+
+.mb-card {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 0.45s var(--mb-ease),
+    box-shadow 0.45s var(--mb-ease);
+}
+
+.mb-card:hover {
+  transform: translate3d(0, -6px, 0);
+  box-shadow: 0 24px 48px -16px rgb(30 64 175 / 0.22);
+}
+
+.mb-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 0%),
+    rgb(37 99 235 / 0.1),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--mb-ease);
+  pointer-events: none;
+}
+
+.mb-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 0%),
+    rgb(37 99 235 / 0.55),
+    transparent 60%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--mb-ease);
+  pointer-events: none;
+}
+
+.mb-card:hover::before,
+.mb-card:hover::after {
+  opacity: 1;
+}
+
+.mb-mini-water {
+  transform: translateY(var(--fill-off, 18px));
+  transition: transform 0.9s var(--mb-ease);
+}
+
+.mb-card:hover .mb-mini-water {
+  transform: translateY(0);
+}
+
+.mb-mini {
+  transition: transform 0.6s var(--mb-ease);
+}
+
+.mb-card:hover .mb-mini {
+  transform: translate3d(0, -4px, 0);
+}
+
+.mb-card:hover .mb-mini:nth-child(2) {
+  transition-delay: 60ms;
+}
+
+.mb-card:hover .mb-mini:nth-child(3) {
+  transition-delay: 120ms;
+}
+
+/* ---------- Buttons ---------- */
+
+.mb-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.mb-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgb(255 255 255 / 0.4) 50%,
+    transparent 75%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.mb-shine:hover::after {
+  transform: translateX(120%);
+  transition: transform 0.9s var(--mb-ease);
+}
+
+.mb-shine-auto::after {
+  animation: mb-shine 6.5s ease-in-out 2.2s infinite;
+}
+
+@keyframes mb-shine {
+  0% {
+    transform: translateX(-120%);
+  }
+  18%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.mb-arrow {
+  transition: transform 0.35s var(--mb-ease);
+}
+
+a:hover > .mb-arrow {
+  transform: translate3d(3px, 0, 0);
+}
+
+/* ---------- WhatsApp FAB ---------- */
+
+.mb-fab {
+  animation: mb-fab-in 0.7s var(--mb-ease) 1.2s both;
+}
+
+@keyframes mb-fab-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mb-fab-btn {
+  transition: transform 0.35s var(--mb-ease);
+}
+
+.mb-fab-btn:hover {
+  transform: scale(1.08);
+}
+
+.mb-fab-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgb(34 197 94 / 0.45);
+  animation: mb-fab-ring 2.8s var(--mb-ease) infinite;
+  pointer-events: none;
+}
+
+.mb-fab-ring + .mb-fab-ring {
+  animation-delay: 1.4s;
+}
+
+@keyframes mb-fab-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.mb-fab-tip {
+  opacity: 0;
+  transform: translate3d(8px, 0, 0);
+  transition:
+    opacity 0.35s var(--mb-ease),
+    transform 0.35s var(--mb-ease);
+  pointer-events: none;
+}
+
+.mb-fab:hover .mb-fab-tip,
+.mb-fab:focus-within .mb-fab-tip,
+.mb-fab[data-tip="true"] .mb-fab-tip {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Reduced motion ---------- */
+
 @media (prefers-reduced-motion: reduce) {
-  .mb-reveal,
-  .mb-fab-pulse {
-    animation: none !important;
+  html:has(.mb-shell) {
+    scroll-behavior: auto;
+  }
+
+  .mb-shell *,
+  .mb-shell *::before,
+  .mb-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .mb-ripple,
+  .mb-bubble,
+  .mb-fab-ring {
+    display: none;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

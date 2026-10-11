@@ -30,48 +30,489 @@
       body {
         font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
       }
-      .mb-reveal {
-        animation: mb-reveal 0.7s ease-out both;
+      /* MiBidón apex — premium storefront (Cauquenes) */
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
       }
-      .mb-reveal-delay-1 {
-        animation-delay: 0.12s;
+
+      body {
+        --mb-primary: #2563eb;
+        --mb-primary-dark: #1d4ed8;
+        --mb-title: #0f172a;
+        --mb-body: #475569;
+        --mb-canvas: #f8fafc;
+        --mb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+        background-color: var(--mb-canvas);
+        color: var(--mb-body);
       }
-      .mb-reveal-delay-2 {
-        animation-delay: 0.24s;
+
+      /* ---------- Navbar ---------- */
+
+      .mb-nav {
+        transition:
+          background-color 0.35s var(--mb-ease),
+          box-shadow 0.35s var(--mb-ease),
+          border-color 0.35s var(--mb-ease);
       }
-      @keyframes mb-reveal {
+
+      .mb-nav-inner {
+        transition: height 0.35s var(--mb-ease);
+      }
+
+      .mb-nav[data-scrolled="true"] {
+        background-color: rgb(255 255 255 / 0.92);
+        border-color: transparent;
+        box-shadow:
+          0 1px 0 rgb(15 23 42 / 0.04),
+          0 10px 30px -12px rgb(15 23 42 / 0.18);
+      }
+
+      .mb-nav[data-scrolled="true"] .mb-nav-inner {
+        height: 3.5rem;
+      }
+
+      .mb-progress {
+        transform: scaleX(var(--mb-progress, 0));
+        transform-origin: 0 50%;
+      }
+
+      /* ---------- Hero entrance ---------- */
+
+      .mb-word {
+        display: inline-block;
+        animation: mb-word 0.9s var(--mb-ease) both;
+        animation-delay: calc(var(--i, 0) * 55ms + 120ms);
+      }
+
+      @keyframes mb-word {
         from {
           opacity: 0;
-          transform: translateY(16px);
+          transform: translate3d(0, 0.5em, 0);
+          filter: blur(10px);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
+          transform: none;
+          filter: blur(0);
         }
       }
+
+      .mb-enter {
+        animation: mb-enter 0.8s var(--mb-ease) both;
+        animation-delay: var(--d, 0ms);
+      }
+
+      @keyframes mb-enter {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 14px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .mb-enter-visual {
+        animation: mb-enter-visual 1.1s var(--mb-ease) 0.25s both;
+      }
+
+      @keyframes mb-enter-visual {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 20px, 0) scale(0.94);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ---------- Hero visual ---------- */
+
       .mb-hero-visual {
         background:
           radial-gradient(ellipse 80% 70% at 70% 30%, rgba(37, 99, 235, 0.22), transparent 60%),
           linear-gradient(145deg, #dbeafe 0%, #eff6ff 45%, #ffffff 100%);
       }
-      .mb-fab-pulse {
-        animation: mb-fab-pulse 2.8s ease-in-out infinite;
+
+      .mb-layer {
+        transform: translate3d(
+          calc(var(--px, 0) * var(--depth, 0) * 1px),
+          calc(var(--py, 0) * var(--depth, 0) * 1px),
+          0
+        );
+        will-change: transform;
       }
-      @keyframes mb-fab-pulse {
+
+      .mb-float {
+        animation: mb-float 6s ease-in-out infinite;
+      }
+
+      .mb-float-slow {
+        animation: mb-float 8s ease-in-out -2s infinite;
+      }
+
+      @keyframes mb-float {
         0%,
         100% {
-          box-shadow: 0 12px 28px rgba(34, 197, 94, 0.35);
+          transform: translate3d(0, 0, 0);
         }
         50% {
-          box-shadow:
-            0 14px 32px rgba(34, 197, 94, 0.5),
-            0 0 0 10px rgba(34, 197, 94, 0.12);
+          transform: translate3d(0, -12px, 0);
         }
       }
+
+      .mb-shadow-pulse {
+        animation: mb-shadow-pulse 6s ease-in-out infinite;
+        transform-origin: center;
+      }
+
+      @keyframes mb-shadow-pulse {
+        0%,
+        100% {
+          transform: scaleX(1);
+          opacity: 0.55;
+        }
+        50% {
+          transform: scaleX(0.82);
+          opacity: 0.32;
+        }
+      }
+
+      .mb-ripple {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 62%;
+        aspect-ratio: 1;
+        border-radius: 9999px;
+        border: 1.5px solid rgb(37 99 235 / 0.22);
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+        animation: mb-ripple 6s var(--mb-ease) infinite;
+      }
+
+      .mb-ripple:nth-child(2) {
+        animation-delay: 2s;
+      }
+
+      .mb-ripple:nth-child(3) {
+        animation-delay: 4s;
+      }
+
+      @keyframes mb-ripple {
+        0% {
+          transform: translate(-50%, -50%) scale(0.6);
+          opacity: 0;
+        }
+        20% {
+          opacity: 0.9;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1.45);
+          opacity: 0;
+        }
+      }
+
+      .mb-wave {
+        animation: mb-wave 7s linear infinite;
+      }
+
+      .mb-wave-back {
+        animation: mb-wave 11s linear infinite reverse;
+      }
+
+      @keyframes mb-wave {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-240px);
+        }
+      }
+
+      .mb-bubble {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: mb-bubble 5s ease-in infinite;
+        animation-delay: var(--d, 0s);
+        opacity: 0;
+      }
+
+      @keyframes mb-bubble {
+        0% {
+          transform: translate3d(0, 0, 0) scale(0.6);
+          opacity: 0;
+        }
+        15% {
+          opacity: 0.85;
+        }
+        85% {
+          opacity: 0.6;
+        }
+        100% {
+          transform: translate3d(var(--sway, 4px), -150px, 0) scale(1);
+          opacity: 0;
+        }
+      }
+
+      .mb-glint {
+        animation: mb-glint 5s ease-in-out infinite;
+      }
+
+      @keyframes mb-glint {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      /* ---------- Scroll reveals ---------- */
+
+      @media (scripting: enabled) {
+        [data-reveal] {
+          opacity: 0;
+          transform: translate3d(0, 28px, 0);
+          transition:
+            opacity 0.8s var(--mb-ease),
+            transform 0.8s var(--mb-ease);
+          transition-delay: var(--d, 0ms);
+        }
+
+        [data-reveal].is-in {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ---------- Product cards ---------- */
+
+      .mb-card {
+        position: relative;
+        isolation: isolate;
+        transition:
+          transform 0.45s var(--mb-ease),
+          box-shadow 0.45s var(--mb-ease);
+      }
+
+      .mb-card:hover {
+        transform: translate3d(0, -6px, 0);
+        box-shadow: 0 24px 48px -16px rgb(30 64 175 / 0.22);
+      }
+
+      .mb-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background: radial-gradient(
+          380px circle at var(--mx, 50%) var(--my, 0%),
+          rgb(37 99 235 / 0.1),
+          transparent 45%
+        );
+        opacity: 0;
+        transition: opacity 0.4s var(--mb-ease);
+        pointer-events: none;
+      }
+
+      .mb-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: radial-gradient(
+          260px circle at var(--mx, 50%) var(--my, 0%),
+          rgb(37 99 235 / 0.55),
+          transparent 60%
+        );
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s var(--mb-ease);
+        pointer-events: none;
+      }
+
+      .mb-card:hover::before,
+      .mb-card:hover::after {
+        opacity: 1;
+      }
+
+      .mb-mini-water {
+        transform: translateY(var(--fill-off, 18px));
+        transition: transform 0.9s var(--mb-ease);
+      }
+
+      .mb-card:hover .mb-mini-water {
+        transform: translateY(0);
+      }
+
+      .mb-mini {
+        transition: transform 0.6s var(--mb-ease);
+      }
+
+      .mb-card:hover .mb-mini {
+        transform: translate3d(0, -4px, 0);
+      }
+
+      .mb-card:hover .mb-mini:nth-child(2) {
+        transition-delay: 60ms;
+      }
+
+      .mb-card:hover .mb-mini:nth-child(3) {
+        transition-delay: 120ms;
+      }
+
+      /* ---------- Buttons ---------- */
+
+      .mb-shine {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .mb-shine::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          110deg,
+          transparent 25%,
+          rgb(255 255 255 / 0.4) 50%,
+          transparent 75%
+        );
+        transform: translateX(-120%);
+        pointer-events: none;
+      }
+
+      .mb-shine:hover::after {
+        transform: translateX(120%);
+        transition: transform 0.9s var(--mb-ease);
+      }
+
+      .mb-shine-auto::after {
+        animation: mb-shine 6.5s ease-in-out 2.2s infinite;
+      }
+
+      @keyframes mb-shine {
+        0% {
+          transform: translateX(-120%);
+        }
+        18%,
+        100% {
+          transform: translateX(120%);
+        }
+      }
+
+      .mb-arrow {
+        transition: transform 0.35s var(--mb-ease);
+      }
+
+      a:hover > .mb-arrow {
+        transform: translate3d(3px, 0, 0);
+      }
+
+      /* ---------- WhatsApp FAB ---------- */
+
+      .mb-fab {
+        animation: mb-fab-in 0.7s var(--mb-ease) 1.2s both;
+      }
+
+      @keyframes mb-fab-in {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 16px, 0) scale(0.6);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .mb-fab-btn {
+        transition: transform 0.35s var(--mb-ease);
+      }
+
+      .mb-fab-btn:hover {
+        transform: scale(1.08);
+      }
+
+      .mb-fab-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        background: rgb(34 197 94 / 0.45);
+        animation: mb-fab-ring 2.8s var(--mb-ease) infinite;
+        pointer-events: none;
+      }
+
+      .mb-fab-ring + .mb-fab-ring {
+        animation-delay: 1.4s;
+      }
+
+      @keyframes mb-fab-ring {
+        0% {
+          transform: scale(1);
+          opacity: 0.6;
+        }
+        100% {
+          transform: scale(1.9);
+          opacity: 0;
+        }
+      }
+
+      .mb-fab-tip {
+        opacity: 0;
+        transform: translate3d(8px, 0, 0);
+        transition:
+          opacity 0.35s var(--mb-ease),
+          transform 0.35s var(--mb-ease);
+        pointer-events: none;
+      }
+
+      .mb-fab:hover .mb-fab-tip,
+      .mb-fab:focus-within .mb-fab-tip,
+      .mb-fab[data-tip="true"] .mb-fab-tip {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ---------- Reduced motion ---------- */
+
       @media (prefers-reduced-motion: reduce) {
-        .mb-reveal,
-        .mb-fab-pulse {
-          animation: none !important;
+        html {
+          scroll-behavior: auto;
+        }
+
+        body *,
+        body *::before,
+        body *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          animation-delay: 0ms !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0ms !important;
+        }
+
+        .mb-ripple,
+        .mb-bubble,
+        .mb-fab-ring {
+          display: none;
+        }
+
+        [data-reveal] {
+          opacity: 1 !important;
+          transform: none !important;
         }
       }
     </style>
@@ -94,88 +535,221 @@
       };
     </script>
 
+    <svg width="0" height="0" class="absolute" aria-hidden="true">
+      <defs>
+        <symbol id="wa-icon" viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+          />
+        </symbol>
+        <symbol id="mini-bottle-shape" viewBox="0 0 60 80">
+          <path d="M24 6 H36 V14 C36 17 42 18 46 20 C51 23 54 27 54 33 V68 C54 73 50 77 45 77 H15 C10 77 6 73 6 68 V33 C6 27 9 23 14 20 C18 18 24 17 24 14 Z" />
+        </symbol>
+        <linearGradient id="mb-drop" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#93c5fd" />
+          <stop offset="1" stop-color="#2563eb" />
+        </linearGradient>
+        <linearGradient id="mini-water" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#60a5fa" />
+          <stop offset="1" stop-color="#1d4ed8" />
+        </linearGradient>
+        <clipPath id="mini-clip">
+          <path d="M24 6 H36 V14 C36 17 42 18 46 20 C51 23 54 27 54 33 V68 C54 73 50 77 45 77 H15 C10 77 6 73 6 68 V33 C6 27 9 23 14 20 C18 18 24 17 24 14 Z" />
+        </clipPath>
+        <symbol id="drop" viewBox="0 0 24 32">
+          <path d="M12 1 C12 1 2 13.5 2 20.5 A10 10 0 0 0 22 20.5 C22 13.5 12 1 12 1 Z" fill="url(#mb-drop)" />
+          <path d="M7.5 20 a4.5 4.5 0 0 0 3 4.5" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.8" />
+        </symbol>
+      </defs>
+    </svg>
+
     <header
-      class="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md"
+      data-nav
+      class="mb-nav fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md"
     >
       <div
-        class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 md:px-8"
+        class="mb-nav-inner mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 md:px-8"
       >
-        <a href="#" class="flex items-center gap-2.5">
+        <a href="#" class="group flex items-center gap-2.5">
           <span
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-extrabold text-white shadow-md shadow-blue-600/25"
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-extrabold text-white shadow-md shadow-blue-600/25 transition-transform duration-500 group-hover:rotate-[-6deg] group-hover:scale-105"
             >MB</span
           >
-          <span class="text-lg font-extrabold tracking-tight text-slate-900"
-            >MiBidón</span
-          >
+          <span class="text-lg font-extrabold tracking-tight text-slate-900">MiBidón</span>
         </a>
+        <nav class="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
+          <a href="#productos" class="transition-colors hover:text-slate-900">Productos</a>
+          <a href="#nosotros" class="transition-colors hover:text-slate-900">Nosotros</a>
+        </nav>
         <a
           id="nav-cta"
           href="#"
-          class="inline-flex min-h-10 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+          class="mb-shine inline-flex min-h-10 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >Hacer Pedido</a
         >
       </div>
+      <div
+        data-progress
+        class="mb-progress absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-400 via-blue-600 to-blue-700"
+        aria-hidden="true"
+      ></div>
     </header>
 
-    <main class="bg-slate-50 pt-16">
+    <main class="overflow-x-clip bg-slate-50 pt-16">
       <!-- Hero -->
       <section
         class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:gap-14 md:px-8 md:py-24"
       >
-        <div class="mb-reveal flex flex-col gap-6">
-          <p class="text-sm font-bold uppercase tracking-wider text-blue-600">
+        <div class="flex flex-col gap-6">
+          <p
+            class="mb-enter inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700 ring-1 ring-blue-100"
+            style="--d: 0ms"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-blue-600"></span>
             MiBidón · Cauquenes
           </p>
           <h1
+            id="hero-title"
             class="text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]"
+          >Hidratación de Primera, Directo a tu Puerta en Cauquenes</h1>
+          <p
+            class="mb-enter max-w-xl text-lg font-medium leading-relaxed text-slate-600"
+            style="--d: 650ms"
           >
-            Hidratación de Primera, Directo a tu Puerta en Cauquenes
-          </h1>
-          <p class="max-w-xl text-lg font-medium leading-relaxed text-slate-600">
             Agua purificada para tu hogar o negocio. Pedí por WhatsApp y recibe
             en la puerta, sin vueltas.
           </p>
-          <div class="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
+          <div
+            class="mb-enter flex flex-col gap-3 pt-1 sm:flex-row sm:items-center"
+            style="--d: 800ms"
+          >
             <a
               id="hero-wa"
               href="#"
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-base font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
+              class="mb-shine mb-shine-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-base font-bold text-white shadow-lg shadow-blue-600/25 transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 active:scale-[0.98]"
             >
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path
-                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-                />
-              </svg>
+              <svg class="h-5 w-5" aria-hidden="true"><use href="#wa-icon" /></svg>
               Pedir por WhatsApp
             </a>
             <a
               href="#productos"
-              class="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-transparent px-6 py-3 text-base font-bold text-slate-900 transition hover:border-slate-400 hover:bg-white"
-              >Ver Productos</a
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-transparent px-6 py-3 text-base font-bold text-slate-900 transition hover:border-slate-400 hover:bg-white"
+              >Ver Productos <span class="mb-arrow" aria-hidden="true">→</span></a
             >
           </div>
+          <p
+            class="mb-enter flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-semibold text-slate-500"
+            style="--d: 950ms"
+          >
+            <span>✓ Despacho a domicilio</span>
+            <span>✓ Pago electrónico</span>
+            <span>✓ Resolución sanitaria</span>
+          </p>
         </div>
 
         <div
-          class="mb-reveal mb-reveal-delay-1 mb-hero-visual relative aspect-[4/3] overflow-hidden rounded-3xl shadow-lg shadow-slate-200/50 md:aspect-square"
+          data-parallax
+          class="mb-enter-visual mb-hero-visual relative aspect-[4/3] overflow-hidden rounded-3xl shadow-lg shadow-slate-200/50 md:aspect-square"
         >
+          <div class="mb-layer absolute inset-0" style="--depth: -6" aria-hidden="true">
+            <span class="mb-ripple"></span>
+            <span class="mb-ripple"></span>
+            <span class="mb-ripple"></span>
+          </div>
+          <div class="mb-layer absolute left-[12%] top-[18%]" style="--depth: -16">
+            <div class="mb-float-slow"><svg class="h-7 w-6 opacity-80" aria-hidden="true"><use href="#drop" /></svg></div>
+          </div>
+          <div class="mb-layer absolute right-[14%] top-[30%]" style="--depth: 20">
+            <div class="mb-float"><svg class="h-5 w-4 opacity-60" aria-hidden="true"><use href="#drop" /></svg></div>
+          </div>
+          <div class="mb-layer absolute bottom-[22%] left-[18%]" style="--depth: 14">
+            <div class="mb-float"><svg class="h-4 w-3 opacity-50" aria-hidden="true"><use href="#drop" /></svg></div>
+          </div>
           <div
-            class="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center"
+            class="mb-layer absolute bottom-[9%] left-1/2 h-5 w-[38%] -translate-x-1/2"
+            style="--depth: 4"
+            aria-hidden="true"
           >
-            <div
-              class="flex h-28 w-28 items-center justify-center rounded-full bg-white/80 shadow-lg shadow-blue-600/10 backdrop-blur-sm md:h-36 md:w-36"
-            >
-              <span class="text-4xl font-extrabold text-blue-600 md:text-5xl"
-                >20L</span
+            <div class="mb-shadow-pulse h-full w-full rounded-[50%] bg-blue-900/25 blur-md"></div>
+          </div>
+
+          <div class="mb-layer absolute inset-0 flex items-center justify-center" style="--depth: 10">
+            <div class="mb-float h-[74%]">
+              <svg
+                viewBox="0 0 240 320"
+                class="h-full w-auto drop-shadow-[0_24px_32px_rgba(30,64,175,0.22)]"
+                role="img"
+                aria-label="Bidón MiBidón de 20 litros con agua purificada"
               >
+                <defs>
+                  <clipPath id="mb-bottle-clip">
+                    <path d="M104 52 L136 52 L136 62 C136 70 150 74 168 80 C188 87 200 100 200 122 L200 266 C200 288 184 304 162 304 L78 304 C56 304 40 288 40 266 L40 122 C40 100 52 87 72 80 C90 74 104 70 104 62 Z" />
+                  </clipPath>
+                  <linearGradient id="mb-glass" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#ffffff" stop-opacity="0.95" />
+                    <stop offset="0.5" stop-color="#dbeafe" stop-opacity="0.55" />
+                    <stop offset="1" stop-color="#ffffff" stop-opacity="0.9" />
+                  </linearGradient>
+                  <linearGradient id="mb-water" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#60a5fa" />
+                    <stop offset="0.55" stop-color="#2563eb" />
+                    <stop offset="1" stop-color="#1d4ed8" />
+                  </linearGradient>
+                  <linearGradient id="mb-cap" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#2563eb" />
+                    <stop offset="1" stop-color="#1e40af" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M104 52 L136 52 L136 62 C136 70 150 74 168 80 C188 87 200 100 200 122 L200 266 C200 288 184 304 162 304 L78 304 C56 304 40 288 40 266 L40 122 C40 100 52 87 72 80 C90 74 104 70 104 62 Z"
+                  fill="url(#mb-glass)"
+                  stroke="#bfdbfe"
+                  stroke-width="2"
+                />
+                <g clip-path="url(#mb-bottle-clip)">
+                  <path class="mb-wave-back" d="M0 126 Q30 117 60 126 T120 126 T180 126 T240 126 T300 126 T360 126 T420 126 T480 126 V320 H0 Z" fill="#93c5fd" opacity="0.65" />
+                  <path class="mb-wave" d="M0 134 Q30 125 60 134 T120 134 T180 134 T240 134 T300 134 T360 134 T420 134 T480 134 V320 H0 Z" fill="url(#mb-water)" />
+                  <circle class="mb-bubble" cx="70" cy="292" r="4" fill="white" style="--d: 0s; --sway: 6px" />
+                  <circle class="mb-bubble" cx="98" cy="292" r="2.5" fill="white" style="--d: 1.2s; --sway: -4px" />
+                  <circle class="mb-bubble" cx="128" cy="292" r="5" fill="white" style="--d: 2.4s; --sway: 5px" />
+                  <circle class="mb-bubble" cx="156" cy="292" r="3" fill="white" style="--d: 0.6s; --sway: -6px" />
+                  <circle class="mb-bubble" cx="176" cy="292" r="2" fill="white" style="--d: 3.1s; --sway: 3px" />
+                  <circle class="mb-bubble" cx="112" cy="292" r="3.5" fill="white" style="--d: 3.8s; --sway: -3px" />
+                  <path d="M40 160 Q120 172 200 160" stroke="white" stroke-opacity="0.5" stroke-width="2" fill="none" />
+                  <path d="M40 252 Q120 264 200 252" stroke="white" stroke-opacity="0.4" stroke-width="2" fill="none" />
+                </g>
+                <rect class="mb-glint" x="56" y="104" width="11" height="168" rx="5.5" fill="white" />
+                <rect x="76" y="186" width="88" height="58" rx="14" fill="white" fill-opacity="0.92" />
+                <text x="120" y="219" text-anchor="middle" font-size="27" font-weight="800" fill="#1d4ed8">20L</text>
+                <text x="120" y="235" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="1.6" fill="#475569">PURIFICADA</text>
+                <rect x="104" y="38" width="32" height="24" rx="4" fill="#e0f2fe" stroke="#bfdbfe" stroke-width="2" />
+                <rect x="96" y="12" width="48" height="30" rx="8" fill="url(#mb-cap)" />
+                <path d="M106 18 V36 M114 18 V36 M122 18 V36 M130 18 V36" stroke="white" stroke-opacity="0.22" stroke-width="2" />
+              </svg>
             </div>
-            <p class="text-sm font-bold text-slate-900">
-              Bidón premium · Agua purificada
-            </p>
-            <p class="text-xs font-medium text-slate-600">
-              Imagen de producto · placeholder
-            </p>
+          </div>
+
+          <div class="mb-layer absolute left-[7%] top-[8%]" style="--depth: 24">
+            <div
+              class="mb-float-slow flex items-center gap-2 rounded-2xl bg-white/85 px-3.5 py-2.5 shadow-lg shadow-blue-900/10 ring-1 ring-white backdrop-blur-md"
+            >
+              <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7" /></svg>
+              </span>
+              <span class="text-xs font-bold text-slate-900">Agua purificada</span>
+            </div>
+          </div>
+          <div class="mb-layer absolute bottom-[8%] right-[7%]" style="--depth: -20">
+            <div
+              class="mb-float flex items-center gap-2 rounded-2xl bg-white/85 px-3.5 py-2.5 shadow-lg shadow-blue-900/10 ring-1 ring-white backdrop-blur-md"
+            >
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-60"></span>
+                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500"></span>
+              </span>
+              <span class="text-xs font-bold text-slate-900">Despacho en Cauquenes</span>
+            </div>
           </div>
         </div>
       </section>
@@ -185,143 +759,139 @@
         <div
           class="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:grid-cols-3 md:gap-8 md:px-8 md:py-12"
         >
-          <div class="flex flex-col gap-1 text-center md:text-left">
-            <h2 class="text-base font-extrabold text-slate-900">
-              Resolución Sanitaria
-            </h2>
-            <p class="text-sm font-medium text-slate-600">
-              Agua tratada bajo normativa vigente.
-            </p>
+          <div data-reveal style="--d: 0ms" class="flex items-center gap-4">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </span>
+            <div class="flex flex-col gap-0.5">
+              <h2 class="text-base font-extrabold text-slate-900">Resolución Sanitaria</h2>
+              <p class="text-sm font-medium text-slate-600">Agua tratada bajo normativa vigente.</p>
+            </div>
           </div>
-          <div class="flex flex-col gap-1 text-center md:text-left">
-            <h2 class="text-base font-extrabold text-slate-900">
-              Despacho Rápido
-            </h2>
-            <p class="text-sm font-medium text-slate-600">
-              Entrega a domicilio en Cauquenes.
-            </p>
+          <div data-reveal style="--d: 120ms" class="flex items-center gap-4">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                <path d="M15 18H9" />
+                <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+                <circle cx="17" cy="18" r="2" />
+                <circle cx="7" cy="18" r="2" />
+              </svg>
+            </span>
+            <div class="flex flex-col gap-0.5">
+              <h2 class="text-base font-extrabold text-slate-900">Despacho Rápido</h2>
+              <p class="text-sm font-medium text-slate-600">Entrega a domicilio en Cauquenes.</p>
+            </div>
           </div>
-          <div class="flex flex-col gap-1 text-center md:text-left">
-            <h2 class="text-base font-extrabold text-slate-900">
-              Pago Electrónico
-            </h2>
-            <p class="text-sm font-medium text-slate-600">
-              Transferencia o medios digitales.
-            </p>
+          <div data-reveal style="--d: 240ms" class="flex items-center gap-4">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <path d="M2 10h20" />
+              </svg>
+            </span>
+            <div class="flex flex-col gap-0.5">
+              <h2 class="text-base font-extrabold text-slate-900">Pago Electrónico</h2>
+              <p class="text-sm font-medium text-slate-600">Transferencia o medios digitales.</p>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Products -->
       <section id="productos" class="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-24">
-        <div class="mb-reveal mx-auto mb-12 max-w-2xl text-center">
-          <h2
-            class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl"
-          >
-            Productos
-          </h2>
+        <div data-reveal class="mx-auto mb-12 max-w-2xl text-center">
+          <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">Productos</h2>
           <p class="mt-3 text-base font-medium text-slate-600">
             Elige tu opción y confirma el pedido por WhatsApp en minutos.
           </p>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3 md:gap-8">
-          <article
-            class="mb-reveal group flex flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div
-              class="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white"
+          <div data-reveal style="--d: 0ms">
+            <article
+              data-spotlight
+              class="mb-card group flex h-full flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50"
             >
-              <span class="text-2xl font-extrabold text-blue-600"
-                >Recarga 20L</span
+              <div class="relative flex h-36 items-end justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-white pb-5">
+                <svg viewBox="0 0 60 80" class="mb-mini h-24 w-auto" data-mini="24" aria-hidden="true"></svg>
+              </div>
+              <div class="flex flex-1 flex-col gap-2">
+                <h3 class="text-xl font-extrabold text-slate-900">Recarga 20L</h3>
+                <p class="text-sm font-medium leading-relaxed text-slate-600">
+                  Llena tu bidón en casa. Agua purificada lista para beber.
+                </p>
+                <p class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600">$2.500</p>
+              </div>
+              <a
+                data-wa="Hola MiBidón, quiero pedir una Recarga 20L a domicilio en Cauquenes."
+                href="#"
+                class="wa-product mb-shine inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                >Pedir por WhatsApp <span class="mb-arrow" aria-hidden="true">→</span></a
               >
-            </div>
-            <div class="flex flex-1 flex-col gap-2">
-              <h3 class="text-xl font-extrabold text-slate-900">Recarga 20L</h3>
-              <p class="text-sm font-medium leading-relaxed text-slate-600">
-                Llena tu bidón en casa. Agua purificada lista para beber.
-              </p>
-              <p
-                class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600"
-              >
-                $2.500
-              </p>
-            </div>
-            <a
-              data-wa="Hola MiBidón, quiero pedir una Recarga 20L a domicilio en Cauquenes."
-              href="#"
-              class="wa-product inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
-              >Pedir por WhatsApp</a
-            >
-          </article>
+            </article>
+          </div>
 
-          <article
-            class="mb-reveal mb-reveal-delay-1 group flex flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div
-              class="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white"
+          <div data-reveal style="--d: 120ms">
+            <article
+              data-spotlight
+              class="mb-card group flex h-full flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50"
             >
-              <span class="text-2xl font-extrabold text-blue-600"
-                >Envase Nuevo</span
+              <div class="relative flex h-36 items-end justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-white pb-5">
+                <svg viewBox="0 0 60 80" class="mb-mini h-24 w-auto" data-mini="8" aria-hidden="true"></svg>
+              </div>
+              <div class="flex flex-1 flex-col gap-2">
+                <h3 class="text-xl font-extrabold text-slate-900">Envase Nuevo</h3>
+                <p class="text-sm font-medium leading-relaxed text-slate-600">
+                  Bidón nuevo + primera carga. Ideal si estás partiendo.
+                </p>
+                <p class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600">$8.990</p>
+              </div>
+              <a
+                data-wa="Hola MiBidón, quiero un Envase Nuevo 20L con primera carga en Cauquenes."
+                href="#"
+                class="wa-product mb-shine inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                >Pedir por WhatsApp <span class="mb-arrow" aria-hidden="true">→</span></a
               >
-            </div>
-            <div class="flex flex-1 flex-col gap-2">
-              <h3 class="text-xl font-extrabold text-slate-900">Envase Nuevo</h3>
-              <p class="text-sm font-medium leading-relaxed text-slate-600">
-                Bidón nuevo + primera carga. Ideal si estás partiendo.
-              </p>
-              <p
-                class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600"
-              >
-                $8.990
-              </p>
-            </div>
-            <a
-              data-wa="Hola MiBidón, quiero un Envase Nuevo 20L con primera carga en Cauquenes."
-              href="#"
-              class="wa-product inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
-              >Pedir por WhatsApp</a
-            >
-          </article>
+            </article>
+          </div>
 
-          <article
-            class="mb-reveal mb-reveal-delay-2 group flex flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div
-              class="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white"
+          <div data-reveal style="--d: 240ms">
+            <article
+              data-spotlight
+              class="mb-card group flex h-full flex-col gap-5 rounded-3xl bg-white p-7 shadow-lg shadow-slate-200/50"
             >
-              <span class="text-2xl font-extrabold text-blue-600">Packs</span>
-            </div>
-            <div class="flex flex-1 flex-col gap-2">
-              <h3 class="text-xl font-extrabold text-slate-900">Packs</h3>
-              <p class="text-sm font-medium leading-relaxed text-slate-600">
-                Pack familiar de recargas. Ahorra y mantén el stock en casa.
-              </p>
-              <p
-                class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600"
+              <div class="relative flex h-36 items-end justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-white pb-5">
+                <svg viewBox="0 0 60 80" class="mb-mini h-20 w-auto" data-mini="14" aria-hidden="true"></svg>
+                <svg viewBox="0 0 60 80" class="mb-mini h-20 w-auto" data-mini="6" aria-hidden="true"></svg>
+                <svg viewBox="0 0 60 80" class="mb-mini h-20 w-auto" data-mini="14" aria-hidden="true"></svg>
+              </div>
+              <div class="flex flex-1 flex-col gap-2">
+                <h3 class="text-xl font-extrabold text-slate-900">Packs</h3>
+                <p class="text-sm font-medium leading-relaxed text-slate-600">
+                  Pack familiar de recargas. Ahorra y mantén el stock en casa.
+                </p>
+                <p class="pt-2 text-3xl font-extrabold tracking-tight text-blue-600">$14.990</p>
+              </div>
+              <a
+                data-wa="Hola MiBidón, quiero información de Packs de agua a domicilio en Cauquenes."
+                href="#"
+                class="wa-product mb-shine inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                >Pedir por WhatsApp <span class="mb-arrow" aria-hidden="true">→</span></a
               >
-                $14.990
-              </p>
-            </div>
-            <a
-              data-wa="Hola MiBidón, quiero información de Packs de agua a domicilio en Cauquenes."
-              href="#"
-              class="wa-product inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
-              >Pedir por WhatsApp</a
-            >
-          </article>
+            </article>
+          </div>
         </div>
       </section>
 
       <!-- Nosotros -->
-      <section class="border-t border-slate-200 bg-white/60 px-5 py-24 md:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <p class="text-sm font-bold uppercase tracking-wider text-blue-600">
-            Nosotros
-          </p>
-          <h2
-            class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl"
-          >
+      <section id="nosotros" class="border-t border-slate-200 bg-white/60 px-5 py-24 md:px-8">
+        <div data-reveal class="mx-auto max-w-2xl text-center">
+          <p class="text-sm font-bold uppercase tracking-wider text-blue-600">Nosotros</p>
+          <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
             Tomarla es Vida
           </h2>
           <p class="mt-5 text-lg font-medium leading-relaxed text-slate-600">
@@ -329,31 +899,42 @@
             Cauquenes. Calidad, puntualidad y un pedido simple por WhatsApp.
           </p>
         </div>
+        <div class="mx-auto mt-14 grid max-w-4xl gap-5 sm:grid-cols-3">
+          <div data-reveal style="--d: 0ms" class="rounded-3xl bg-white p-6 text-center shadow-lg shadow-slate-200/50 transition-transform duration-500 hover:-translate-y-1">
+            <p class="text-4xl font-extrabold tracking-tight text-blue-600 tabular-nums"><span data-count="20">20</span>L</p>
+            <p class="mt-2 text-sm font-medium text-slate-600">Por bidón, sellado y listo para beber</p>
+          </div>
+          <div data-reveal style="--d: 120ms" class="rounded-3xl bg-white p-6 text-center shadow-lg shadow-slate-200/50 transition-transform duration-500 hover:-translate-y-1">
+            <p class="text-4xl font-extrabold tracking-tight text-blue-600 tabular-nums"><span data-count="3">3</span></p>
+            <p class="mt-2 text-sm font-medium text-slate-600">Formatos: recarga, envase nuevo y packs</p>
+          </div>
+          <div data-reveal style="--d: 240ms" class="rounded-3xl bg-white p-6 text-center shadow-lg shadow-slate-200/50 transition-transform duration-500 hover:-translate-y-1">
+            <p class="text-4xl font-extrabold tracking-tight text-blue-600 tabular-nums"><span data-count="100">100</span>%</p>
+            <p class="mt-2 text-sm font-medium text-slate-600">Agua purificada bajo normativa</p>
+          </div>
+        </div>
       </section>
 
-      <footer
-        class="border-t border-slate-200 bg-slate-50 px-5 py-10 text-center md:px-8"
-      >
+      <footer class="border-t border-slate-200 bg-slate-50 px-5 py-10 text-center md:px-8">
         <p class="text-sm font-extrabold text-slate-900">MiBidón</p>
-        <p class="mt-1 text-sm font-medium text-slate-600">
-          Agua purificada a domicilio · Cauquenes
-        </p>
+        <p class="mt-1 text-sm font-medium text-slate-600">Agua purificada a domicilio · Cauquenes</p>
       </footer>
     </main>
 
     <!-- FAB WhatsApp -->
-    <a
-      id="fab-wa"
-      href="#"
-      aria-label="Pedir por WhatsApp"
-      class="mb-fab-pulse fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-2xl transition hover:scale-110 hover:bg-green-600"
-    >
-      <svg class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path
-          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-        />
-      </svg>
-    </a>
+    <div data-fab class="mb-fab fixed bottom-6 right-6 z-50 flex items-center gap-3">
+      <span class="mb-fab-tip whitespace-nowrap rounded-xl bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-xl">¿Pedimos tu agua?</span>
+      <a
+        id="fab-wa"
+        href="#"
+        aria-label="Pedir por WhatsApp"
+        class="mb-fab-btn relative flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-2xl shadow-green-600/40 hover:bg-green-600"
+      >
+        <span class="mb-fab-ring" aria-hidden="true"></span>
+        <span class="mb-fab-ring" aria-hidden="true"></span>
+        <svg class="relative h-7 w-7" aria-hidden="true"><use href="#wa-icon" /></svg>
+      </a>
+    </div>
 
     <script>
       (function () {
@@ -367,6 +948,136 @@
         document.querySelectorAll(".wa-product").forEach(function (el) {
           el.href = wa(el.getAttribute("data-wa") || orderMsg);
         });
+
+        var title = document.getElementById("hero-title");
+        var words = title.textContent.trim().split(/\s+/);
+        title.textContent = "";
+        words.forEach(function (word, i) {
+          var span = document.createElement("span");
+          span.className = "mb-word" + (word === "Cauquenes" ? " text-blue-600" : "");
+          span.style.setProperty("--i", i);
+          span.textContent = word;
+          title.appendChild(span);
+          if (i < words.length - 1) title.appendChild(document.createTextNode(" "));
+        });
+
+        document.querySelectorAll("[data-mini]").forEach(function (svg) {
+          svg.innerHTML =
+            '<use href="#mini-bottle-shape" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5" />' +
+            '<g clip-path="url(#mini-clip)"><rect class="mb-mini-water" x="0" y="30" width="60" height="50" fill="url(#mini-water)" style="--fill-off: ' +
+            svg.getAttribute("data-mini") +
+            'px" /></g>' +
+            '<rect x="13" y="30" width="3" height="38" rx="1.5" fill="white" opacity="0.6" />' +
+            '<rect x="21" y="1" width="18" height="8" rx="2.5" fill="#2563eb" />';
+        });
+      })();
+    </script>
+
+    <!-- Motion: mirror of src/components/mibidon/landing-effects.tsx -->
+    <script>
+      (function () {
+        var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+        var nav = document.querySelector("[data-nav]");
+        var progress = document.querySelector("[data-progress]");
+        var scrollRaf = 0;
+        function onScroll() {
+          if (scrollRaf) return;
+          scrollRaf = requestAnimationFrame(function () {
+            scrollRaf = 0;
+            var y = window.scrollY;
+            if (nav) nav.setAttribute("data-scrolled", String(y > 12));
+            if (progress) {
+              var max = document.documentElement.scrollHeight - window.innerHeight;
+              progress.style.setProperty("--mb-progress", String(max > 0 ? Math.min(1, y / max) : 0));
+            }
+          });
+        }
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+
+        var counters = [].slice.call(document.querySelectorAll("[data-count]"));
+        function runCount(el) {
+          var target = Number(el.getAttribute("data-count")) || 0;
+          if (reduced) {
+            el.textContent = target.toLocaleString("es-CL");
+            return;
+          }
+          var t0 = performance.now();
+          var dur = 1600;
+          function tick(now) {
+            var p = Math.min(1, (now - t0) / dur);
+            var eased = 1 - Math.pow(1 - p, 4);
+            el.textContent = Math.round(target * eased).toLocaleString("es-CL");
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        }
+
+        var reveals = [].slice.call(document.querySelectorAll("[data-reveal]"));
+        if (reduced || !("IntersectionObserver" in window)) {
+          reveals.forEach(function (el) { el.classList.add("is-in"); });
+          counters.forEach(runCount);
+        } else {
+          counters.forEach(function (el) { el.textContent = "0"; });
+          var io = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var el = entry.target;
+                if (el.hasAttribute("data-count")) runCount(el);
+                else el.classList.add("is-in");
+                io.unobserve(el);
+              });
+            },
+            { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+          );
+          reveals.forEach(function (el) { io.observe(el); });
+          counters.forEach(function (el) { io.observe(el); });
+        }
+
+        if (finePointer && !reduced) {
+          document.querySelectorAll("[data-spotlight]").forEach(function (card) {
+            card.addEventListener("pointermove", function (e) {
+              var r = card.getBoundingClientRect();
+              card.style.setProperty("--mx", e.clientX - r.left + "px");
+              card.style.setProperty("--my", e.clientY - r.top + "px");
+            });
+          });
+
+          var stage = document.querySelector("[data-parallax]");
+          if (stage) {
+            var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+            function step() {
+              cx += (tx - cx) * 0.08;
+              cy += (ty - cy) * 0.08;
+              stage.style.setProperty("--px", cx.toFixed(3));
+              stage.style.setProperty("--py", cy.toFixed(3));
+              raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.001 ? requestAnimationFrame(step) : 0;
+            }
+            function kick() {
+              if (!raf) raf = requestAnimationFrame(step);
+            }
+            stage.addEventListener("pointermove", function (e) {
+              var r = stage.getBoundingClientRect();
+              tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+              ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+              kick();
+            });
+            stage.addEventListener("pointerleave", function () {
+              tx = 0;
+              ty = 0;
+              kick();
+            });
+          }
+        }
+
+        var fab = document.querySelector("[data-fab]");
+        if (fab && !reduced) {
+          setTimeout(function () { fab.setAttribute("data-tip", "true"); }, 3500);
+          setTimeout(function () { fab.removeAttribute("data-tip"); }, 8000);
+        }
       })();
     </script>
   </body>
