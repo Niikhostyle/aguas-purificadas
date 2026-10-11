@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Plataforma white-label con carrito, WebPay y panel multi-empresa. Tu marca, tu subdominio, tus clientes.",
 };
 
-const DEMO_HREF = "https://rio-claro.mibidon.cl";
+const DEMO_HREF = "https://demo.mibidon.cl";
 const DEMO_FALLBACK = "/?tenant=rio-claro";
 const CONTACT_HREF = "mailto:hola@mibidon.cl?subject=Solicitar%20demo%20MiBidón";
 const ADMIN_HREF = "/admin/login?tenant=plataforma";
@@ -111,7 +111,7 @@ export default function MiBidonLandingPage() {
           <p className="animate-fade-up mt-4 text-sm text-white/70 [animation-delay:260ms]">
             Demo en vivo:{" "}
             <a href={DEMO_HREF} className="underline decoration-white/40 underline-offset-2 hover:text-white">
-              rio-claro.mibidon.cl
+              demo.mibidon.cl
             </a>
             <span className="mx-1.5 opacity-50">·</span>
             <Link href={DEMO_FALLBACK} className="underline decoration-white/40 underline-offset-2 hover:text-white">
@@ -183,7 +183,7 @@ export default function MiBidonLandingPage() {
               className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
             />
             <span className="absolute bottom-4 left-4 rounded-md bg-[#12326e]/px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
-              rio-claro.mibidon.cl
+              demo.mibidon.cl
             </span>
           </a>
         </div>

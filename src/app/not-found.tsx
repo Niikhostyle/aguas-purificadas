@@ -10,7 +10,7 @@ export default function NotFound() {
         No hay una tienda activa para este subdominio, o la página no existe.
         La demo está en{" "}
         <code className="rounded bg-white px-1.5 py-0.5 text-sm">
-          rio-claro.mibidon.cl
+          demo.mibidon.cl
         </code>
         .
       </p>

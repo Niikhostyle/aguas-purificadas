@@ -15,7 +15,7 @@ function isPlatformHost(hostname: string): boolean {
 
 /**
  * Tenant resolution (storefront only):
- * 1. Subdomain: rio-claro.mibidon.cl / demo.mibidon.cl → tenant slug
+ * 1. Subdomain: demo.mibidon.cl (alias → rio-claro) or cliente.mibidon.cl
  * 2. Query: ?tenant=rio-claro
  * 3. Header: x-tenant
  *
