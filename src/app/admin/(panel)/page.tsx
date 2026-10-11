@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { FulfillmentBadge, PageHeader, PaymentBadge, StatCard, btn } from "@/components/admin/dispatch-ui";
+import { BarChart, Panel, StatsTable } from "@/components/admin/ui";
+import { orderPeriodStats } from "@/lib/admin-stats";
 import { isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -35,7 +37,7 @@ export default async function AdminHomePage() {
   const tenantId = admin.tenantId;
   const flags = parseModuleFlags(admin.tenant.modulesEnabled);
 
-  const stats = await getDispatchStats(tenantId);
+  const [stats, period] = await Promise.all([getDispatchStats(tenantId), orderPeriodStats({ tenantId })]);
   const today = stats.today;
   const dayStart = startOfDayCl(today);
   const weekStart = startOfDayCl(addDaysStr(today, -6));
@@ -88,7 +90,7 @@ export default async function AdminHomePage() {
 
   return (
     <div>
-      <PageHeader title="Resumen" subtitle={`${admin.tenant.name} · ${formatDateCl(today, "long")}`}>
+      <PageHeader title="Dashboard" subtitle={`${admin.tenant.name} · ${formatDateCl(today, "long")}`}>
         {flags.despacho ? (
           <Link href="/admin/despacho" className={btn.primary}>
             <Truck className="size-4" /> Ir a despacho
@@ -113,6 +115,24 @@ export default async function AdminHomePage() {
           <StatCard label="Envases en la calle" value={inStreet} hint={`${owing} clientes con saldo`} icon={Package} tone="navy" href="/admin/envases" />
         ) : null}
       </section>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Panel title="Estadísticas" description="Pedidos y ventas pagadas, horario de Chile." flush>
+          <StatsTable
+            caption="Estadísticas por período"
+            rows={[
+              { label: "Ventas pagadas", values: period.revenue.map((v) => formatClp(v)) },
+              { label: "Pedidos", values: period.orders.map((v) => v.toLocaleString("es-CL")) },
+            ]}
+          />
+        </Panel>
+        <Panel title="Ventas · últimos 14 días">
+          <BarChart
+            ariaLabel="Ventas pagadas por día, últimos 14 días"
+            data={period.daily.map((d) => ({ label: d.label, value: d.revenue, display: formatClp(d.revenue) }))}
+          />
+        </Panel>
+      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <section className="rounded-xl border border-[#d5e3ec] bg-white">
