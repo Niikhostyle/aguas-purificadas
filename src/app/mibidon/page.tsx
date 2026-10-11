@@ -1,899 +1,746 @@
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BarChart3,
-  Banknote,
-  Check,
+  Ban,
+  BadgeCheck,
+  Calculator,
+  ChevronDown,
+  CircleCheck,
+  CirclePlay,
   CreditCard,
-  Droplets,
-  FileCheck2,
-  Globe,
-  Headphones,
-  LayoutDashboard,
+  House,
   Lock,
-  Mail,
+  MapPin,
   MessageCircle,
-  MousePointerClick,
-  Play,
-  Repeat,
+  MessageSquareMore,
+  Pointer,
+  ReceiptText,
+  RefreshCw,
   Rocket,
   ShieldCheck,
-  Sparkles,
   Star,
   Store,
+  Tag,
+  TrendingUp,
   Truck,
-  X,
   Zap,
 } from "lucide-react";
-import { FaqAccordion } from "@/components/mibidon/faq-accordion";
-import { HeroMockup } from "@/components/mibidon/hero-mockup";
 import {
   CountUp,
+  Parallax,
   Reveal,
   ScrollHeader,
   SpotlightCard,
 } from "@/components/mibidon/landing-motion";
-import { RoiCalculator } from "@/components/mibidon/roi-calculator";
+import { RevenueSimulator } from "@/components/mibidon/revenue-simulator";
 import { whatsappHref } from "@/lib/whatsapp";
 
 const DEMO_HREF = "https://demo.mibidon.cl";
-const STATIC_EXAMPLE_HREF = "/landing-premium.html";
 const CLIENT_LOGIN_HREF = "/admin/login?tenant=plataforma";
 const CONTACT_MAIL = "mailto:hola@mibidon.cl";
 
-function cssVars(vars: Record<string, string | number>) {
-  return vars as CSSProperties;
+function d(ms: number) {
+  return { "--d": `${ms}ms` } as CSSProperties;
 }
 
-const HEADLINE: Array<{ text: string; accent?: boolean }> = [
-  { text: "Tu" },
-  { text: "tienda" },
-  { text: "online" },
-  { text: "de" },
-  { text: "agua" },
-  { text: "que" },
-  { text: "vende", accent: true },
-  { text: "en", accent: true },
-  { text: "piloto", accent: true },
-  { text: "automático", accent: true },
-];
+const HEADLINE = ["Multiplica", "tus", "ventas", "de", "agua", "purificada", "en"];
 
 const STATS = [
-  { n: 120, prefix: "+", suffix: "", label: "Purificadoras y embotelladoras" },
-  { n: 24, prefix: "", suffix: " h", label: "Para tener tu tienda activa" },
-  { n: 45, prefix: "+", suffix: "%", label: "Más recargas el primer mes" },
-  { n: 0, prefix: "", suffix: "%", label: "Comisión por venta" },
+  { label: "Embotelladoras activas", icon: Store, value: 120, prefix: "+", suffix: "", trend: "+45% en 2024" },
+  { label: "Retención mensual promedio", icon: RefreshCw, value: 85, prefix: "", suffix: "%", trend: "+18% recompra recurrente" },
+  { label: "Nuevas tiendas esta semana", icon: Rocket, value: 3, prefix: "", suffix: "", trend: "+100% velocidad onboarding" },
 ];
 
-const TRUST = [
-  { icon: CreditCard, label: "WebPay Plus · Transbank" },
-  { icon: FileCheck2, label: "Boleta electrónica SII" },
-  { icon: Lock, label: "SSL 256-bit" },
-  { icon: Globe, label: "Tu dominio .cl" },
-  { icon: Truck, label: "Despacho por comuna" },
-  { icon: Repeat, label: "Suscripciones de recarga" },
-  { icon: Headphones, label: "Soporte en Chile" },
+const WHATSAPP_PAINS = [
+  ["Comprobantes falsos o sin verificar:", "Pérdidas constantes por transferencias dudosas que nadie alcanza a revisar en el banco."],
+  ["Clientes olvidados en el chat:", "Mensajes que quedan abajo en la lista y clientes que terminan pidiéndole al camión vecino."],
+  ["Rutas desordenadas:", "Choferes dando vueltas en círculos por la ciudad sin orden por sector ni franjas horarias."],
+  ["Cero recurrencia garantizada:", "Dependes de que el cliente se acuerde de pedirte cuando ya se quedó sin agua."],
+];
+
+const MIBIDON_WINS = [
+  ["Cobro WebPay Plus al instante:", "El cliente paga con débito o crédito en 2 clics antes de despachar. Cero cheques o transferencias manuales."],
+  ["Ruta de despacho inteligente:", "El sistema agrupa pedidos por sector, comuna y día de entrega automáticamente para tus choferes."],
+  ["Recordatorios y suscripción automática:", "Notificaciones SMS/WhatsApp para recargas quincenales. Retención del 85%."],
+  ["Control de envases retornables:", "Registro exacto de quién tiene tus bidones vacíos para no perder inventario caro."],
 ];
 
 const FEATURES = [
-  {
-    icon: CreditCard,
-    tone: "from-blue-600 to-sky-500",
-    title: "Cobro automático con WebPay Plus",
-    body: "Débito, crédito y prepago al instante. Cero comprobantes adulterados y conciliación bancaria en un clic.",
-    tip: "Dinero directo a tu cuenta",
-  },
-  {
-    icon: Repeat,
-    tone: "from-cyan-500 to-teal-400",
-    title: "Suscripciones y pedidos recurrentes",
-    body: "Hogares y empresas programan recargas semanales o quincenales. Flujo de caja predecible mes a mes.",
-    tip: "Fidelización sin llamadas",
-  },
-  {
-    icon: Truck,
-    tone: "from-indigo-600 to-blue-500",
-    title: "Rutas y despachos por comuna",
-    body: "Días de entrega, pedidos mínimos y costo de envío por sector. Tus choferes salen con la ruta ordenada.",
-    tip: "Menos combustible, más entregas",
-  },
-  {
-    icon: MousePointerClick,
-    tone: "from-sky-500 to-cyan-400",
-    title: "Compra en 2 toques",
-    body: "Sin registros eternos ni apps que descargar. Funciona perfecto desde tu bio de Instagram o estado de WhatsApp.",
-    tip: "3x más conversión que un eCommerce genérico",
-  },
-  {
-    icon: LayoutDashboard,
-    tone: "from-blue-700 to-indigo-500",
-    title: "Panel de pedidos en tiempo real",
-    body: "Ve cada pedido pagado, su comuna y estado de despacho. Exporta reportes de ventas cuando quieras.",
-    tip: "Todo tu negocio en una pantalla",
-  },
-  {
-    icon: Store,
-    tone: "from-cyan-600 to-blue-500",
-    title: "100% tu marca",
-    body: "Tu logo, tus colores y tu dominio. Tus clientes nunca ven MiBidón: ven a tu empresa.",
-    tip: "White-label de verdad",
-  },
-];
-
-const STEPS = [
-  {
-    n: "01",
-    title: "Nos cuentas tu operación",
-    body: "Productos, precios, comunas de reparto y días de despacho. Una llamada de 10 minutos.",
-  },
-  {
-    n: "02",
-    title: "Configuramos tu tienda",
-    body: "Cargamos tu catálogo, conectamos tu WebPay y aplicamos tu marca. Lista en menos de 24 horas.",
-  },
-  {
-    n: "03",
-    title: "Compartes el link y vendes",
-    body: "Publícalo en WhatsApp e Instagram. Los pedidos llegan pagados y ordenados por ruta.",
-  },
-];
-
-const WEBPAY_BENEFITS = [
-  {
-    icon: Banknote,
-    title: "La plata llega a tu cuenta",
-    body: "Usamos tu propio código de comercio Transbank. No retenemos ni tocamos tus ventas.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Adiós comprobantes falsos",
-    body: "Cada pedido se confirma solo cuando el pago está aprobado. Nada que revisar a mano.",
-  },
-  {
-    icon: Zap,
-    title: "Checkout en segundos",
-    body: "Débito, crédito y prepago desde el celular, con la experiencia que tus clientes ya conocen.",
-  },
-  {
-    icon: BarChart3,
-    title: "Conciliación automática",
-    body: "Ventas, pagos y despachos cuadran en el mismo panel. Cierra el día en un minuto.",
-  },
+  { icon: CreditCard, title: "WebPay Plus Directo", body: "Sin enredos. El dinero va a tu cuenta bancaria. Acepta Débito, Crédito y Mach al segundo." },
+  { icon: RefreshCw, title: "Recargas Recurrentes", body: "Tus clientes se suscriben a 2, 4 u 8 bidones mensuales. Ingreso fijo y predecible todos los meses." },
+  { icon: MapPin, title: "Zonas y Despachos", body: "Configura comunas, días de reparto específicos y tarifas de envío según distancia en segundos." },
+  { icon: Pointer, title: "Compra en 2 Toques", body: "Optimizada para celulares. Tus clientes no descargan apps pesadas: entran, tocan 'Repetir pedido' y listo." },
 ];
 
 const TESTIMONIALS = [
   {
-    quote:
-      "Aumentamos un 45% las recargas en el primer mes sin contratar más secretarias. Los pedidos entran pagados y los choferes saben exactamente adónde ir.",
-    initials: "CM",
-    name: "Carlos Morales",
-    role: "Agua Manantial del Valle · Santiago",
+    quote: (
+      <>
+        &ldquo;Aumentamos un <strong>45% las recargas el primer mes</strong> sin contratar más personal de
+        oficina. Antes pasaba 4 horas al día respondiendo mensajes de WhatsApp y confirmando si la
+        transferencia había caído. Ahora solo despachamos.&rdquo;
+      </>
+    ),
+    name: "Carlos Muñoz",
+    role: "Fundador, Agua Manantial del Valle (Rancagua)",
+    photo: "/brand/stitch/carlos-munoz.jpg",
   },
   {
-    quote:
-      "Antes pasaba 3 horas cada noche cuadrando transferencias truchas. Ahora con WebPay automático duermo tranquila y las empresas me compran solas.",
-    initials: "AV",
+    quote: (
+      <>
+        &ldquo;Los clientes pagan con tarjeta al tiro y <strong>las rutas salen ordenadas cada mañana</strong>.
+        Ya no tenemos pérdidas de envases porque el sistema le cobra automáticamente garantía al cliente
+        que pide bidón nuevo.&rdquo;
+      </>
+    ),
     name: "Andrea Valenzuela",
-    role: "Purificadora Aconcagua · Valparaíso",
-  },
-  {
-    quote:
-      "Pusimos el link en el estado de WhatsApp y el mismo día entraron 30 pedidos pagados. La suscripción quincenal nos ordenó la producción.",
-    initials: "RP",
-    name: "Rodrigo Pérez",
-    role: "Aguas Cordillera · Rancagua",
+    role: "Gerenta de Operaciones, Purificadora Aconcagua",
+    photo: "/brand/stitch/andrea-valenzuela.jpg",
   },
 ];
 
-export default function MiBidonLandingPage() {
+const PLAN_FEATURES = [
+  <>
+    <strong>0% de comisión</strong> por venta o botellón vendido
+  </>,
+  <>
+    Tu propio dominio y logo (ej: <em>pedidos.tuagua.cl</em>)
+  </>,
+  <>Integración Transbank WebPay Plus directa a tu banco</>,
+  <>Módulo de gestión de envases y bidones en préstamo</>,
+  <>Rutas automáticas ordenadas por comuna y chofer</>,
+  <>Soporte prioritario por WhatsApp en Chile</>,
+];
+
+const FAQS = [
+  {
+    q: "¿El dinero de las ventas va directo a mi cuenta bancaria?",
+    a: "Sí, 100%. MiBidón se conecta directamente con tu código de comercio de WebPay Plus (Transbank). Los pagos se abonan en tu cuenta corriente o vista registrada sin pasar por cuentas intermedias.",
+  },
+  {
+    q: "¿Qué necesito para empezar a vender hoy mismo?",
+    a: "Solo necesitas el nombre de tu purificadora, las comunas donde repartes y tus precios por bidón (recarga y bidón con envase nuevo). Nuestro equipo te entrega la tienda configurada en menos de 24 horas.",
+  },
+  {
+    q: "¿Puedo usar mi propio dominio web (ej: www.miagua.cl)?",
+    a: "Por supuesto. Puedes enlazar tu propio dominio .cl o .com sin costo extra. La tienda llevará únicamente tus logos, colores y datos de contacto; no aparece la marca MiBidón ante tus clientes.",
+  },
+  {
+    q: "¿Cómo resuelven el tema de los bidones retornables?",
+    a: "El sistema tiene una lógica específica para purificadoras: el cliente selecciona si ya tiene envase vacío para intercambiar o si necesita comprar el botellón completo. Además, queda registrado en su ficha de cliente.",
+  },
+];
+
+function DropLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg fill="currentColor" viewBox="0 0 256 256" className={className} aria-hidden>
+      <path d="M174,47.75a254.19,254.19,0,0,0-41.45-38.3,8,8,0,0,0-9.18,0A254.19,254.19,0,0,0,82,47.75C54.51,79.32,40,112.6,40,144a88,88,0,0,0,176,0C216,112.6,201.49,79.32,174,47.75ZM128,216a72.08,72.08,0,0,1-72-72c0-57.23,55.47-105,72-118,16.53,13,72,60.75,72,118A72.08,72.08,0,0,1,128,216Zm55.89-62.66a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68Z" />
+    </svg>
+  );
+}
+
+function SectionIntro({
+  eyebrow,
+  title,
+  body,
+  className = "mb-12 max-w-3xl",
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  className?: string;
+}) {
+  return (
+    <Reveal className={`mx-auto text-center ${className}`}>
+      <span className="text-xs font-bold uppercase tracking-widest text-sv-secondary">{eyebrow}</span>
+      <h2 className="sv-display mt-1 text-2xl font-black text-sv-primary sm:text-4xl">{title}</h2>
+      <p className="mt-3 text-base text-sv-on-surface-variant">{body}</p>
+    </Reveal>
+  );
+}
+
+export default function MiBidonLanding() {
   const waTrial = whatsappHref(
-    "Hola, quiero activar mi tienda en MiBidón con los 14 días gratis",
+    "Hola MiBidón, quiero comenzar mi prueba gratis de 14 días para mi purificadora.",
   );
-  const waPro = whatsappHref(
-    "Hola, quiero contratar el Plan Pro Despegue de MiBidón para mi purificadora",
-  );
-  const waEnterprise = whatsappHref(
-    "Hola, tengo varias sucursales y quiero cotizar el plan Empresa de MiBidón",
+  const waPlan = whatsappHref(
+    "Hola MiBidón, quiero mi tienda con el Plan Pro Despegue ($34.990/mes).",
   );
   const waAdvisor = whatsappHref(
-    "Hola, quiero hablar con un asesor comercial de MiBidón",
+    "Hola MiBidón, quiero hablar con un asesor comercial y ver una demo para mi planta.",
   );
 
-  const plans = [
-    {
-      name: "Prueba",
-      price: "$0",
-      period: "14 días",
-      blurb: "Prueba el sistema completo con tu marca, sin tarjeta.",
-      features: [
-        "Tienda en tuempresa.mibidon.cl",
-        "Catálogo y comunas configuradas",
-        "Pedidos ilimitados de prueba",
-        "Soporte por WhatsApp",
-      ],
-      cta: "Empezar gratis",
-      href: waTrial,
-      popular: false,
-    },
-    {
-      name: "Pro Despegue",
-      price: "$29.990",
-      period: "/ mes",
-      blurb: "Tu tienda llave en mano, configurada por especialistas.",
-      features: [
-        "Dominio propio .cl o subdominio",
-        "WebPay Plus directo a tu cuenta",
-        "Suscripciones de recarga",
-        "Comunas, tarifas y rutas de despacho",
-        "Migración y carga de catálogo gratis",
-        "Soporte prioritario con asesor en Chile",
-      ],
-      cta: "Quiero mi tienda",
-      href: waPro,
-      popular: true,
-    },
-    {
-      name: "Empresa",
-      price: "A medida",
-      period: "",
-      blurb: "Para plantas con varias sucursales o flota propia.",
-      features: [
-        "Todo lo del plan Pro",
-        "Múltiples sucursales y bodegas",
-        "Integraciones y reportes a medida",
-        "Ejecutivo de cuenta dedicado",
-      ],
-      cta: "Hablar con ventas",
-      href: waEnterprise,
-      popular: false,
-    },
-  ];
-
   return (
-    <>
-      <ScrollHeader>
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 md:px-8">
-          <Link href="/" className="mb-nav-logo flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-400 text-white shadow-[0_6px_20px_-4px_rgba(56,189,248,0.7)]">
-              <Droplets className="size-5" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="mb-display text-lg font-extrabold text-white">MiBidón</span>
-              <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-300/90 sm:block">
-                Tiendas para purificadoras
+    <div className="pb-32 sm:pb-20 md:pb-0">
+      {/* Announcement bar */}
+      <div className="flex flex-wrap items-center justify-center gap-2 border-b border-sv-surface-tint/30 bg-sv-primary-container px-4 py-2.5 text-center text-xs font-medium text-sv-surface">
+        <span className="inline-flex items-center rounded-full bg-sv-secondary-container px-2 py-0.5 text-[10px] font-bold text-sv-on-secondary-container">
+          OFERTA ACTIVA
+        </span>
+        <span>Asegura 14 días gratis + integración WebPay Plus sin costo de instalación este mes</span>
+        <a className="font-bold underline transition-colors hover:text-sv-secondary-fixed" href="#precios">
+          Ver Plan Despegue →
+        </a>
+      </div>
+
+      {/* Header */}
+      <ScrollHeader className="sticky top-0 z-40 border-b border-sv-surface-high bg-sv-surface/95 px-4 backdrop-blur-md sm:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <Link href="/" className="mb-nav-logo flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-sv-surface-high text-sv-secondary">
+              <DropLogo className="size-6" />
+            </div>
+            <div>
+              <p className="sv-display text-xl font-bold leading-none tracking-tight text-sv-primary">MiBidón</p>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-sv-secondary">
+                ECommerce Purificadoras
               </span>
-            </span>
+            </div>
           </Link>
-
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-300 lg:flex">
-            <a href="#plataforma" className="transition-colors hover:text-white">
-              Plataforma
-            </a>
-            <a href="#calculadora" className="transition-colors hover:text-white">
-              Calculadora
-            </a>
-            <a href="#webpay" className="transition-colors hover:text-white">
-              WebPay
-            </a>
-            <a href="#precios" className="transition-colors hover:text-white">
-              Precios
-            </a>
-            <a href={DEMO_HREF} className="transition-colors hover:text-white">
-              Ejemplo de tienda
-            </a>
+          <nav className="hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
+            <a className="transition-colors hover:text-sv-primary" href="#beneficios">Ventajas Clave</a>
+            <a className="transition-colors hover:text-sv-primary" href="#comparativa">WhatsApp vs MiBidón</a>
+            <a className="transition-colors hover:text-sv-primary" href="#simulador">Simulador de ROI</a>
+            <a className="transition-colors hover:text-sv-primary" href="#testimonios">Casos de Éxito</a>
+            <a className="transition-colors hover:text-sv-primary" href="#precios">Planes</a>
           </nav>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Link
+              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-sv-primary transition-colors hover:bg-sv-surface-container sm:inline-block"
               href={CLIENT_LOGIN_HREF}
-              className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 transition-colors hover:text-white md:block"
             >
-              Acceso clientes
+              Ingresar
             </Link>
             <a
+              className="sv-shine flex items-center gap-1.5 rounded-lg bg-sv-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-sv-primary-container sm:text-sm"
               href="#precios"
-              className="mb-cta flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-bold sm:px-4"
             >
-              <span>Empieza gratis</span>
-              <ArrowRight className="size-4" />
+              <span>Probar Gratis</span>
+              <ArrowRight className="sv-arrow size-4" aria-hidden />
             </a>
           </div>
         </div>
       </ScrollHeader>
 
-      <main className="relative">
-        {/* Hero */}
-        <section className="mb-hero relative overflow-hidden pb-20 pt-28 text-white md:pb-28 md:pt-36">
-          <div className="mb-grid-overlay pointer-events-none absolute inset-0" />
-          <div className="mb-orb -right-24 -top-24 size-96 bg-blue-500/40" />
-          <div
-            className="mb-orb -left-32 bottom-0 size-80 bg-cyan-400/25"
-            style={{ animationDelay: "-6s", animationDuration: "20s" }}
-          />
-
-          <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 md:px-8 lg:grid-cols-[1.02fr_1fr] lg:gap-10">
-            <div className="flex flex-col gap-6">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-sv-surface-low via-sv-surface to-sv-surface pb-16 pt-8 lg:pb-24 lg:pt-16">
+        <div className="sv-blob -left-24 top-10 h-72 w-72 bg-sv-secondary-container/20" />
+        <div className="sv-blob -right-20 bottom-0 h-80 w-80 bg-sv-surface-highest/70" style={{ animationDelay: "-6s" }} />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+            <div className="flex flex-col gap-6 text-left lg:col-span-7">
               <div
-                className="mb-fade-up inline-flex items-center gap-2 self-start rounded-full border border-sky-300/25 bg-sky-400/10 px-3.5 py-1.5 text-xs font-semibold text-sky-200 backdrop-blur"
-                style={cssVars({ "--d": "0ms" })}
+                className="mb-fade-up inline-flex items-center gap-2 self-start rounded-full border border-sv-secondary/20 bg-sv-secondary-fixed/50 px-3.5 py-1.5"
+                style={d(80)}
               >
-                <Sparkles className="size-3.5 text-sky-300" />
-                eCommerce white-label para purificadoras y embotelladoras
+                <span className="relative flex h-2 w-2">
+                  <span className="mb-ping absolute inline-flex h-full w-full rounded-full bg-sv-secondary opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sv-secondary" />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wide text-sv-on-secondary-fixed-variant">
+                  Software Oficial para Embotelladoras de Agua
+                </span>
               </div>
-
-              <h1 className="mb-display text-[2.6rem] font-extrabold leading-[1.05] sm:text-6xl lg:text-[4.1rem]">
+              <h1 className="sv-display text-3xl font-black leading-tight tracking-tight text-sv-primary sm:text-4xl lg:text-5xl">
                 {HEADLINE.map((w, i) => (
-                  <span key={i}>
-                    <span
-                      className={`mb-word ${w.accent ? "mb-gradient-text" : ""}`}
-                      style={cssVars({ "--i": i })}
-                    >
-                      {w.text}
+                  <span key={w + i}>
+                    <span className="mb-word" style={{ "--i": i } as CSSProperties}>
+                      {w}
                     </span>{" "}
                   </span>
                 ))}
-              </h1>
-
-              <p
-                className="mb-fade-up max-w-xl text-lg leading-relaxed text-slate-300"
-                style={cssVars({ "--d": "750ms" })}
-              >
-                Le damos a tu purificadora una tienda online con tu marca que
-                recibe pedidos, ordena los despachos por comuna y cobra con{" "}
-                <strong className="font-semibold text-white">WebPay en 2 clics</strong>.
-                Lista en menos de 24 horas, sin comisiones por venta.
-              </p>
-
-              <div
-                className="mb-fade-up flex flex-col gap-3 sm:flex-row"
-                style={cssVars({ "--d": "900ms" })}
-              >
-                <a
-                  href="#precios"
-                  className="mb-cta flex min-h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base font-bold"
+                <span
+                  className="mb-word text-sv-secondary underline decoration-sv-secondary-container decoration-4 underline-offset-4"
+                  style={{ "--i": HEADLINE.length } as CSSProperties}
                 >
-                  <Rocket className="size-5" />
+                  piloto automático
+                </span>
+              </h1>
+              <p
+                className="mb-fade-up max-w-2xl text-base leading-relaxed text-sv-on-surface-variant sm:text-lg"
+                style={d(650)}
+              >
+                La plataforma eCommerce white-label que digitaliza pedidos, optimiza rutas y cobra con{" "}
+                <strong>WebPay Plus en 2 clics</strong>. Lista en menos de 24 horas y con tu propio logo.
+              </p>
+              <div className="mb-fade-up flex flex-col gap-3 pt-2 sm:flex-row" style={d(800)}>
+                <a
+                  className="sv-shine inline-flex items-center justify-center gap-2 rounded-xl bg-sv-primary-container px-6 py-4 text-base font-semibold text-white shadow-lg hover:bg-sv-primary hover:shadow-xl"
+                  href={waTrial}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <span>Comenzar gratis 14 días</span>
+                  <Rocket className="sv-arrow size-5" aria-hidden />
                 </a>
                 <a
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-sv-outline-variant bg-sv-surface-lowest px-6 py-4 text-base font-semibold text-sv-on-surface transition-all hover:-translate-y-0.5 hover:bg-sv-surface-container"
                   href={DEMO_HREF}
-                  className="group flex min-h-14 items-center justify-center gap-2.5 rounded-2xl border border-white/15 bg-white/[0.06] px-6 text-base font-semibold text-white backdrop-blur transition-colors hover:border-white/30 hover:bg-white/10"
                 >
-                  <span className="flex size-7 items-center justify-center rounded-full bg-white/15 transition-transform duration-300 group-hover:scale-110">
-                    <Play className="size-3.5 fill-white" />
-                  </span>
-                  Ver tienda de ejemplo
+                  <CirclePlay className="size-5 text-sv-secondary" aria-hidden />
+                  <span>Ver demostración en vivo (2 min)</span>
                 </a>
               </div>
-
               <div
-                className="mb-fade-up flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400"
-                style={cssVars({ "--d": "1050ms" })}
+                className="mb-fade-up flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs text-sv-on-surface-variant"
+                style={d(950)}
               >
-                {["Sin tarjeta de crédito", "0% comisión", "Cancela cuando quieras"].map((t) => (
-                  <span key={t} className="flex items-center gap-1.5">
-                    <Check className="size-4 text-emerald-400" />
-                    {t}
+                <span className="inline-flex items-center gap-1 font-bold text-sv-on-secondary-fixed-variant">
+                  <Zap className="size-3.5" aria-hidden /> Sin comisiones por recarga
+                </span>
+                <span className="inline-flex items-center gap-1 font-semibold">
+                  <BadgeCheck className="size-3.5 text-sv-secondary" aria-hidden /> 100% bajo tu marca
+                </span>
+                <span className="inline-flex items-center gap-1 font-semibold">
+                  <Ban className="size-3.5 text-sv-secondary" aria-hidden /> Sin tarjeta de crédito
+                </span>
+              </div>
+              <div
+                className="mb-fade-up mt-4 flex max-w-md items-center justify-between rounded-xl border border-sv-surface-highest bg-sv-surface-container p-3"
+                style={d(1100)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base" aria-hidden>🔥</span>
+                  <p className="text-xs font-semibold text-sv-primary">
+                    <strong>3 nuevas plantas activadas</strong> esta semana en Chile
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded bg-sv-surface-lowest px-2 py-1 text-[11px] font-bold text-sv-secondary">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="mb-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-70" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   </span>
-                ))}
+                  En Vivo
+                </span>
               </div>
             </div>
 
-            <HeroMockup />
+            <Parallax className="relative lg:col-span-5">
+              <div className="mb-pop" style={d(450)}>
+                <div className="mb-layer" style={{ "--depth": 10 } as CSSProperties}>
+                  <div className="mb-float">
+                    <RevenueSimulator />
+                  </div>
+                </div>
+              </div>
+              <div
+                className="mb-layer pointer-events-none absolute -left-10 top-24 hidden xl:block"
+                style={{ "--depth": -22 } as CSSProperties}
+              >
+                <div className="mb-pop" style={d(1200)}>
+                  <div className="mb-float flex items-center gap-2 rounded-xl border border-sv-surface-high bg-white/95 px-3 py-2 shadow-lg" style={{ "--fd": "-2s" } as CSSProperties}>
+                    <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                      <CircleCheck className="size-4" aria-hidden />
+                    </span>
+                    <div className="leading-tight">
+                      <p className="text-[11px] font-bold text-sv-primary">Pago WebPay aprobado</p>
+                      <p className="text-[10px] text-sv-on-surface-variant">2 bidones · $7.000</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="mb-layer pointer-events-none absolute -bottom-6 -right-6 hidden xl:block"
+                style={{ "--depth": -16 } as CSSProperties}
+              >
+                <div className="mb-pop" style={d(1400)}>
+                  <div className="mb-float flex items-center gap-2 rounded-xl border border-sv-surface-high bg-white/95 px-3 py-2 shadow-lg" style={{ "--fd": "-4s" } as CSSProperties}>
+                    <span className="flex size-7 items-center justify-center rounded-lg bg-sv-secondary-fixed text-sv-secondary">
+                      <Truck className="size-4" aria-hidden />
+                    </span>
+                    <div className="leading-tight">
+                      <p className="text-[11px] font-bold text-sv-primary">Ruta del día lista</p>
+                      <p className="text-[10px] text-sv-on-surface-variant">18 entregas · 3 comunas</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Parallax>
           </div>
+        </div>
+      </section>
 
-          {/* Stats */}
-          <div className="relative mx-auto mt-16 max-w-7xl px-5 md:mt-20 md:px-8">
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 md:grid-cols-4">
-              {STATS.map((s, i) => (
-                <Reveal
-                  key={s.label}
-                  delayMs={i * 90}
-                  className="flex flex-col gap-1 bg-[#071334]/80 px-6 py-6 backdrop-blur"
-                >
-                  <span className="mb-display text-4xl font-extrabold text-white md:text-5xl">
-                    <CountUp value={s.n} prefix={s.prefix} suffix={s.suffix} durationMs={1400 + i * 150} />
-                  </span>
-                  <span className="text-sm text-slate-400">{s.label}</span>
+      {/* Social proof & trust badges */}
+      <section className="border-y border-sv-surface-high bg-sv-surface py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+            <Reveal className="text-center md:text-left">
+              <p className="text-xs font-bold uppercase tracking-widest text-sv-secondary">Ecosistema Validado</p>
+              <p className="text-base font-bold text-sv-primary">
+                +120 embotelladoras y distribuidores ya escalaron sus ventas en Chile
+              </p>
+            </Reveal>
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
+              {[
+                { icon: ShieldCheck, label: "WebPay Plus Transbank", tone: "text-sv-secondary" },
+                { icon: ReceiptText, label: "Boleta Electrónica SII", tone: "text-emerald-600" },
+                { icon: Lock, label: "Seguridad SSL 256-Bit", tone: "text-sv-secondary" },
+              ].map((b, i) => (
+                <Reveal key={b.label} delayMs={i * 90} variant="scale">
+                  <div className="flex items-center gap-2 rounded-lg border border-sv-surface-container bg-sv-surface-low px-3 py-2 text-xs font-bold text-sv-on-surface transition-transform duration-300 hover:-translate-y-0.5">
+                    <b.icon className={`size-[18px] ${b.tone}`} aria-hidden />
+                    <span>{b.label}</span>
+                  </div>
                 </Reveal>
               ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Trust marquee */}
-        <section className="border-b border-slate-200/80 bg-white py-6">
-          <div className="mb-marquee overflow-hidden">
-            <div className="mb-marquee-track flex w-max gap-12 pr-12">
-              {[...TRUST, ...TRUST].map((t, i) => (
-                <span
-                  key={i}
-                  aria-hidden={i >= TRUST.length}
-                  className="flex shrink-0 items-center gap-2 text-sm font-semibold text-slate-500"
-                >
-                  <t.icon className="size-4 text-blue-600" />
-                  {t.label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Problem vs solution */}
-        <section className="mx-auto max-w-7xl px-5 py-24 md:px-8">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-rose-600">
-              El costo oculto de vender a la antigua
-            </span>
-            <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
-              WhatsApp y transferencias <span className="text-slate-400">vs.</span>{" "}
-              <span className="mb-gradient-text-dark">tu tienda MiBidón</span>
+      {/* Metrics */}
+      <section className="bg-sv-surface-low py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="mx-auto mb-8 max-w-2xl text-center">
+            <h2 className="sv-display text-2xl font-extrabold text-sv-primary sm:text-3xl">
+              Crecimiento real medible desde el primer mes
             </h2>
-            <p className="mt-4 text-lg text-slate-600">
-              Cada mensaje que no contestas a tiempo es un bidón que vendió tu competencia.
+            <p className="mt-2 text-sm text-sv-on-surface-variant">
+              Nuestras plantas purificadoras asociadas reportan resultados inmediatos tras reemplazar notas de WhatsApp.
             </p>
           </Reveal>
-
-          <div className="mt-14 grid gap-6 md:grid-cols-2">
-            <Reveal variant="left">
-              <div className="h-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                    <X className="size-5" />
-                  </span>
-                  <h3 className="mb-display text-xl font-bold text-slate-900">El caos del WhatsApp</h3>
-                </div>
-                <ul className="mt-6 flex flex-col gap-4">
-                  {[
-                    ["Clientes perdidos", "Demoras en responder y se van con otro distribuidor."],
-                    ["Comprobantes falsos", "Horas cuadrando transferencias en el banco."],
-                    ["Rutas desordenadas", "Choferes dando vueltas sin orden por comuna."],
-                    ["Cero recompra", "Dependes de que el cliente se acuerde de pedir."],
-                  ].map(([k, val]) => (
-                    <li key={k} className="flex gap-3 text-slate-600">
-                      <X className="mt-0.5 size-4 shrink-0 text-rose-400" />
-                      <span>
-                        <strong className="font-semibold text-slate-800">{k}:</strong> {val}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-
-            <Reveal variant="right" delayMs={120}>
-              <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600 p-8 text-white shadow-[0_30px_60px_-25px_rgba(37,99,235,0.7)]">
-                <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl" />
-                <div className="relative flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex size-10 items-center justify-center rounded-xl bg-white/15">
-                      <Check className="size-5" />
-                    </span>
-                    <h3 className="mb-display text-xl font-bold">Con MiBidón</h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {STATS.map((s, i) => (
+              <Reveal key={s.label} delayMs={i * 110}>
+                <SpotlightCard className="mb-lift flex h-full flex-col gap-2 rounded-xl border border-sv-surface-high bg-sv-surface-lowest p-6 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-sv-on-surface">{s.label}</p>
+                    <s.icon className="size-[18px] text-sv-secondary" aria-hidden />
                   </div>
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
-                    +85% retención
-                  </span>
-                </div>
-                <ul className="relative mt-6 flex flex-col gap-4">
-                  {[
-                    ["Cobro inmediato con WebPay", "La plata entra directo a tu cuenta."],
-                    ["Despacho por comuna", "Rutas listas cada mañana para tus choferes."],
-                    ["Suscripciones de recarga", "Ingresos fijos y clientes cautivos."],
-                    ["100% tu marca", "Tu logo, tus colores, tu dominio."],
-                  ].map(([k, val]) => (
-                    <li key={k} className="flex gap-3 text-blue-50">
-                      <Check className="mt-0.5 size-4 shrink-0 text-cyan-200" />
-                      <span>
-                        <strong className="font-semibold text-white">{k}:</strong> {val}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section id="plataforma" className="relative scroll-mt-20 bg-gradient-to-b from-slate-50 via-blue-50/60 to-slate-50 py-24">
-          <div className="mx-auto max-w-7xl px-5 md:px-8">
-            <Reveal className="max-w-2xl">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                La plataforma
-              </span>
-              <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
-                Diseñada exclusivamente para el negocio del agua
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                No es un eCommerce genérico: resuelve los dolores reales de plantas
-                purificadoras y distribuidores.
-              </p>
-            </Reveal>
-
-            <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f, i) => (
-                <Reveal key={f.title} delayMs={(i % 3) * 100} variant="scale">
-                  <SpotlightCard className="mb-lift h-full rounded-3xl border border-slate-200/80 bg-white/90 p-7 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,40,100,0.18)]">
-                    <span
-                      className={`flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br ${f.tone} text-white shadow-lg shadow-blue-500/20`}
-                    >
-                      <f.icon className="size-6" />
-                    </span>
-                    <h3 className="mb-display mt-5 text-lg font-bold text-slate-900">{f.title}</h3>
-                    <p className="mt-2 leading-relaxed text-slate-600">{f.body}</p>
-                    <p className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-blue-700">
-                      <Check className="size-4" />
-                      {f.tip}
-                    </p>
-                  </SpotlightCard>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section className="mx-auto max-w-7xl px-5 py-24 md:px-8">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-              Cómo funciona
-            </span>
-            <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
-              De WhatsApp a tienda online en 24 horas
-            </h2>
-          </Reveal>
-          <div className="relative mt-14 grid gap-6 md:grid-cols-3">
-            <div
-              aria-hidden
-              className="absolute left-[16%] right-[16%] top-9 hidden h-px bg-gradient-to-r from-blue-200 via-cyan-300 to-blue-200 md:block"
-            />
-            {STEPS.map((s, i) => (
-              <Reveal key={s.n} delayMs={i * 140} className="relative flex flex-col items-center text-center">
-                <span className="mb-display relative flex size-[72px] items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-xl font-extrabold text-white shadow-[0_16px_32px_-12px_rgba(37,99,235,0.7)]">
-                  {s.n}
-                </span>
-                <h3 className="mb-display mt-6 text-xl font-bold text-slate-900">{s.title}</h3>
-                <p className="mt-2 max-w-xs leading-relaxed text-slate-600">{s.body}</p>
+                  <p className="sv-display text-3xl font-extrabold tracking-tight text-sv-primary">
+                    <CountUp value={s.value} prefix={s.prefix} suffix={s.suffix} />
+                  </p>
+                  <div className="flex w-fit items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600">
+                    <TrendingUp className="size-3.5" aria-hidden />
+                    <span>{s.trend}</span>
+                  </div>
+                </SpotlightCard>
               </Reveal>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ROI */}
-        <section id="calculadora" className="mb-dark-band relative scroll-mt-20 overflow-hidden py-24 text-white">
-          <div className="mb-grid-overlay pointer-events-none absolute inset-0 opacity-60" />
-          <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 md:px-8 lg:grid-cols-2">
-            <Reveal variant="left" className="flex flex-col gap-5">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-sky-300">
-                Calculadora de ganancias
-              </span>
-              <h2 className="mb-display text-3xl font-extrabold md:text-5xl">
-                ¿Cuánto podrías vender{" "}
-                <span className="mb-gradient-text">con tu tienda online?</span>
-              </h2>
-              <p className="text-lg leading-relaxed text-slate-300">
-                Mueve el control con tus bidones del mes. Con pedidos pagados al
-                instante y recargas programadas, el plan se paga solo desde la
-                primera semana.
-              </p>
-              <ul className="flex flex-col gap-3 text-slate-200">
-                {[
-                  "Pedidos pagados antes de salir a ruta",
-                  "Clientes que recargan solos cada semana",
-                  "Menos horas respondiendo WhatsApp",
-                ].map((t) => (
-                  <li key={t} className="flex items-center gap-3">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-sky-400/20">
-                      <Check className="size-3.5 text-sky-300" />
-                    </span>
-                    {t}
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-            <Reveal variant="right" delayMs={120}>
-              <RoiCalculator />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* WebPay */}
-        <section id="webpay" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 md:px-8">
-          <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.1fr]">
-            <Reveal variant="left" className="relative">
-              <div className="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-blue-400/30 to-cyan-300/30 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#061331] via-[#0a2160] to-[#0b3b63] p-8 text-white shadow-[0_40px_80px_-30px_rgba(15,40,100,0.6)]">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-300">Pagos de hoy</span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-bold text-emerald-300">
-                    <span className="size-1.5 rounded-full bg-emerald-400" /> En línea
-                  </span>
-                </div>
-                <p className="mb-display mt-3 text-5xl font-extrabold">
-                  $<CountUp value={1284500} />
-                </p>
-                <p className="mt-1 text-sm text-slate-400">Abonado a tu cuenta corriente</p>
-                <div className="mt-7 flex flex-col gap-3">
-                  {[
-                    ["Pedido #1291 · Providencia", "$14.000", "Débito"],
-                    ["Pedido #1290 · Las Condes", "$21.000", "Crédito"],
-                    ["Suscripción · Oficina Vitacura", "$56.000", "Crédito"],
-                  ].map(([k, amount, method], i) => (
-                    <Reveal
-                      key={k}
-                      delayMs={250 + i * 120}
-                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-400/15 text-emerald-300">
-                          <Check className="size-4" />
+      {/* WhatsApp vs MiBidón */}
+      <section className="scroll-mt-20 bg-sv-surface py-16" id="comparativa">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionIntro
+            eyebrow="El Diagnóstico del Negocio"
+            title="El alto costo de vender solo por WhatsApp vs. MiBidón"
+            body="Seguir anotando pedidos a mano te hace perder hasta un 30% de clientes que se van con la competencia que sí tiene web."
+          />
+          <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2">
+            <Reveal variant="left" className="h-full">
+              <div className="flex h-full flex-col justify-between rounded-2xl border border-red-200/60 bg-red-50/50 p-6 sm:p-8">
+                <div>
+                  <div className="flex items-center gap-3 border-b border-red-200/50 pb-4">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-sv-error">✕</div>
+                    <div>
+                      <h3 className="sv-display text-lg font-bold text-sv-primary">Vender Manual por WhatsApp</h3>
+                      <p className="text-xs font-semibold text-sv-error">Caos operativo y fuga de dinero</p>
+                    </div>
+                  </div>
+                  <ul className="my-6 space-y-4 text-sm font-medium text-sv-on-surface-variant">
+                    {WHATSAPP_PAINS.map(([t, b], i) => (
+                      <Reveal as="li" key={t} delayMs={150 + i * 90} className="flex items-start gap-3">
+                        <span className="font-bold text-sv-error">✗</span>
+                        <span>
+                          <strong>{t}</strong> {b}
                         </span>
-                        <div className="leading-tight">
-                          <p className="text-sm font-semibold">{k}</p>
-                          <p className="text-xs text-slate-400">WebPay Plus · {method}</p>
-                        </div>
-                      </div>
-                      <span className="font-bold">{amount}</span>
-                    </Reveal>
-                  ))}
+                      </Reveal>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-red-100/60 p-3 text-center text-xs font-bold text-sv-error">
+                  Resultado: Estrés diario y tope de crecimiento
                 </div>
               </div>
             </Reveal>
-
-            <div>
-              <Reveal>
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                  Pagos con WebPay Plus
-                </span>
-                <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
-                  Cobra antes de cargar el camión
-                </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  Conectamos tu comercio Transbank para que cada pedido llegue
-                  pagado. Sin transferencias pendientes ni fiado.
-                </p>
-              </Reveal>
-              <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                {WEBPAY_BENEFITS.map((b, i) => (
-                  <Reveal key={b.title} delayMs={i * 90}>
-                    <SpotlightCard className="mb-lift h-full rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-                      <b.icon className="size-6 text-blue-600" />
-                      <h3 className="mb-display mt-3 font-bold text-slate-900">{b.title}</h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{b.body}</p>
-                    </SpotlightCard>
-                  </Reveal>
-                ))}
+            <Reveal variant="right" delayMs={120} className="h-full">
+              <div className="relative flex h-full flex-col justify-between rounded-2xl border-2 border-sv-secondary bg-sv-surface-low p-6 shadow-lg transition-shadow duration-500 hover:shadow-2xl sm:p-8">
+                <div className="absolute -top-3.5 right-6 rounded-full bg-sv-secondary px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+                  Sistema MiBidón
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 border-b border-sv-surface-high pb-4">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-sv-secondary-fixed text-xl font-bold text-sv-secondary">✓</div>
+                    <div>
+                      <h3 className="sv-display text-lg font-bold text-sv-primary">Tu eCommerce con MiBidón</h3>
+                      <p className="text-xs font-bold text-sv-secondary">100% automatizado y profesional</p>
+                    </div>
+                  </div>
+                  <ul className="my-6 space-y-4 text-sm font-medium text-sv-on-surface">
+                    {MIBIDON_WINS.map(([t, b], i) => (
+                      <Reveal as="li" key={t} delayMs={250 + i * 90} className="flex items-start gap-3">
+                        <span className="font-bold text-emerald-600">✓</span>
+                        <span>
+                          <strong>{t}</strong> {b}
+                        </span>
+                      </Reveal>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-sv-secondary-fixed/50 p-3 text-center text-xs font-bold text-sv-on-secondary-fixed-variant">
+                  Resultado: +40% pedidos con la mitad del tiempo operativo
+                </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="bg-gradient-to-b from-slate-50 via-sky-50/70 to-slate-50 py-24">
-          <div className="mx-auto max-w-7xl px-5 md:px-8">
-            <Reveal className="mx-auto max-w-2xl text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                Resultados reales
-              </span>
-              <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
-                Purificadoras que ya escalaron
-              </h2>
             </Reveal>
-            <div className="mt-14 grid gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((t, i) => (
-                <Reveal key={t.name} delayMs={i * 110}>
-                  <figure className="mb-lift flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm">
-                    <div className="flex gap-0.5 text-amber-400">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} className="size-4 fill-current" />
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="scroll-mt-20 bg-sv-surface-low py-16" id="beneficios">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionIntro
+            className="mb-14 max-w-3xl"
+            eyebrow="Herramientas Diseñadas para Agua"
+            title="Funcionalidades hechas para embotelladoras"
+            body="No uses Shopify o WooCommerce genéricos. MiBidón resuelve el retorno de botellones, la logística local y el pago rápido."
+          />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delayMs={i * 100}>
+                <SpotlightCard className="mb-lift h-full rounded-2xl border border-sv-surface-high bg-sv-surface-lowest p-6 shadow-sm">
+                  <div className="sv-icon-tile mb-4 flex size-12 items-center justify-center rounded-xl bg-sv-surface-container text-sv-secondary">
+                    <f.icon className="size-6" aria-hidden />
+                  </div>
+                  <h3 className="sv-display mb-2 text-lg font-bold text-sv-primary">{f.title}</h3>
+                  <p className="text-sm leading-relaxed text-sv-on-surface-variant">{f.body}</p>
+                </SpotlightCard>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal variant="scale" className="mt-12">
+            <div className="flex flex-col items-center gap-8 rounded-2xl border border-sv-surface-high bg-sv-surface-lowest p-6 shadow-md sm:p-10 lg:flex-row">
+              <div className="w-full space-y-4 lg:w-1/2">
+                <span className="text-xs font-bold uppercase tracking-wider text-sv-secondary">
+                  Control Total en Tiempo Real
+                </span>
+                <h3 className="sv-display text-2xl font-bold text-sv-primary">
+                  Un panel de despachos que tu chofer entenderá en 5 minutos
+                </h3>
+                <p className="text-sm leading-relaxed text-sv-on-surface-variant">
+                  Cada mañana el sistema genera la hoja de ruta con direcciones verificadas en Waze y Google Maps,
+                  número de envases a retirar y estado de pago confirmado.
+                </p>
+                <div className="pt-2">
+                  <a className="inline-flex items-center gap-2 text-sm font-bold text-sv-secondary hover:underline" href="#precios">
+                    <span>Probar el panel de control gratis</span>
+                    <ArrowRight className="sv-arrow size-4" aria-hidden />
+                  </a>
+                </div>
+              </div>
+              <Parallax className="w-full lg:w-1/2">
+                <div className="mb-layer" style={{ "--depth": 8 } as CSSProperties}>
+                  <div className="mb-float" style={{ "--fd": "-3s" } as CSSProperties}>
+                    <Image
+                      src="/brand/stitch/panel-despachos.jpg"
+                      alt="Panel de despachos MiBidón en una tablet con mapa de rutas, inventario de bidones y estado de pagos WebPay"
+                      width={512}
+                      height={279}
+                      sizes="(min-width: 1024px) 560px, 100vw"
+                      className="h-64 w-full rounded-xl border border-sv-surface-high object-cover shadow-sm sm:h-72"
+                    />
+                  </div>
+                </div>
+              </Parallax>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="scroll-mt-20 bg-sv-surface py-16" id="testimonios">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionIntro
+            className="mb-12 max-w-2xl"
+            eyebrow="Testimonios Reales"
+            title="Lo que dicen los dueños de purificadoras"
+            body="Empresas en Santiago, Valparaíso, Concepción y regiones ya transformaron su operación diaria."
+          />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {TESTIMONIALS.map((t, i) => (
+              <Reveal key={t.name} delayMs={i * 140} className="h-full">
+                <SpotlightCard className="mb-lift flex h-full flex-col justify-between rounded-2xl border border-sv-surface-high bg-sv-surface-low p-6 sm:p-8">
+                  <div>
+                    <div className="mb-4 flex items-center gap-1 text-amber-500">
+                      {Array.from({ length: 5 }).map((_, k) => (
+                        <Star key={k} className="size-[18px] fill-current" aria-hidden />
                       ))}
                     </div>
-                    <blockquote className="mt-4 flex-1 leading-relaxed text-slate-700">
-                      “{t.quote}”
-                    </blockquote>
-                    <figcaption className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
-                      <span className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-sm font-bold text-white">
-                        {t.initials}
-                      </span>
-                      <span className="leading-tight">
-                        <span className="block font-bold text-slate-900">{t.name}</span>
-                        <span className="text-sm text-slate-500">{t.role}</span>
-                      </span>
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section id="precios" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 md:px-8">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-              <Sparkles className="size-3.5" />
-              Oferta de lanzamiento · 0% comisión
-            </span>
-            <h2 className="mb-display mt-4 text-3xl font-extrabold text-slate-900 md:text-5xl">
-              Empieza a vender esta misma semana
-            </h2>
-            <p className="mt-4 text-lg text-slate-600">
-              Prueba el sistema completo 14 días, sin tarjeta y sin amarres.
-            </p>
-          </Reveal>
-
-          <div className="mt-16 grid items-stretch gap-6 lg:grid-cols-3 lg:gap-5">
-            {plans.map((p, i) => (
-              <Reveal key={p.name} delayMs={i * 120} variant="scale" className={p.popular ? "lg:-my-4" : ""}>
-                {p.popular ? (
-                  <div className="mb-popular h-full rounded-[1.75rem]">
-                    <div className="mb-popular-halo" aria-hidden />
-                    <div className="mb-popular-glow" aria-hidden />
-                    <SpotlightCard className="flex h-full flex-col rounded-[1.7rem] bg-gradient-to-b from-[#071334] to-[#0b2259] p-8 text-white">
-                      <div className="flex items-center justify-between">
-                        <h3 className="mb-display text-lg font-bold">{p.name}</h3>
-                        <span className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-3 py-1 text-xs font-bold uppercase tracking-wide">
-                          Más elegido
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm text-slate-300">{p.blurb}</p>
-                      <p className="mt-6 flex items-baseline gap-1.5">
-                        <span className="mb-display text-5xl font-extrabold">{p.price}</span>
-                        <span className="text-slate-400">{p.period}</span>
-                      </p>
-                      <a
-                        href={p.href}
-                        className="mb-cta mt-7 flex min-h-12 items-center justify-center gap-2 rounded-xl text-base font-bold"
-                      >
-                        <span>{p.cta}</span>
-                        <ArrowRight className="size-4" />
-                      </a>
-                      <ul className="mt-8 flex flex-col gap-3 text-sm">
-                        {p.features.map((f) => (
-                          <li key={f} className="flex gap-3 text-slate-200">
-                            <Check className="size-4 shrink-0 text-cyan-300" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="mt-auto flex items-center gap-1.5 pt-8 text-xs text-slate-400">
-                        <ShieldCheck className="size-4 text-emerald-400" />
-                        Garantía de satisfacción de 30 días
-                      </p>
-                    </SpotlightCard>
+                    <p className="text-base italic leading-relaxed text-sv-on-surface sm:text-lg">{t.quote}</p>
                   </div>
-                ) : (
-                  <SpotlightCard className="mb-lift flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-white p-8 shadow-sm">
-                    <h3 className="mb-display text-lg font-bold text-slate-900">{p.name}</h3>
-                    <p className="mt-2 text-sm text-slate-600">{p.blurb}</p>
-                    <p className="mt-6 flex items-baseline gap-1.5">
-                      <span className="mb-display text-5xl font-extrabold text-slate-900">{p.price}</span>
-                      <span className="text-slate-500">{p.period}</span>
-                    </p>
-                    <a
-                      href={p.href}
-                      className="mt-7 flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white text-base font-bold text-slate-900 transition-colors hover:border-blue-500 hover:text-blue-700"
-                    >
-                      {p.cta}
-                      <ArrowRight className="size-4" />
-                    </a>
-                    <ul className="mt-8 flex flex-col gap-3 text-sm">
-                      {p.features.map((f) => (
-                        <li key={f} className="flex gap-3 text-slate-600">
-                          <Check className="size-4 shrink-0 text-blue-600" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </SpotlightCard>
-                )}
+                  <div className="mt-6 flex items-center gap-4 border-t border-sv-surface-container pt-6">
+                    <Image
+                      src={t.photo}
+                      alt={t.name}
+                      width={96}
+                      height={96}
+                      className="size-12 rounded-full border border-sv-outline-variant object-cover"
+                    />
+                    <div>
+                      <p className="text-sm font-bold text-sv-primary">{t.name}</p>
+                      <p className="text-xs text-sv-on-surface-variant">{t.role}</p>
+                    </div>
+                  </div>
+                </SpotlightCard>
               </Reveal>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* FAQ */}
-        <section className="bg-gradient-to-b from-slate-50 to-blue-50/50 py-24">
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 md:px-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <Reveal>
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                Preguntas frecuentes
-              </span>
-              <h2 className="mb-display mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">
-                Resolvemos tus dudas antes de activar
-              </h2>
-              <p className="mt-4 text-slate-600">
-                ¿No encuentras tu respuesta? Escríbenos y un asesor te responde en minutos.
-              </p>
-              <a
-                href={waAdvisor}
-                className="mt-6 inline-flex items-center gap-2 font-semibold text-blue-700 transition-colors hover:text-blue-900"
-              >
-                <MessageCircle className="size-5" />
-                Hablar con un asesor
-              </a>
-            </Reveal>
-            <Reveal delayMs={100}>
-              <FaqAccordion />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* Demo CTA */}
-        <section className="px-5 py-24 md:px-8">
-          <Reveal variant="scale">
-            <div className="mb-hero relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] px-6 py-16 text-center text-white shadow-[0_50px_100px_-40px_rgba(15,40,100,0.7)] md:px-16 md:py-20">
-              <div className="mb-grid-overlay pointer-events-none absolute inset-0" />
-              <div className="mb-orb -right-20 -top-20 size-72 bg-blue-500/40" />
-              <div className="mb-orb -bottom-24 -left-16 size-72 bg-cyan-400/30" style={{ animationDelay: "-5s" }} />
-              <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-6">
-                <h2 className="mb-display text-3xl font-extrabold md:text-5xl">
-                  Mira cómo se vería <span className="mb-gradient-text">tu propia tienda</span>
-                </h2>
-                <p className="text-lg text-slate-300">
-                  Recorre una tienda real funcionando con MiBidón y agenda una demo
-                  de 10 minutos con un especialista en distribución de agua.
-                </p>
-                <div className="flex w-full flex-col justify-center gap-3 sm:flex-row">
-                  <a
-                    href={DEMO_HREF}
-                    className="mb-cta flex min-h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base font-bold"
-                  >
-                    <Store className="size-5" />
-                    <span>Ver tienda de ejemplo</span>
-                  </a>
-                  <a
-                    href={waAdvisor}
-                    className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-7 text-base font-bold text-white shadow-[0_12px_30px_-10px_rgba(16,185,129,0.8)] transition-colors hover:bg-emerald-400"
-                  >
-                    <MessageCircle className="size-5" />
-                    Agendar demo por WhatsApp
-                  </a>
-                </div>
+      {/* Pricing */}
+      <section className="relative scroll-mt-20 overflow-hidden bg-sv-surface-low py-16" id="precios">
+        <div className="sv-blob left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 bg-sv-secondary-container/15" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionIntro
+            eyebrow="Inversión Simple y Clara"
+            title="Empieza hoy y recupera tu inversión en los primeros 10 bidones"
+            body="Sin comisiones por venta. Lo que vendes es 100% tuyo."
+          />
+          <Reveal variant="scale" className="mx-auto max-w-lg">
+            <div className="relative rounded-3xl border-2 border-sv-secondary bg-sv-surface-lowest p-8 shadow-2xl transition-transform duration-500 hover:-translate-y-1 sm:p-10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-sv-secondary px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md sm:text-xs">
+                PLAN PRO DESPEGUE • MÁS ELEGIDO
               </div>
+              <div className="border-b border-sv-surface-container pb-6 text-center">
+                <h3 className="sv-display text-2xl font-black text-sv-primary">Plataforma White-Label Completa</h3>
+                <p className="mt-1 text-sm text-sv-on-surface-variant">Todo incluido para embotelladoras y distribuidores</p>
+                <div className="mt-4 flex items-baseline justify-center gap-1">
+                  <span className="sv-display text-4xl font-black text-sv-primary sm:text-5xl">
+                    <CountUp value={34990} prefix="$" durationMs={1400} />
+                  </span>
+                  <span className="text-sm font-semibold text-sv-on-surface-variant">CLP / mes</span>
+                </div>
+                <p className="mt-1 text-xs font-bold text-sv-secondary">
+                  14 días de prueba sin costo • Cancela cuando quieras
+                </p>
+              </div>
+              <ul className="space-y-3.5 py-6 text-sm text-sv-on-surface">
+                {PLAN_FEATURES.map((f, i) => (
+                  <Reveal as="li" key={i} delayMs={120 + i * 70} className="flex items-center gap-3">
+                    <CircleCheck className="size-[18px] shrink-0 text-emerald-600" aria-hidden />
+                    <span>{f}</span>
+                  </Reveal>
+                ))}
+              </ul>
+              <a
+                className="sv-shine flex w-full items-center justify-center gap-1.5 rounded-xl bg-sv-primary px-6 py-4 text-center text-base font-bold text-white shadow-lg hover:bg-sv-primary-container hover:shadow-xl"
+                href={waPlan}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ "--shine-delay": "0.6s" } as CSSProperties}
+              >
+                <span>Quiero mi tienda ahora</span>
+                <ArrowRight className="sv-arrow size-5" aria-hidden />
+              </a>
+              <p className="mt-3 flex items-center justify-center gap-1 text-center text-xs text-sv-outline">
+                <BadgeCheck className="size-4 text-emerald-600" aria-hidden />
+                <span>Garantía de activación en 24 horas hábiles</span>
+              </p>
             </div>
           </Reveal>
-        </section>
-      </main>
-
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-8">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 text-white">
-                <Droplets className="size-4" />
-              </span>
-              <span className="mb-display text-lg font-extrabold text-slate-900">MiBidón</span>
-            </div>
-            <p className="max-w-sm text-sm text-slate-500">
-              Plataforma eCommerce white-label para purificadoras y embotelladoras de agua en Chile.
-            </p>
-          </div>
-          <nav className="flex flex-wrap gap-x-7 gap-y-3 text-sm font-semibold text-slate-600">
-            <a href="#plataforma" className="hover:text-blue-700">Plataforma</a>
-            <a href="#precios" className="hover:text-blue-700">Precios</a>
-            <a href={DEMO_HREF} className="hover:text-blue-700">Ejemplo de tienda</a>
-            <a href={STATIC_EXAMPLE_HREF} className="hover:text-blue-700">Otro diseño de tienda</a>
-            <Link href={CLIENT_LOGIN_HREF} className="hover:text-blue-700">Acceso clientes</Link>
-            <a href={CONTACT_MAIL} className="flex items-center gap-1.5 hover:text-blue-700">
-              <Mail className="size-4" /> hola@mibidon.cl
-            </a>
-          </nav>
         </div>
-        <div className="border-t border-slate-100 py-5 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} MiBidón Chile
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-sv-surface py-16" id="faq">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <SectionIntro
+            eyebrow="Respuestas Claras"
+            title="Preguntas Frecuentes"
+            body="Derribamos todas tus dudas antes de empezar tu prueba gratuita."
+          />
+          <div className="space-y-4">
+            {FAQS.map((f, i) => (
+              <Reveal key={f.q} delayMs={i * 80}>
+                <details className="sv-faq group cursor-pointer rounded-xl border border-sv-surface-high bg-sv-surface-low p-5">
+                  <summary className="flex list-none items-center justify-between gap-4 text-base font-bold text-sv-primary">
+                    <span>{f.q}</span>
+                    <ChevronDown className="sv-faq-icon size-5 shrink-0 text-sv-secondary" aria-hidden />
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-sv-on-surface-variant">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal variant="scale" className="mt-12">
+            <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-sv-surface-highest bg-sv-surface-container p-6 text-center sm:flex-row sm:p-8">
+              <div className="text-left">
+                <h4 className="text-lg font-bold text-sv-primary">¿Prefieres conversar con una persona antes de decidir?</h4>
+                <p className="mt-1 text-sm text-sv-on-surface-variant">
+                  Un asesor comercial te muestra una demo personalizada de 10 minutos para tu planta.
+                </p>
+              </div>
+              <a
+                className="sv-shine flex items-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white shadow-md hover:bg-emerald-700"
+                href={waAdvisor}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-5" aria-hidden />
+                <span>Hablar con un asesor comercial</span>
+              </a>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <footer className="border-t border-sv-surface-high bg-sv-surface-low py-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-sv-on-surface-variant sm:flex-row sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <DropLogo className="size-4 text-sv-secondary" />
+            <span>© {new Date().getFullYear()} MiBidón · ECommerce Purificadoras</span>
+          </div>
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-medium">
+            <a href={DEMO_HREF} className="hover:text-sv-primary">Ver tienda demo</a>
+            <Link href={CLIENT_LOGIN_HREF} className="hover:text-sv-primary">Acceso clientes</Link>
+            <a href={CONTACT_MAIL} className="hover:text-sv-primary">hola@mibidon.cl</a>
+          </nav>
         </div>
       </footer>
 
-      <a
-        href={waAdvisor}
-        aria-label="Hablar con ventas por WhatsApp"
-        className="fixed bottom-5 right-5 z-40 flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_14px_30px_-8px_rgba(16,185,129,0.8)] transition-transform duration-300 hover:scale-110"
-      >
-        <MessageCircle className="size-6" />
-      </a>
-    </>
+      {/* Mobile sticky CTA */}
+      <div className="fixed inset-x-0 bottom-14 z-30 border-t border-sv-surface-high bg-sv-surface/95 p-3 backdrop-blur-md sm:hidden">
+        <a
+          className="sv-shine flex w-full items-center justify-center gap-2 rounded-lg bg-sv-primary py-3 text-xs font-bold text-white shadow-md"
+          href={waTrial}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>Comenzar gratis 14 días</span>
+          <Rocket className="size-4" aria-hidden />
+        </a>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 md:hidden" aria-label="Navegación rápida">
+        <div className="flex gap-2 border-t border-[#e8ecf2] bg-[#f8fafb] px-4 pb-3 pt-2">
+          {[
+            { href: "#", label: "Inicio", icon: House, active: true },
+            { href: "#simulador", label: "Simulador", icon: Calculator },
+            { href: "#precios", label: "Planes", icon: Tag },
+            { href: waAdvisor, label: "WhatsApp", icon: MessageSquareMore },
+          ].map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className={`flex flex-1 flex-col items-center justify-end gap-1 transition-transform active:scale-95 ${item.active ? "text-[#0e131a]" : "text-[#516a94]"}`}
+            >
+              <span className="flex h-8 items-center justify-center">
+                <item.icon className="size-6" strokeWidth={item.active ? 2.5 : 2} aria-hidden />
+              </span>
+              <span className="text-xs font-medium leading-normal tracking-[0.015em]">{item.label}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+    </div>
   );
 }

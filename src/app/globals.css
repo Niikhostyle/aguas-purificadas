@@ -48,6 +48,32 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* MiBidón apex landing (Stitch v2 palette) */
+@theme {
+  --color-sv-primary: #00163d;
+  --color-sv-primary-container: #0f2b5c;
+  --color-sv-secondary: #00658d;
+  --color-sv-secondary-container: #41befd;
+  --color-sv-secondary-fixed: #c6e7ff;
+  --color-sv-on-secondary-fixed: #001e2d;
+  --color-sv-on-secondary-fixed-variant: #004c6b;
+  --color-sv-on-secondary-container: #004b69;
+  --color-sv-surface: #faf8ff;
+  --color-sv-surface-lowest: #ffffff;
+  --color-sv-surface-low: #f2f3ff;
+  --color-sv-surface-container: #eaedff;
+  --color-sv-surface-high: #e2e7ff;
+  --color-sv-surface-highest: #dae2fd;
+  --color-sv-surface-tint: #465d91;
+  --color-sv-on-surface: #131b2e;
+  --color-sv-on-surface-variant: #44464f;
+  --color-sv-outline: #747780;
+  --color-sv-outline-variant: #c4c6d0;
+  --color-sv-error: #ba1a1a;
+  --font-sv-display: var(--font-sv-jakarta), "Plus Jakarta Sans", sans-serif;
+  --font-sv-body: var(--font-sv-inter), "Inter", sans-serif;
+}
+
 /* Defaults aligned with Aguas Río Claro reference */
 :root {
   --background: #ffffff;

@@ -64,8 +64,14 @@ export function Reveal({
   );
 }
 
-/** Fixed glass navbar that shrinks and gains a shadow once scrolled. */
-export function ScrollHeader({ children }: { children: ReactNode }) {
+/** Glass navbar that shrinks and gains a shadow once scrolled. */
+export function ScrollHeader({
+  children,
+  className = "fixed inset-x-0 top-0 z-50",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -88,7 +94,7 @@ export function ScrollHeader({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <header ref={ref} data-scrolled="false" className="mb-nav fixed inset-x-0 top-0 z-50">
+    <header ref={ref} data-scrolled="false" className={`mb-nav ${className}`}>
       {children}
     </header>
   );
