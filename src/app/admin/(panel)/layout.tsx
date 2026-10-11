@@ -103,6 +103,7 @@ export default async function AdminPanelLayout({
         siteLabel={superAdmin ? "Ver landing mibidon.cl" : "Ver tienda"}
         notifications={notifications}
         hiddenHrefs={hiddenHrefs}
+        year={todayCl().slice(0, 4)}
       >
         {children}
       </AdminShell>

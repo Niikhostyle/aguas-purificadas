@@ -79,6 +79,8 @@ type Props = {
   notifications: AdminNotification[];
   /** Nav hrefs to hide (e.g. modules the tenant has switched off). */
   hiddenHrefs?: string[];
+  /** Computed on the server so the footer never differs between SSR and hydration. */
+  year: string;
   children: ReactNode;
 };
 
@@ -503,6 +505,7 @@ export function AdminShell({
   siteLabel,
   notifications,
   hiddenHrefs,
+  year,
   children,
 }: Props) {
   const pathname = usePathname() ?? "";
@@ -678,7 +681,7 @@ export function AdminShell({
           {children}
         </main>
         <footer className="mx-auto max-w-[1400px] px-4 pb-8 text-xs text-[#7b8aa0] sm:px-6 lg:px-8 print:hidden">
-          © {new Date().getFullYear()} MiBidón · Plataforma para empresas de agua purificada.
+          © {year} MiBidón · Plataforma para empresas de agua purificada.
         </footer>
       </div>
     </div>
