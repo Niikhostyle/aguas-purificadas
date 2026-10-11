@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LandingNav } from "@/components/mibidon/landing-nav";
+import {
+  CountUp,
+  HeroParallax,
+  Reveal,
+} from "@/components/mibidon/landing-motion";
 
 export const metadata: Metadata = {
   title: "MiBidón · Tienda online para empresas de agua",
@@ -65,76 +71,41 @@ const steps = [
   },
 ];
 
+const displayFont = {
+  fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
+} as const;
+
 export default function MiBidonLandingPage() {
   return (
     <>
-      {/* —— Header (VAO-like nav) —— */}
-      <header className="sticky top-0 z-40 border-b border-[#d5e3ec]/80 bg-[#f7fbfd]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
-          <a
-            href="/"
-            className="text-2xl tracking-tight text-[#12326e] md:text-[1.75rem]"
-            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-          >
-            MiBidón
-          </a>
-          <nav className="flex items-center gap-3 text-sm font-semibold text-[#12326e] sm:gap-5">
-            <a href="#servicios" className="hidden hover:text-[#00b1e2] sm:inline">
-              Qué incluye
-            </a>
-            <a href="#como" className="hidden hover:text-[#00b1e2] md:inline">
-              Cómo funciona
-            </a>
-            <Link href={ADMIN_HREF} className="hover:text-[#00b1e2]">
-              Acceso
-            </Link>
-            <a
-              href={DEMO_HREF}
-              className="rounded-md bg-[#00b1e2] px-3.5 py-2 text-white transition hover:bg-[#0099c7]"
-            >
-              Ver demo
-            </a>
-          </nav>
-        </div>
-      </header>
+      <LandingNav />
 
-      {/* —— 1. Main banner / hero —— */}
       <section className="relative min-h-[88vh] overflow-hidden">
-        <div className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/rio-claro/destacado-01.jpg"
-            alt=""
-            className="h-full w-full scale-105 object-cover blur-[1px]"
-          />
-          {/* Heavy wash so source-asset copy never competes with MiBidón brand */}
-          <div className="absolute inset-0 bg-[linear-gradient(115deg,#12326ef5_0%,#00b1e2cc_48%,#12326ee6_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(0,177,226,0.35),transparent_55%)]" />
-        </div>
+        <HeroParallax src="/brand/rio-claro/destacado-01.jpg" />
         <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:justify-center md:px-8 md:pb-28">
-          <p className="animate-fade-up text-xs font-bold uppercase tracking-[0.22em] text-white/80">
+          <p className="mb-hero-in text-xs font-bold uppercase tracking-[0.22em] text-white/80">
             Ecommerce · Agua a domicilio · White-label
           </p>
           <h1
-            className="animate-fade-up mt-4 max-w-3xl text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl [animation-delay:60ms]"
-            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+            className="mb-hero-in mt-4 max-w-3xl text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl [animation-delay:90ms]"
+            style={displayFont}
           >
             En un mercado saturado, tu marca de agua necesita su propia tienda
           </h1>
-          <p className="animate-fade-up mt-5 max-w-xl text-lg text-white/85 md:text-xl [animation-delay:120ms]">
+          <p className="mb-hero-in mt-5 max-w-xl text-lg text-white/85 md:text-xl [animation-delay:180ms]">
             MiBidón es la plataforma white-label para vender botellones online:
             catálogo, carrito, WebPay y panel — con tu identidad.
           </p>
-          <div className="animate-fade-up mt-9 flex flex-wrap gap-3 [animation-delay:180ms]">
+          <div className="mb-hero-in mt-9 flex flex-wrap gap-3 [animation-delay:260ms]">
             <a
               href={DEMO_HREF}
-              className="inline-flex items-center rounded-md bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#12326e] transition hover:bg-[#e8f7fc]"
+              className="inline-flex items-center rounded-md bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#12326e] transition hover:-translate-y-0.5 hover:bg-[#e8f7fc] hover:shadow-lg"
             >
               Ver demo
             </a>
             <a
               href={CONTACT_HREF}
-              className="inline-flex items-center rounded-md border border-white/70 bg-white/10 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition hover:bg-white/20"
+              className="inline-flex items-center rounded-md border border-white/70 bg-white/10 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/20"
             >
               Solicitar demo
             </a>
@@ -142,247 +113,249 @@ export default function MiBidonLandingPage() {
         </div>
       </section>
 
-      {/* —— 2. Mid CTA strip (VAO “¿Estás listo…”) —— */}
-      <section className="bg-[#12326e] text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-14 md:flex-row md:items-center md:px-8 md:py-16">
-          <div className="max-w-2xl">
-            <h2
-              className="text-3xl leading-tight tracking-tight md:text-4xl"
-              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+      <Reveal>
+        <section className="bg-[#12326e] text-white">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-14 md:flex-row md:items-center md:px-8 md:py-16">
+            <div className="max-w-2xl">
+              <h2
+                className="text-3xl leading-tight tracking-tight md:text-4xl"
+                style={displayFont}
+              >
+                ¿Listo para que tus clientes pidan agua en dos clics?
+              </h2>
+              <p className="mt-3 text-white/75">
+                No bajes la meta: subí el canal. Probá la demo en vivo y pedí tu
+                espacio MiBidón.
+              </p>
+            </div>
+            <a
+              href={DEMO_HREF}
+              className="shrink-0 rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:-translate-y-0.5 hover:bg-[#33c1e8] hover:shadow-lg hover:shadow-[#00b1e2]/40"
             >
-              ¿Listo para que tus clientes pidan agua en dos clics?
-            </h2>
-            <p className="mt-3 text-white/75">
-              No bajes la meta: subí el canal. Probá la demo en vivo y pedí tu
-              espacio MiBidón.
-            </p>
+              Entrar a la demo
+            </a>
           </div>
-          <a
-            href={DEMO_HREF}
-            className="shrink-0 rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#33c1e8]"
-          >
-            Entrar a la demo
-          </a>
-        </div>
-      </section>
+        </section>
+      </Reveal>
 
-      {/* —— 3. Services grid (VAO services-slide pattern, no client logos) —— */}
       <section id="servicios" className="bg-white">
         <div className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
-            Qué hace MiBidón
-          </p>
-          <h2
-            className="mt-3 max-w-3xl text-3xl leading-tight tracking-tight text-[#12326e] md:text-5xl"
-            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-          >
-            Una buena plataforma hace a tu marca de agua memorable e
-            indispensable
-          </h2>
-          <p className="mt-4 max-w-2xl text-[#5a6578]">
-            En MiBidón somos especialistas en ecommerce para agua purificada a
-            domicilio. Esto es lo que incluye:
-          </p>
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
+              Qué hace MiBidón
+            </p>
+            <h2
+              className="mt-3 max-w-3xl text-3xl leading-tight tracking-tight text-[#12326e] md:text-5xl"
+              style={displayFont}
+            >
+              Una buena plataforma hace a tu marca de agua memorable e
+              indispensable
+            </h2>
+            <p className="mt-4 max-w-2xl text-[#5a6578]">
+              En MiBidón somos especialistas en ecommerce para agua purificada a
+              domicilio. Esto es lo que incluye:
+            </p>
+          </Reveal>
 
           <ul className="mt-14 grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
             {services.map((s, i) => (
-              <li
-                key={s.title}
-                className="group border border-[#d5e3ec] bg-[#f7fbfd] p-6 transition hover:bg-[#e8f7fc] sm:-ml-px sm:-mt-px"
-                style={{ animationDelay: `${i * 40}ms` }}
-              >
-                <span className="text-xs font-bold text-[#00b1e2]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3
-                  className="mt-3 text-xl tracking-tight text-[#12326e]"
-                  style={{
-                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
-                  }}
-                >
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#5a6578]">
-                  {s.body}
-                </p>
-              </li>
+              <Reveal key={s.title} delayMs={i * 50}>
+                <li className="group border border-[#d5e3ec] bg-[#f7fbfd] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#00b1e2] hover:bg-[#e8f7fc] hover:shadow-lg hover:shadow-[#00b1e2]/15 sm:-ml-px sm:-mt-px">
+                  <span className="text-xs font-bold text-[#00b1e2] transition group-hover:tracking-widest">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3
+                    className="mt-3 text-xl tracking-tight text-[#12326e]"
+                    style={displayFont}
+                  >
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#5a6578]">
+                    {s.body}
+                  </p>
+                </li>
+              </Reveal>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* —— 4. Banner cover / proof (no portfolio logos) —— */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/rio-claro/hero-2.jpg"
             alt=""
-            className="h-full w-full object-cover"
+            className="h-full w-full scale-105 object-cover"
           />
           <div className="absolute inset-0 bg-[#12326e]/88" />
         </div>
         <div className="relative mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-          <h2
-            className="max-w-2xl text-3xl tracking-tight text-white md:text-5xl"
-            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-          >
-            Hecho para flotas de botellones, no para tiendas genéricas
-          </h2>
-          <p className="mt-4 max-w-xl text-lg text-white/80">
-            Multi-tenant, subdominios, zonas de despacho y WebPay. Un solo
-            hosting; cada empresa vende con su marca.
-          </p>
+          <Reveal>
+            <h2
+              className="max-w-2xl text-3xl tracking-tight text-white md:text-5xl"
+              style={displayFont}
+            >
+              Hecho para flotas de botellones, no para tiendas genéricas
+            </h2>
+            <p className="mt-4 max-w-xl text-lg text-white/80">
+              Multi-tenant, subdominios, zonas de despacho y WebPay. Un solo
+              hosting; cada empresa vende con su marca.
+            </p>
+          </Reveal>
           <dl className="mt-12 grid gap-8 sm:grid-cols-3">
             {[
-              { k: "N empresas", v: "Un solo servidor" },
-              { k: "Subdominio", v: "cliente.mibidon.cl" },
-              { k: "Pagos", v: "WebPay listo" },
-            ].map((stat) => (
-              <div key={stat.k} className="border-t border-white/25 pt-4">
-                <dt
-                  className="text-2xl text-white md:text-3xl"
-                  style={{
-                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
-                  }}
-                >
-                  {stat.k}
-                </dt>
-                <dd className="mt-1 text-sm text-white/70">{stat.v}</dd>
-              </div>
+              { k: "Empresas", v: "Un solo servidor", n: 1, suffix: "+" },
+              { k: "Subdominio", v: "cliente.mibidon.cl", n: 1, suffix: "" },
+              { k: "Módulos", v: "Activables por tienda", n: 8, suffix: "" },
+            ].map((stat, i) => (
+              <Reveal key={stat.k} delayMs={i * 80}>
+                <div className="border-t border-white/25 pt-4 transition hover:border-[#00b1e2]">
+                  <dt
+                    className="text-2xl text-white md:text-3xl"
+                    style={displayFont}
+                  >
+                    {stat.n > 1 ? (
+                      <>
+                        <CountUp value={stat.n} suffix={stat.suffix} />{" "}
+                        {stat.k}
+                      </>
+                    ) : (
+                      stat.k
+                    )}
+                  </dt>
+                  <dd className="mt-1 text-sm text-white/70">{stat.v}</dd>
+                </div>
+              </Reveal>
             ))}
           </dl>
         </div>
       </section>
 
-      {/* —— 5. How it works —— */}
       <section id="como" className="bg-[#f7fbfd]">
         <div className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
-            Cómo funciona
-          </p>
-          <h2
-            className="mt-3 text-3xl tracking-tight text-[#12326e] md:text-5xl"
-            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-          >
-            Tres pasos para vender online
-          </h2>
+          <Reveal>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
+              Cómo funciona
+            </p>
+            <h2
+              className="mt-3 text-3xl tracking-tight text-[#12326e] md:text-5xl"
+              style={displayFont}
+            >
+              Tres pasos para vender online
+            </h2>
+          </Reveal>
           <ol className="mt-14 grid gap-10 md:grid-cols-3">
-            {steps.map((step) => (
-              <li key={step.n} className="border-t-2 border-[#00b1e2] pt-6">
-                <span
-                  className="text-4xl text-[#00b1e2]"
-                  style={{
-                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
-                  }}
-                >
-                  {step.n}
-                </span>
-                <h3
-                  className="mt-3 text-2xl text-[#12326e]"
-                  style={{
-                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
-                  }}
-                >
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-[#5a6578]">{step.body}</p>
-              </li>
+            {steps.map((step, i) => (
+              <Reveal key={step.n} delayMs={i * 90}>
+                <li className="border-t-2 border-[#00b1e2] pt-6 transition hover:border-[#12326e]">
+                  <span className="text-4xl text-[#00b1e2]" style={displayFont}>
+                    {step.n}
+                  </span>
+                  <h3
+                    className="mt-3 text-2xl text-[#12326e]"
+                    style={displayFont}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[#5a6578]">{step.body}</p>
+                </li>
+              </Reveal>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* —— 6. Demo showcase + CTA —— */}
       <section className="border-y border-[#d5e3ec] bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-2 md:items-center md:px-8 md:py-24">
-          <div>
+          <Reveal>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
               Demo para prospectos
             </p>
             <h2
               className="mt-3 text-3xl tracking-tight text-[#12326e] md:text-5xl"
-              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+              style={displayFont}
             >
               Mirá la tienda como la vería tu cliente
             </h2>
             <p className="mt-4 text-[#5a6578]">
-              Demo pública con home, grilla, detalle, carrito y checkout. Entrá
+              Demo pública con hogar/empresa, módulos, carrito y checkout. Entrá
               a{" "}
-              <a href={DEMO_HREF} className="font-semibold text-[#00b1e2] hover:underline">
+              <a
+                href={DEMO_HREF}
+                className="font-semibold text-[#00b1e2] hover:underline"
+              >
                 demo.mibidon.cl
               </a>
               .
             </p>
             <a
               href={DEMO_HREF}
-              className="mt-8 inline-flex rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#0099c7]"
+              className="mt-8 inline-flex rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:-translate-y-0.5 hover:bg-[#0099c7] hover:shadow-lg hover:shadow-[#00b1e2]/30"
             >
               Abrir demo.mibidon.cl
             </a>
-          </div>
-          <a
-            href={DEMO_HREF}
-            className="group relative block overflow-hidden border border-[#d5e3ec] bg-[#f7fbfd] shadow-[0_24px_60px_-36px_rgba(18,50,110,0.5)]"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/rio-claro/hero-2.jpg"
-              alt="Vista previa de la tienda demo MiBidón"
-              className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-            />
-            <span className="absolute bottom-4 left-4 rounded-md bg-[#12326e] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
-              demo.mibidon.cl
-            </span>
-          </a>
-        </div>
-      </section>
-
-      {/* —— 7. Final CTA banner —— */}
-      <section className="bg-[#00b1e2]">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-16 md:flex-row md:items-center md:px-8 md:py-20">
-          <div className="max-w-xl text-white">
-            <h2
-              className="text-3xl tracking-tight md:text-4xl"
-              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-            >
-              Subamos el volumen de tus pedidos
-            </h2>
-            <p className="mt-3 text-white/90">
-              Pedí una demo guiada o entrá al panel si ya sos partner MiBidón.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
+          </Reveal>
+          <Reveal delayMs={100}>
             <a
-              href={CONTACT_HREF}
-              className="rounded-md bg-[#12326e] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#0d2454]"
+              href={DEMO_HREF}
+              className="group relative block overflow-hidden border border-[#d5e3ec] bg-[#f7fbfd] shadow-[0_24px_60px_-36px_rgba(18,50,110,0.5)] transition hover:border-[#00b1e2]"
             >
-              Solicitar demo
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/rio-claro/hero-2.jpg"
+                alt="Vista previa de la tienda demo MiBidón"
+                className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+              />
+              <span className="absolute bottom-4 left-4 rounded-md bg-[#12326e] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition group-hover:bg-[#00b1e2]">
+                demo.mibidon.cl
+              </span>
             </a>
-            <Link
-              href={ADMIN_HREF}
-              className="rounded-md border border-white/80 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/15"
-            >
-              Panel plataforma
-            </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* —— Footer —— */}
+      <Reveal>
+        <section className="bg-[#00b1e2]">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-16 md:flex-row md:items-center md:px-8 md:py-20">
+            <div className="max-w-xl text-white">
+              <h2
+                className="text-3xl tracking-tight md:text-4xl"
+                style={displayFont}
+              >
+                Subamos el volumen de tus pedidos
+              </h2>
+              <p className="mt-3 text-white/90">
+                Pedí una demo guiada o entrá al panel si ya sos partner MiBidón.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={CONTACT_HREF}
+                className="rounded-md bg-[#12326e] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:-translate-y-0.5 hover:bg-[#0d2454]"
+              >
+                Solicitar demo
+              </a>
+              <Link
+                href={ADMIN_HREF}
+                className="rounded-md border border-white/80 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/15"
+              >
+                Panel plataforma
+              </Link>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
       <footer className="bg-[#12326e] text-white/75">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-10 md:flex-row md:items-end md:justify-between md:px-8">
           <div>
-            <p
-              className="text-2xl text-white"
-              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
-            >
+            <p className="text-2xl text-white" style={displayFont}>
               MiBidón
             </p>
             <p className="mt-2 max-w-sm text-sm">
-              Plataforma white-label para empresas de agua purificada.
-              Tiendas en{" "}
-              <span className="text-white">cliente.mibidon.cl</span>.
+              Plataforma white-label para empresas de agua purificada. Tiendas
+              en <span className="text-white">cliente.mibidon.cl</span>.
             </p>
           </div>
           <div className="text-sm">

@@ -17,9 +17,20 @@ export default async function AdminPanelLayout({
   const theme = adminThemeStyle();
 
   return (
-    <div style={theme} className="min-h-screen bg-[#f7fbfd]">
-      <header className="border-b border-[#d5e3ec] bg-white">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4">
+    <div
+      style={theme}
+      className={`min-h-screen ${
+        superAdmin
+          ? "bg-[linear-gradient(180deg,#e8f7fc_0%,#f7fbfd_28%,#f7fbfd_100%)]"
+          : "bg-[#f7fbfd]"
+      }`}
+    >
+      <header className="border-b border-[#d5e3ec] bg-white/95 backdrop-blur">
+        <div
+          className={`mx-auto flex flex-wrap items-center justify-between gap-4 px-5 py-4 ${
+            superAdmin ? "max-w-6xl" : "max-w-5xl"
+          }`}
+        >
           <div>
             <p className="font-[family-name:var(--font-display)] text-lg text-[var(--brand-deep)]">
               {admin.tenant.name}
@@ -93,7 +104,13 @@ export default async function AdminPanelLayout({
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-5 py-8">{children}</main>
+      <main
+        className={`mx-auto px-5 py-8 ${
+          superAdmin ? "max-w-6xl" : "max-w-5xl"
+        }`}
+      >
+        {children}
+      </main>
     </div>
   );
 }

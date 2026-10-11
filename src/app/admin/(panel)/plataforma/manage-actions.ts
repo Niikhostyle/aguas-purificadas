@@ -18,6 +18,30 @@ function rethrowRedirect(e: unknown) {
   }
 }
 
+/** Quick activate / suspend from the platform dashboard table. */
+export async function setTenantActiveAction(formData: FormData) {
+  const admin = await requireSuperAdmin();
+  if (!admin) redirect("/admin/login?tenant=plataforma");
+
+  const tenantId = String(formData.get("tenantId") || "");
+  const active = String(formData.get("active") || "") === "1";
+  if (!tenantId) redirect("/admin/plataforma");
+
+  const tenant = await prisma.tenant.findFirst({
+    where: { id: tenantId, slug: { not: "plataforma" } },
+  });
+  if (!tenant) redirect("/admin/plataforma");
+
+  await prisma.tenant.update({
+    where: { id: tenantId },
+    data: { active },
+  });
+
+  revalidatePath("/admin/plataforma");
+  revalidatePath(`/admin/plataforma/${tenantId}`);
+  redirect("/admin/plataforma");
+}
+
 export async function updateCompanyAction(formData: FormData) {
   const admin = await requireSuperAdmin();
   if (!admin) redirect("/admin/login?tenant=plataforma");

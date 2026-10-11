@@ -116,8 +116,76 @@
   animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@keyframes mb-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mb-hero-in {
+  animation: mb-hero-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mb-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.mb-hero-kenburns {
+  animation: mb-kenburns 18s ease-out alternate infinite;
+}
+
+@keyframes mb-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 177, 226, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 177, 226, 0);
+  }
+}
+
+.mb-cta-pulse {
+  animation: mb-cta-pulse 2.8s ease-out infinite;
+}
+
+@keyframes platform-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.platform-dash__enter {
+  animation: platform-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.platform-dash__card,
+.platform-dash__row {
+  animation: platform-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up {
+  .animate-fade-up,
+  .mb-hero-in,
+  .mb-hero-kenburns,
+  .mb-cta-pulse,
+  .platform-dash__enter,
+  .platform-dash__card,
+  .platform-dash__row {
     animation: none;
   }
 }
