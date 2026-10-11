@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { Breadcrumbs } from "@/components/admin/ui";
 import { SectionEditor } from "@/components/admin/landing/section-editor";
 import { requireSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -31,6 +32,14 @@ export default async function LandingSectionPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-4">
+      <Breadcrumbs
+        homeHref="/admin/plataforma"
+        items={[
+          { label: "Plataforma", href: "/admin/plataforma" },
+          { label: "Landing CMS", href: "/admin/plataforma/landing" },
+          { label: meta.title },
+        ]}
+      />
       {dbError ? (
         <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
           No se pudo leer la base de datos; se muestran los valores por defecto.

@@ -372,8 +372,7 @@ export function SectionEditor({
     >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Landing mibidon.cl</p>
-          <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-[var(--brand-deep)] md:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--brand-deep)] md:text-[26px]">
             {meta.title}
           </h1>
           <p className="mt-1 max-w-xl text-sm text-[#5a6578]">{meta.description}</p>
@@ -394,7 +393,7 @@ export function SectionEditor({
         </a>
       </header>
 
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-[#d5e3ec] bg-white px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between gap-4 rounded-xl border border-[#dde7ee] bg-white px-5 py-3.5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
         <div>
           <p className="text-sm font-bold text-[var(--brand-deep)]">Sección visible en la landing</p>
           <p className="text-xs text-[#5a6578]">
@@ -414,7 +413,7 @@ export function SectionEditor({
         </div>
       </div>
 
-      <div className="space-y-5 rounded-2xl border border-[#d5e3ec] bg-white p-5 shadow-sm">
+      <div className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
         {meta.fields.map((f) => (
           <FieldView
             key={f.key}
@@ -430,7 +429,7 @@ export function SectionEditor({
         ))}
       </div>
 
-      <div className="sticky bottom-0 z-10 -mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#d5e3ec] bg-white/95 px-5 py-3 backdrop-blur">
+      <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dde7ee] bg-white/95 px-5 py-3 shadow-[0_-6px_16px_-12px_rgba(16,40,70,0.25)] backdrop-blur">
         <div className="min-h-5 text-sm" aria-live="polite">
           {status ? (
             <span className={status.tone === "ok" ? "font-medium text-emerald-700" : "font-medium text-red-600"}>
