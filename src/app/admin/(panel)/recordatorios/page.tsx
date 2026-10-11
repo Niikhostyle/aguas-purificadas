@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { BellRing, CalendarClock, MessageCircle, Repeat, UserPlus, Users } from "lucide-react";
 import {
   createRecurringCustomerAction,
@@ -22,6 +23,7 @@ import {
 } from "@/lib/dispatch";
 import { requireTenantModule } from "@/lib/tenant-admin";
 import { cn } from "@/lib/utils";
+import { formatChileWhatsapp, normalizeChileWhatsapp } from "@/lib/whatsapp";
 
 const DUE_WINDOW_DAYS = 3;
 
@@ -72,8 +74,15 @@ export default async function RemindersPage({
   ]);
   const host = (await headers()).get("host");
   const shopUrl = host ? `https://${host}/productos` : "";
+  const companyWhatsapp = normalizeChileWhatsapp(admin.tenant.whatsapp);
   const reminderText = (name: string, next: string | null) =>
-    `Hola ${name.split(" ")[0]}, te saluda ${admin.tenant.name}. Te toca reponer tu agua el ${formatDateCl(next, "long")}. ¿Te agendamos el despacho? ${shopUrl ? `Podés pedir aquí: ${shopUrl}` : ""}`.trim();
+    [
+      `Hola ${name.split(" ")[0]}, te saluda ${admin.tenant.name}. Te toca reponer tu agua el ${formatDateCl(next, "long")}. ¿Te agendamos el despacho?`,
+      shopUrl ? `Podés pedir aquí: ${shopUrl}` : "",
+      companyWhatsapp ? `o escríbenos al WhatsApp ${formatChileWhatsapp(companyWhatsapp)}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
   const overdue = due.filter((c) => toDateStr(c.nextDeliveryDate)! < today).length;
   const freqCount = (f: string) => byFreq.find((r) => r.frequency === f)?._count ?? 0;
 
@@ -99,6 +108,22 @@ export default async function RemindersPage({
           </h2>
           <span className="text-xs text-[#5a6578]">Vencidos y hasta {formatDateCl(addDaysStr(today, DUE_WINDOW_DAYS))}</span>
         </header>
+        <p className="flex flex-wrap items-center gap-x-1 border-b border-[#eef3f7] bg-[#fbfdfe] px-4 py-2 text-xs text-[#5a6578]">
+          <MessageCircle className="size-3.5 text-emerald-600" />
+          Se envía desde el WhatsApp abierto en este dispositivo; usa el de la empresa.
+          {companyWhatsapp ? (
+            <span>
+              El mensaje incluye tu número <strong>{formatChileWhatsapp(companyWhatsapp)}</strong>.
+            </span>
+          ) : (
+            <span>
+              <Link href="/admin/marca#contacto" className="font-medium text-[var(--brand)] underline">
+                Configura el WhatsApp de la empresa
+              </Link>{" "}
+              para incluirlo en el mensaje.
+            </span>
+          )}
+        </p>
         {due.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-[#5a6578]">Nadie por reponer en los próximos días.</p>
         ) : (

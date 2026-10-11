@@ -6,6 +6,7 @@ import {
 import { encryptSecret } from "@/lib/crypto";
 import { prisma } from "@/lib/db";
 import { isValidHexColor } from "@/lib/branding";
+import { normalizeChileWhatsapp } from "@/lib/whatsapp";
 
 export type CreateTenantInput = {
   slug: string;
@@ -80,6 +81,13 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
     throw new Error("Elegí una contraseña más segura");
   }
 
+  const whatsapp = input.whatsapp?.trim()
+    ? normalizeChileWhatsapp(input.whatsapp)
+    : null;
+  if (input.whatsapp?.trim() && !whatsapp) {
+    throw new Error("WhatsApp inválido: usa un número chileno, ej. +56 9 1234 5678");
+  }
+
   const passwordHash = hashSync(input.adminPassword, 12);
   const { DEFAULT_MODULE_FLAGS, defaultDemoModulesContent } = await import(
     "@/lib/modules"
@@ -96,7 +104,7 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       logoUrl: input.logoUrl?.trim() || null,
       phone: input.phone?.trim() || null,
       email: input.email?.trim() || null,
-      whatsapp: input.whatsapp?.trim() || null,
+      whatsapp,
       address: input.address?.trim() || null,
       city: input.city?.trim() || null,
       region: input.region?.trim() || null,

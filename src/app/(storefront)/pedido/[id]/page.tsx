@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
+import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -48,6 +49,10 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
   const copy = statusCopy[order.status] ?? statusCopy.pending;
   const canRetry = order.status === "pending" || order.status === "failed";
+  const whatsapp = tenantWhatsappHref(
+    tenant.whatsapp,
+    `Hola ${tenant.name}, te escribo por mi pedido ${order.id.slice(-8).toUpperCase()}.`,
+  );
 
   return (
     <div className="bg-[linear-gradient(180deg,#e8f4f1_0%,#f3f7f6_50%)]">
@@ -145,6 +150,16 @@ export default async function OrderConfirmationPage({ params }: Props) {
           >
             Seguir comprando
           </Link>
+          {whatsapp ? (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-8 items-center rounded-md bg-[#25D366] px-4 text-sm font-medium text-white hover:bg-[#1ebe5b]"
+            >
+              Consultar por WhatsApp
+            </a>
+          ) : null}
         </div>
       </div>
     </div>

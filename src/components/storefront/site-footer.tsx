@@ -1,7 +1,9 @@
 import type { Tenant } from "@prisma/client";
+import { formatChileWhatsapp, tenantWhatsappHref } from "@/lib/whatsapp";
 
 export function SiteFooter({ tenant }: { tenant: Tenant }) {
   const phones = [tenant.phone, tenant.phoneSecondary].filter(Boolean);
+  const whatsapp = tenantWhatsappHref(tenant.whatsapp);
   const coverage =
     tenant.coverageText ||
     "Nos esmeramos día a día por nuestros clientes, sabemos que para ellos el agua debe llegar a tiempo. Despacho a Talca, Curicó, Linares y comunas de la región.";
@@ -47,6 +49,16 @@ export function SiteFooter({ tenant }: { tenant: Tenant }) {
                 <li>—</li>
               )}
             </ul>
+            {whatsapp ? (
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-1.5 text-sm font-bold text-white hover:bg-[#1ebe5b]"
+              >
+                WhatsApp {formatChileWhatsapp(tenant.whatsapp)}
+              </a>
+            ) : null}
             {tenant.email ? (
               <p className="mt-3 text-sm text-white/80">{tenant.email}</p>
             ) : null}

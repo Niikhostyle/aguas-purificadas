@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { requireAdmin } from "@/lib/auth";
 import { parseHeroSlides } from "@/lib/hero-slides";
+import { formatChileWhatsapp, tenantWhatsappHref } from "@/lib/whatsapp";
 
 export default async function BrandingAdminPage({
   searchParams,
@@ -23,6 +24,7 @@ export default async function BrandingAdminPage({
   const tenant = admin.tenant;
   const { ok, error } = await searchParams;
   const slides = parseHeroSlides(tenant.heroSlides);
+  const whatsappLink = tenantWhatsappHref(tenant.whatsapp);
 
   return (
     <div className="max-w-4xl">
@@ -175,10 +177,41 @@ export default async function BrandingAdminPage({
           </div>
         </section>
 
-        <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+        <section
+          id="contacto"
+          className="scroll-mt-6 space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]"
+        >
           <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
             Contacto y cobertura
           </h2>
+          <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+            <Label htmlFor="whatsapp">WhatsApp de la empresa</Label>
+            <Input
+              id="whatsapp"
+              name="whatsapp"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="+56 9 1234 5678"
+              defaultValue={tenant.whatsapp ? formatChileWhatsapp(tenant.whatsapp) : ""}
+            />
+            <p className="text-xs text-[#5a6578]">
+              Número donde tus clientes te escriben: botón flotante de la
+              tienda, footer, fichas de producto y confirmación de pedido. Acepta{" "}
+              <code>+56 9 1234 5678</code>, <code>912345678</code> o{" "}
+              <code>56912345678</code>. Déjalo vacío para ocultar los botones de
+              WhatsApp.
+            </p>
+            {whatsappLink ? (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-xs font-medium text-emerald-700 underline"
+              >
+                Probar: {whatsappLink}
+              </a>
+            ) : null}
+          </div>
           <div className="space-y-2">
             <Label htmlFor="coverageText">Cobertura (footer)</Label>
             <Textarea
@@ -201,15 +234,7 @@ export default async function BrandingAdminPage({
                 defaultValue={tenant.phoneSecondary ?? ""}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp">WhatsApp</Label>
-              <Input
-                id="whatsapp"
-                name="whatsapp"
-                defaultValue={tenant.whatsapp ?? ""}
-              />
-            </div>
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"

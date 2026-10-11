@@ -11,6 +11,7 @@ import {
   type TenantHeroSlide,
 } from "@/lib/hero-slides";
 import { saveBannerImage, saveLogoImage } from "@/lib/uploads";
+import { normalizeChileWhatsapp } from "@/lib/whatsapp";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -67,6 +68,18 @@ export async function updateBrandingAction(formData: FormData) {
     redirect(
       "/admin/marca?error=" +
         encodeURIComponent("Revisá los campos del formulario"),
+    );
+  }
+
+  const whatsapp = parsed.data.whatsapp
+    ? normalizeChileWhatsapp(parsed.data.whatsapp)
+    : null;
+  if (parsed.data.whatsapp && !whatsapp) {
+    redirect(
+      "/admin/marca?error=" +
+        encodeURIComponent(
+          "WhatsApp inválido: usa un número chileno, ej. +56 9 1234 5678",
+        ),
     );
   }
 
@@ -141,7 +154,7 @@ export async function updateBrandingAction(formData: FormData) {
       phone: parsed.data.phone ?? null,
       phoneSecondary: parsed.data.phoneSecondary ?? null,
       email: parsed.data.email || null,
-      whatsapp: parsed.data.whatsapp ?? null,
+      whatsapp,
       address: parsed.data.address ?? null,
       city: parsed.data.city ?? null,
       region: parsed.data.region ?? null,

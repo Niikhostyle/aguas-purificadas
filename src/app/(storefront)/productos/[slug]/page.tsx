@@ -5,6 +5,7 @@ import { AddToCartForm } from "@/components/storefront/add-to-cart-form";
 import { prisma } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
+import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -24,6 +25,10 @@ export default async function ProductDetailPage({ params }: Props) {
     where: { tenantId: tenant.id, slug, active: true },
   });
   if (!product) notFound();
+  const whatsapp = tenantWhatsappHref(
+    tenant.whatsapp,
+    `Hola ${tenant.name}, quiero consultar por ${product.name}.`,
+  );
 
   return (
     <div className="bg-white">
@@ -60,7 +65,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="mt-8">
             <AddToCartForm productId={product.id} />
           </div>
-          {(tenant.phone || tenant.whatsapp) && (
+          {(tenant.phone || whatsapp) && (
             <p className="mt-6 text-sm text-[#5a6578]">
               También podés pedir por teléfono{" "}
               {tenant.phone ? (
@@ -71,15 +76,15 @@ export default async function ProductDetailPage({ params }: Props) {
                   {tenant.phone}
                 </a>
               ) : null}
-              {tenant.whatsapp ? (
+              {whatsapp ? (
                 <>
                   {" "}
                   o{" "}
                   <a
                     className="font-bold text-[var(--brand-deep)]"
-                    href={`https://wa.me/${tenant.whatsapp.replace(/\D/g, "")}`}
+                    href={whatsapp}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
                     WhatsApp
                   </a>

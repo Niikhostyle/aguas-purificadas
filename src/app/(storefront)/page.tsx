@@ -25,6 +25,7 @@ import {
   type Audience,
 } from "@/lib/modules";
 import { getTenantProducts, requireTenant } from "@/lib/tenant";
+import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await requireTenant();
@@ -49,6 +50,10 @@ export default async function HomePage({
   const host = (h.get("host") || "").split(":")[0].toLowerCase();
   const isDemo = host.startsWith("demo.") || tenant.slug === "demo";
   const brandName = isDemo ? "Demo" : tenant.name;
+  const whatsappContact = tenantWhatsappHref(
+    tenant.whatsapp,
+    `Hola ${tenant.name}, quiero hacer un pedido.`,
+  );
 
   const sp = await searchParams;
   const audience: Audience = sp.audience === "empresa" ? "empresa" : "hogar";
@@ -145,6 +150,16 @@ export default async function HomePage({
                   .join(" | ")}
               </p>
             )}
+            {whatsappContact ? (
+              <a
+                href={whatsappContact}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold uppercase text-white hover:bg-[#1ebe5b]"
+              >
+                Escríbenos por WhatsApp
+              </a>
+            ) : null}
           </div>
         </div>
       </section>

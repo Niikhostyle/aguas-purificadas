@@ -80,7 +80,7 @@ async function main() {
     phone: "+56 2 2123 4567",
     phoneSecondary: null as string | null,
     email: "hola@demo.mibidon.cl",
-    whatsapp: "+56912345678",
+    whatsapp: "56912345678",
     address: "Chile",
     city: "Santiago",
     region: "Región Metropolitana",

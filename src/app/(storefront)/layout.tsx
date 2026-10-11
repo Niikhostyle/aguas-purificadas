@@ -2,11 +2,13 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { SiteFooter } from "@/components/storefront/site-footer";
 import { SiteHeader } from "@/components/storefront/site-header";
+import { WhatsappFloat } from "@/components/storefront/whatsapp-float";
 import { tenantThemeStyle } from "@/lib/branding";
 import { getResolvedCart } from "@/lib/cart";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { parseModuleFlags, parseModulesContent } from "@/lib/modules";
 import { requireTenant } from "@/lib/tenant";
+import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 export default async function StorefrontLayout({
   children,
@@ -47,6 +49,12 @@ export default async function StorefrontLayout({
       </Suspense>
       <main className="flex-1">{children}</main>
       <SiteFooter tenant={tenant} />
+      <WhatsappFloat
+        href={tenantWhatsappHref(
+          tenant.whatsapp,
+          `Hola ${tenant.name}, quiero hacer una consulta.`,
+        )}
+      />
     </div>
   );
 }
