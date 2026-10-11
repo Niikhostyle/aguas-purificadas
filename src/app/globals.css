@@ -70,6 +70,9 @@
   --color-sv-outline: #747780;
   --color-sv-outline-variant: #c4c6d0;
   --color-sv-error: #ba1a1a;
+}
+
+@theme inline {
   --font-sv-display: var(--font-sv-jakarta), "Plus Jakarta Sans", sans-serif;
   --font-sv-body: var(--font-sv-inter), "Inter", sans-serif;
 }

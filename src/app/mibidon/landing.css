@@ -5,6 +5,11 @@
   overflow-x: clip;
 }
 
+.sv-shell :is(a, button),
+.sv-label {
+  font-family: var(--font-sv-jakarta), "Plus Jakarta Sans", sans-serif;
+}
+
 .sv-display {
   font-family: var(--font-sv-jakarta), "Plus Jakarta Sans", sans-serif;
   letter-spacing: -0.02em;

@@ -175,7 +175,7 @@ export default function MiBidonLanding() {
   return (
     <div className="pb-32 sm:pb-20 md:pb-0">
       {/* Announcement bar */}
-      <div className="flex flex-wrap items-center justify-center gap-2 border-b border-sv-surface-tint/30 bg-sv-primary-container px-4 py-2.5 text-center text-xs font-medium text-sv-surface">
+      <div className="flex flex-wrap items-center justify-center gap-2 border-b border-sv-surface-tint/30 sv-label bg-sv-primary-container px-4 py-2.5 text-center text-xs font-medium text-sv-surface">
         <span className="inline-flex items-center rounded-full bg-sv-secondary-container px-2 py-0.5 text-[10px] font-bold text-sv-on-secondary-container">
           OFERTA ACTIVA
         </span>
@@ -199,7 +199,7 @@ export default function MiBidonLanding() {
               </span>
             </div>
           </Link>
-          <nav className="hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
+          <nav className="sv-label hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
             <a className="transition-colors hover:text-sv-primary" href="#beneficios">Ventajas Clave</a>
             <a className="transition-colors hover:text-sv-primary" href="#comparativa">WhatsApp vs MiBidón</a>
             <a className="transition-colors hover:text-sv-primary" href="#simulador">Simulador de ROI</a>
@@ -284,7 +284,7 @@ export default function MiBidonLanding() {
                 </a>
               </div>
               <div
-                className="mb-fade-up flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs text-sv-on-surface-variant"
+                className="mb-fade-up sv-label flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs text-sv-on-surface-variant"
                 style={d(950)}
               >
                 <span className="inline-flex items-center gap-1 font-bold text-sv-on-secondary-fixed-variant">
@@ -326,7 +326,7 @@ export default function MiBidonLanding() {
                 </div>
               </div>
               <div
-                className="mb-layer pointer-events-none absolute -left-10 top-24 hidden xl:block"
+                className="mb-layer pointer-events-none absolute -top-8 right-20 hidden xl:block"
                 style={{ "--depth": -22 } as CSSProperties}
               >
                 <div className="mb-pop" style={d(1200)}>
