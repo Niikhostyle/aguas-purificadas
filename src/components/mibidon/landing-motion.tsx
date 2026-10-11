@@ -5,29 +5,39 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ElementType,
   type ReactNode,
 } from "react";
 
-/** Scroll-triggered reveal. */
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function hasFinePointer() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+/** Scroll-triggered reveal; stagger siblings with `delayMs`. */
 export function Reveal({
   children,
   className = "",
   delayMs = 0,
+  variant = "up",
+  as: Tag = "div",
 }: {
   children: ReactNode;
   className?: string;
   delayMs?: number;
+  variant?: "up" | "scale" | "left" | "right";
+  as?: ElementType;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const [on, setOn] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setOn(true);
-      return;
-    }
+    // Reduced motion: CSS already forces `.mb-reveal` visible.
+    if (!el || prefersReducedMotion()) return;
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e?.isIntersecting) {
@@ -35,57 +45,61 @@ export function Reveal({
           obs.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+      { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  const style: CSSProperties = { transitionDelay: `${delayMs}ms` };
-
   return (
-    <div
+    <Tag
       ref={ref}
-      style={style}
-      className={`transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        on ? "translate-y-0 opacity-100" : "translate-y-9 opacity-0"
-      } ${className}`}
+      data-in={on}
+      data-variant={variant}
+      style={{ "--d": `${delayMs}ms` } as CSSProperties}
+      className={`mb-reveal ${className}`}
     >
       {children}
-    </div>
+    </Tag>
   );
 }
 
-/** Sticky header that densifies after scroll. */
+/** Fixed glass navbar that shrinks and gains a shadow once scrolled. */
 export function ScrollHeader({ children }: { children: ReactNode }) {
-  const [scrolled, setScrolled] = useState(false);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 18);
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        el.dataset.scrolled = String(window.scrollY > 24);
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
-    <header
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
-          ? "border-b border-white/10 bg-[#04101f]/94 shadow-[0_8px_28px_-8px_rgba(4,16,31,0.55)] backdrop-blur-xl"
-          : "border-b border-transparent bg-[#04101f]/58 backdrop-blur-md"
-      }`}
-    >
+    <header ref={ref} data-scrolled="false" className="mb-nav fixed inset-x-0 top-0 z-50">
       {children}
     </header>
   );
 }
 
-/** Animated integer counter when in view. */
+/** Integer counter that animates once it scrolls into view. */
 export function CountUp({
   value,
   suffix = "",
   prefix = "",
-  durationMs = 1400,
+  durationMs = 1600,
 }: {
   value: number;
   suffix?: string;
@@ -98,27 +112,21 @@ export function CountUp({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setN(value);
-      return;
-    }
+    const duration = prefersReducedMotion() ? 0 : durationMs;
     let raf = 0;
-    let started = false;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (!e?.isIntersecting || started) return;
-        started = true;
+        if (!e?.isIntersecting) return;
+        obs.disconnect();
         const t0 = performance.now();
         const tick = (now: number) => {
-          const p = Math.min(1, (now - t0) / durationMs);
-          const eased = 1 - Math.pow(1 - p, 3);
-          setN(Math.round(value * eased));
+          const p = duration ? Math.min(1, (now - t0) / duration) : 1;
+          setN(Math.round(value * (1 - Math.pow(1 - p, 4))));
           if (p < 1) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
-        obs.disconnect();
       },
-      { threshold: 0.35 },
+      { threshold: 0.4 },
     );
     obs.observe(el);
     return () => {
@@ -136,8 +144,90 @@ export function CountUp({
   );
 }
 
-/** Soft mouse-tilt for the ROI glass panel. */
-export function TiltPanel({
+/** Tweens between successive values (used by the ROI calculator). */
+export function AnimatedNumber({
+  value,
+  prefix = "",
+  suffix = "",
+  durationMs = 520,
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  durationMs?: number;
+}) {
+  const [shown, setShown] = useState(value);
+  const fromRef = useRef(value);
+
+  useEffect(() => {
+    const duration = prefersReducedMotion() ? 0 : durationMs;
+    const from = fromRef.current;
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = duration ? Math.min(1, (now - t0) / duration) : 1;
+      const v = Math.round(from + (value - from) * (1 - Math.pow(1 - p, 3)));
+      fromRef.current = v;
+      setShown(v);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, durationMs]);
+
+  return (
+    <span className="tabular-nums">
+      {prefix}
+      {shown.toLocaleString("es-CL")}
+      {suffix}
+    </span>
+  );
+}
+
+/** Card with a radial spotlight + gradient border that follows the cursor. */
+export function SpotlightCard({
+  children,
+  className = "",
+  style,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !hasFinePointer()) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        el.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    };
+    el.addEventListener("pointermove", onMove);
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} style={style} className={`mb-spot ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Mouse parallax: sets --px/--py (-1..1) on the container; `.mb-layer`
+ * children translate by `--depth` px. Desktop fine pointers only.
+ */
+export function Parallax({
   children,
   className = "",
 }: {
@@ -148,33 +238,27 @@ export function TiltPanel({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(900px) rotateY(${x * 5}deg) rotateX(${-y * 4}deg)`;
+    if (!el || prefersReducedMotion() || !hasFinePointer()) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const x = (e.clientX / window.innerWidth) * 2 - 1;
+        const y = (e.clientY / window.innerHeight) * 2 - 1;
+        el.style.setProperty("--px", x.toFixed(3));
+        el.style.setProperty("--py", y.toFixed(3));
+      });
     };
-    const onLeave = () => {
-      el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
-    };
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
+    window.addEventListener("pointermove", onMove, { passive: true });
     return () => {
-      el.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
     };
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className={`transition-transform duration-200 ease-out will-change-transform ${className}`}
-    >
+    <div ref={ref} className={`mb-parallax ${className}`}>
       {children}
     </div>
   );

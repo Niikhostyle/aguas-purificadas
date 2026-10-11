@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./landing.css";
 
-const display = Plus_Jakarta_Sans({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-mb-display",
 });
 
-const body = Source_Sans_3({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-mb-body",
-});
-
 export const metadata: Metadata = {
-  title: "MiBidón · Tienda white-label para embotelladoras de agua",
+  title: "MiBidón · Tiendas online para purificadoras y embotelladoras de agua",
   description:
-    "Multiplica tus ventas de agua purificada. eCommerce white-label con WebPay, rutas por comuna y activación en 24 horas.",
+    "Tu propia tienda online de agua purificada con tu marca: pedidos, despachos por comuna, suscripciones de recarga y cobro con WebPay. Activa en 24 horas, 0% comisión.",
 };
 
 export default function MiBidonLayout({
@@ -26,20 +20,14 @@ export default function MiBidonLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-        rel="stylesheet"
-      />
-      <div
-        className={`${display.variable} ${body.variable} mb-shell min-h-screen antialiased`}
-        style={{
-          fontFamily: "var(--font-mb-body), 'Source Sans 3', sans-serif",
-        }}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      className={`${jakarta.variable} mb-shell min-h-screen antialiased`}
+      style={{ fontFamily: "var(--font-mb-display), 'Plus Jakarta Sans', sans-serif" }}
+    >
+      <noscript>
+        <style>{`.mb-reveal,.mb-word,.mb-fade-up,.mb-pop,.mb-bar{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+      </noscript>
+      {children}
+    </div>
   );
 }
