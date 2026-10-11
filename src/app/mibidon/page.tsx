@@ -69,7 +69,7 @@ export default function MiBidonLandingPage() {
       <ScrollHeader>
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 md:px-8">
           <Link href="/" className="flex min-w-0 flex-1 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#00a3e0] to-[#06b6d4] text-sm font-extrabold text-white shadow-[0_4px_14px_rgba(0,163,224,0.45)]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#00a3e0] via-[#06b6d4] to-[#0891b2] text-sm font-extrabold text-white shadow-[0_4px_14px_rgba(0,163,224,0.5)]">
               MB
             </div>
             <div className="flex min-w-0 flex-col">
@@ -98,7 +98,7 @@ export default function MiBidonLandingPage() {
           <div className="flex shrink-0 items-center gap-2">
             <a
               href="#pricing"
-              className="mb-cta-pulse flex min-h-10 items-center justify-center rounded-lg bg-[#00a3e0] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition hover:brightness-110 active:scale-95"
+              className="mb-cta-pulse mb-cta-hydro flex min-h-10 items-center justify-center rounded-lg px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition hover:brightness-110 active:scale-95"
             >
               Activar Tienda
             </a>
@@ -162,7 +162,7 @@ export default function MiBidonLandingPage() {
                   style={display}
                 >
                   Multiplica tus ventas en{" "}
-                  <span className="bg-gradient-to-r from-[#41befd] to-[#67e8f9] bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#38bdf8] via-[#22d3ee] to-[#67e8f9] bg-clip-text text-transparent">
                     piloto automático
                   </span>
                 </h1>
@@ -199,7 +199,7 @@ export default function MiBidonLandingPage() {
                 <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
                   <a
                     href="#pricing"
-                    className="mb-cta-pulse flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00a3e0] to-[#06b6d4] px-4 py-3 text-base font-bold text-white ring-2 ring-[#41befd]/35 transition hover:brightness-110 active:scale-[0.98] sm:w-auto sm:px-8"
+                    className="mb-cta-pulse mb-cta-hydro flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-white ring-2 ring-[#38bdf8]/40 transition hover:brightness-110 active:scale-[0.98] sm:w-auto sm:px-8"
                     style={display}
                   >
                     <span>Comenzar gratis 14 días</span>
@@ -237,7 +237,7 @@ export default function MiBidonLandingPage() {
         {/* Stats strip */}
         <section className="relative z-10 -mt-6 px-4 md:-mt-8 md:px-8">
           <Reveal>
-            <div className="mx-auto grid max-w-6xl grid-cols-3 gap-2 rounded-2xl border border-[#0f2b5c]/10 bg-white/80 p-3 shadow-[0_16px_40px_-20px_rgba(15,43,92,0.35)] backdrop-blur-md md:gap-4 md:p-5">
+            <div className="mb-frost mx-auto grid max-w-6xl grid-cols-3 gap-2 rounded-2xl p-3 md:gap-4 md:p-5">
               {[
                 { n: 120, suffix: "+", label: "Embotelladoras" },
                 { n: 24, suffix: "h", label: "Activación" },
@@ -248,12 +248,12 @@ export default function MiBidonLandingPage() {
                   className="flex flex-col items-center text-center"
                 >
                   <span
-                    className="text-2xl font-extrabold text-[#0a1c3c] md:text-3xl"
+                    className="text-2xl font-extrabold text-[#071a36] md:text-3xl"
                     style={display}
                   >
                     <CountUp value={s.n} suffix={s.suffix} durationMs={1100 + i * 200} />
                   </span>
-                  <span className="text-[11px] font-semibold text-[#475569] md:text-xs">
+                  <span className="text-[11px] font-semibold text-[#3d566e] md:text-xs">
                     {s.label}
                   </span>
                 </div>
@@ -263,9 +263,9 @@ export default function MiBidonLandingPage() {
         </section>
 
         {/* Trust */}
-        <section className="px-4 py-8 md:px-8 md:py-10">
+        <section className="mb-section-mist px-4 py-8 md:px-8 md:py-10">
           <Reveal>
-            <div className="mx-auto max-w-6xl rounded-2xl border border-[#0f2b5c]/08 bg-gradient-to-r from-[#dff3fb] to-[#eef8fc] p-4 md:p-6">
+            <div className="mb-frost mx-auto max-w-6xl rounded-2xl p-4 md:p-6">
               <div className="flex items-center justify-center gap-1 text-center">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span
@@ -275,19 +275,19 @@ export default function MiBidonLandingPage() {
                     star
                   </span>
                 ))}
-                <span className="ml-1 text-xs font-bold text-[#0a1c3c]">
+                <span className="ml-1 text-xs font-bold text-[#071a36]">
                   +120 embotelladoras y distribuidores
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-[#0f2b5c]/08 pt-3 text-center">
+              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-[#071a36]/10 pt-3 text-center">
                 {[
                   ["Transbank", "WebPay Plus"],
                   ["Boleta SII", "Automática"],
                   ["SSL 256-bit", "Transacción Segura"],
                 ].map(([t, s]) => (
                   <div key={t} className="flex flex-col items-center">
-                    <span className="text-xs font-bold text-[#0a1c3c]">{t}</span>
-                    <span className="text-[11px] text-[#475569]">{s}</span>
+                    <span className="text-xs font-bold text-[#071a36]">{t}</span>
+                    <span className="text-[11px] text-[#3d566e]">{s}</span>
                   </div>
                 ))}
               </div>
@@ -303,12 +303,12 @@ export default function MiBidonLandingPage() {
                 El costo oculto de operar a la antigua
               </span>
               <h2
-                className="text-xl font-bold tracking-tight text-[#0a1c3c] md:text-3xl"
+                className="text-xl font-bold tracking-tight text-[#071a36] md:text-3xl"
                 style={display}
               >
                 Vender por WhatsApp vs. Crecer con MiBidón
               </h2>
-              <p className="text-[13px] text-[#475569]">
+              <p className="text-[13px] text-[#3d566e]">
                 Cada mensaje sin contestar a tiempo es un botellón que vendió tu
                 competencia.
               </p>
@@ -376,21 +376,22 @@ export default function MiBidonLandingPage() {
         {/* Features */}
         <section
           id="features"
-          className="relative mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 md:px-8 md:py-12"
+          className="mb-section-slate relative px-4 py-6 md:px-8 md:py-12"
         >
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-40 rounded-full bg-[#00a3e0]/10 blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-40 rounded-full bg-[#00a3e0]/12 blur-3xl" />
+          <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-4">
           <Reveal>
             <div className="relative flex flex-col gap-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#00a3e0]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0891b2]">
                 Características que generan ingresos
               </span>
               <h2
-                className="text-2xl font-bold tracking-tight text-[#0a1c3c] md:text-4xl"
+                className="text-2xl font-bold tracking-tight text-[#071a36] md:text-4xl"
                 style={display}
               >
                 Diseñado exclusivamente para el negocio del agua
               </h2>
-              <p className="max-w-2xl text-[15px] text-[#475569]">
+              <p className="max-w-2xl text-[15px] text-[#3d566e]">
                 Herramientas creadas para resolver los dolores específicos de
                 plantas y distribuidores.
               </p>
@@ -399,7 +400,7 @@ export default function MiBidonLandingPage() {
           <div className="relative grid gap-3 sm:grid-cols-2">
             {FEATURES.map((f, i) => (
               <Reveal key={f.title} delayMs={i * 70}>
-                <article className="flex h-full flex-col gap-2 rounded-2xl border border-[#0f2b5c]/08 bg-white/85 p-4 shadow-[0_10px_30px_-18px_rgba(15,43,92,0.35)] transition hover:-translate-y-1 hover:border-[#00a3e0]/50 hover:shadow-[0_16px_36px_-16px_rgba(0,163,224,0.35)]">
+                <article className="mb-panel flex h-full flex-col gap-2 rounded-2xl p-4 transition hover:-translate-y-1 hover:border-[#00a3e0]/45 hover:shadow-[0_16px_36px_-16px_rgba(0,163,224,0.32)]">
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-xl ${f.iconBg}`}
                   >
@@ -408,12 +409,12 @@ export default function MiBidonLandingPage() {
                     </span>
                   </div>
                   <h3
-                    className="text-lg font-bold text-[#0a1c3c]"
+                    className="text-lg font-bold text-[#071a36]"
                     style={display}
                   >
                     {f.title}
                   </h3>
-                  <p className="text-[13px] leading-5 text-[#475569]">{f.body}</p>
+                  <p className="text-[13px] leading-5 text-[#3d566e]">{f.body}</p>
                   <div
                     className={`inline-flex items-center gap-1 pt-1 text-[11px] font-semibold ${f.tipColor}`}
                   >
@@ -426,13 +427,14 @@ export default function MiBidonLandingPage() {
               </Reveal>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Testimonials */}
-        <section className="mx-2 rounded-3xl bg-gradient-to-br from-[#0f2b5c] to-[#061229] px-4 py-8 text-white md:mx-auto md:max-w-6xl md:px-8 md:py-12">
+        <section className="mx-2 rounded-3xl bg-gradient-to-br from-[#071a36] via-[#0c274f] to-[#0a4a5c] px-4 py-8 text-white md:mx-auto md:max-w-6xl md:px-8 md:py-12">
           <Reveal>
             <div className="flex flex-col gap-1 text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#41befd]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#38bdf8]">
                 Resultados reales
               </span>
               <h2
@@ -495,8 +497,9 @@ export default function MiBidonLandingPage() {
         {/* Pricing */}
         <section
           id="pricing"
-          className="mx-auto flex w-full max-w-xl flex-col gap-4 px-4 py-10 md:max-w-6xl md:px-8 md:py-14"
+          className="mb-section-mist px-4 py-10 md:px-8 md:py-14"
         >
+          <div className="mx-auto flex w-full max-w-xl flex-col gap-4 md:max-w-6xl">
           <Reveal>
             <div className="flex flex-col gap-1 text-center">
               <div className="mx-auto inline-flex items-center justify-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800">
@@ -506,45 +509,45 @@ export default function MiBidonLandingPage() {
                 Oferta de lanzamiento exclusiva
               </div>
               <h2
-                className="text-2xl font-bold text-[#0a1c3c] md:text-4xl"
+                className="text-2xl font-bold text-[#071a36] md:text-4xl"
                 style={display}
               >
                 Empieza a vender esta misma semana
               </h2>
-              <p className="text-[13px] text-[#475569]">
+              <p className="text-[13px] text-[#3d566e]">
                 Prueba el sistema completo durante 14 días sin ningún riesgo.
               </p>
             </div>
           </Reveal>
 
           <Reveal delayMs={80}>
-            <div className="relative mx-auto flex w-full max-w-lg flex-col gap-4 overflow-hidden rounded-2xl border-2 border-[#00a3e0] bg-gradient-to-b from-white to-[#e8f4fb] p-4 shadow-[0_20px_50px_-24px_rgba(0,163,224,0.55)] md:p-6">
-              <div className="absolute -right-12 top-6 rotate-45 bg-[#00a3e0] px-12 py-1 text-center text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
+            <div className="relative mx-auto flex w-full max-w-lg flex-col gap-4 overflow-hidden rounded-2xl border-2 border-[#00a3e0]/80 bg-gradient-to-b from-[#f2f8fc] to-[#cfe8f6] p-4 shadow-[0_20px_50px_-24px_rgba(0,163,224,0.5)] md:p-6">
+              <div className="absolute -right-12 top-6 rotate-45 bg-gradient-to-r from-[#00a3e0] to-[#06b6d4] px-12 py-1 text-center text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
                 Más Elegido
               </div>
               <div className="flex flex-col gap-1 pr-14">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#00a3e0]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#0891b2]">
                   Plan Pro Despegue
                 </span>
                 <h3
-                  className="text-xl font-extrabold text-[#0a1c3c]"
+                  className="text-xl font-extrabold text-[#071a36]"
                   style={display}
                 >
                   Tu Tienda Llave en Mano
                 </h3>
-                <p className="text-[13px] text-[#475569]">
+                <p className="text-[13px] text-[#3d566e]">
                   Todo configurado por nuestros especialistas listo para recibir
                   pedidos.
                 </p>
               </div>
-              <div className="flex items-baseline gap-2 border-b border-[#cfe8f6] pb-2">
+              <div className="flex items-baseline gap-2 border-b border-[#a8d4e8] pb-2">
                 <span
-                  className="text-4xl font-extrabold text-[#0a1c3c]"
+                  className="text-4xl font-extrabold text-[#071a36]"
                   style={display}
                 >
                   $29.990
                 </span>
-                <span className="text-xs text-[#475569]">/ mes</span>
+                <span className="text-xs text-[#3d566e]">/ mes</span>
                 <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
                   0% Comisiones
                 </span>
@@ -571,7 +574,7 @@ export default function MiBidonLandingPage() {
               <div className="flex flex-col gap-2 pt-1">
                 <a
                   href={waActivate}
-                  className="mb-cta-pulse flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00a3e0] to-[#06b6d4] px-4 py-3 text-center text-base font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
+                  className="mb-cta-pulse mb-cta-hydro flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-base font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
                   style={display}
                 >
                   <span>Quiero mi tienda ahora</span>
@@ -579,7 +582,7 @@ export default function MiBidonLandingPage() {
                     arrow_forward
                   </span>
                 </a>
-                <div className="flex items-center justify-center gap-1.5 text-center text-[11px] text-[#64748b]">
+                <div className="flex items-center justify-center gap-1.5 text-center text-[11px] text-[#3d566e]">
                   <span className="material-symbols-outlined text-[16px] text-emerald-600">
                     verified_user
                   </span>
@@ -590,16 +593,18 @@ export default function MiBidonLandingPage() {
               </div>
             </div>
           </Reveal>
+          </div>
         </section>
 
         {/* FAQ */}
-        <section className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 py-6 md:px-8">
+        <section className="mb-section-slate px-4 py-6 md:px-8">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
           <Reveal>
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#00a3e0]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0891b2]">
                 Resolvemos tus dudas
               </span>
-              <h3 className="text-lg font-bold text-[#0a1c3c]" style={display}>
+              <h3 className="text-lg font-bold text-[#071a36]" style={display}>
                 Preguntas frecuentes antes de activar
               </h3>
             </div>
@@ -607,14 +612,15 @@ export default function MiBidonLandingPage() {
           <Reveal delayMs={60}>
             <FaqAccordion />
           </Reveal>
+          </div>
         </section>
 
         {/* Closer */}
         <section className="px-4 pb-10 md:px-8">
           <Reveal>
-            <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-3 overflow-hidden rounded-3xl bg-gradient-to-br from-[#061229] via-[#0f2b5c] to-[#0a3a5c] p-6 text-center text-white shadow-xl md:p-10">
+            <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-3 overflow-hidden rounded-3xl bg-gradient-to-br from-[#04101f] via-[#0c274f] to-[#0a4a5c] p-6 text-center text-white shadow-xl md:p-10">
               <div className="mb-orb mb-orb-c !opacity-60" />
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[#41befd]">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[#38bdf8]">
                 <span className="material-symbols-outlined text-[32px]">
                   support_agent
                 </span>
@@ -656,33 +662,33 @@ export default function MiBidonLandingPage() {
           </Reveal>
         </section>
 
-        <footer className="mt-auto flex flex-col items-center justify-center gap-1 border-t border-[#0f2b5c]/10 px-4 py-6 text-center">
+        <footer className="mt-auto flex flex-col items-center justify-center gap-1 border-t border-[#071a36]/12 px-4 py-6 text-center">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-[#00a3e0] to-[#06b6d4] text-[10px] font-extrabold text-white">
               MB
             </div>
-            <span className="text-xs font-bold text-[#0a1c3c]">
+            <span className="text-xs font-bold text-[#071a36]">
               MiBidón Chile
             </span>
           </div>
           <a
             href={CONTACT_MAIL}
-            className="flex items-center gap-1 text-xs font-semibold text-[#00a3e0] transition hover:text-[#0a1c3c]"
+            className="flex items-center gap-1 text-xs font-semibold text-[#0891b2] transition hover:text-[#071a36]"
           >
             <span className="material-symbols-outlined text-[16px]">mail</span>
             hola@mibidon.cl
           </a>
-          <span className="text-[11px] text-[#64748b]">
+          <span className="text-[11px] text-[#3d566e]">
             Plataforma eCommerce White-Label para Embotelladoras de Agua
           </span>
         </footer>
       </main>
 
-      <nav className="fixed bottom-0 z-50 w-full border-t border-[#0f2b5c]/10 bg-[#e8f4fb]/92 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgba(15,43,92,0.25)] backdrop-blur-xl md:hidden">
+      <nav className="fixed bottom-0 z-50 w-full border-t border-[#071a36]/12 bg-[#d4ebf5]/94 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgba(7,26,54,0.28)] backdrop-blur-xl md:hidden">
         <div className="flex h-16 items-center justify-around px-4">
           <a
             href="#"
-            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 font-bold text-[#00a3e0]"
+            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 font-bold text-[#0891b2]"
           >
             <span className="material-symbols-outlined text-[22px]">
               rocket_launch
@@ -691,7 +697,7 @@ export default function MiBidonLandingPage() {
           </a>
           <a
             href="#demo-interactiva"
-            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 text-[#475569] transition hover:text-[#00a3e0]"
+            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 text-[#3d566e] transition hover:text-[#00a3e0]"
           >
             <span className="material-symbols-outlined text-[22px]">
               calculate
@@ -700,7 +706,7 @@ export default function MiBidonLandingPage() {
           </a>
           <a
             href="#pricing"
-            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 text-[#475569] transition hover:text-[#00a3e0]"
+            className="flex h-11 w-14 flex-col items-center justify-center gap-0.5 text-[#3d566e] transition hover:text-[#00a3e0]"
           >
             <span className="material-symbols-outlined text-[22px]">sell</span>
             <span className="text-[11px]">Planes</span>
