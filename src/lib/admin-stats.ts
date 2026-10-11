@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 
 const TZ = "America/Santiago";
 const dayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
-const labelFmt = new Intl.DateTimeFormat("es-CL", { timeZone: TZ, day: "2-digit", month: "short" });
+const labelFmt = new Intl.DateTimeFormat("es-CL", { timeZone: TZ, day: "2-digit", month: "2-digit" });
 
 function dayKey(d: Date) {
   return dayFmt.format(d);
@@ -60,7 +60,7 @@ export async function orderPeriodStats(where: Prisma.OrderWhereInput, days = 14)
     const d = new Date(now.getTime() - (days - 1 - i) * 86_400_000);
     const k = dayKey(d);
     const b = byDay.get(k) ?? { orders: 0, revenue: 0 };
-    return { key: k, label: labelFmt.format(d).replace(".", ""), ...b };
+    return { key: k, label: labelFmt.format(d).replace("-", "/"), ...b };
   });
 
   return { orders, revenue, daily };

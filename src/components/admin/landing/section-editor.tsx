@@ -377,7 +377,7 @@ export function SectionEditor({
           </h1>
           <p className="mt-1 max-w-xl text-sm text-[#5a6578]">{meta.description}</p>
           {updatedAt ? (
-            <p className="mt-1 text-xs text-[#8a96a6]">
+            <p className="mt-1 text-xs text-[#8a96a6]" suppressHydrationWarning>
               Última edición: {new Date(updatedAt).toLocaleString("es-CL")}
               {updatedBy ? ` · ${updatedBy}` : ""}
             </p>
