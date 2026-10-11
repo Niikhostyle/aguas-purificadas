@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 export type AdminButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type AdminButtonSize = "sm" | "md";
 
@@ -21,5 +23,5 @@ export function adminButton({
   size = "md",
   className = "",
 }: { variant?: AdminButtonVariant; size?: AdminButtonSize; className?: string } = {}) {
-  return `${BASE} ${VARIANT[variant]} ${SIZE[size]} ${className}`.trim();
+  return cn(BASE, VARIANT[variant], SIZE[size], className);
 }

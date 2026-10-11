@@ -354,7 +354,7 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
       <form
         id={BULK_FORM}
         action={assignOrdersAction}
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#d5e3ec] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(18,50,110,0.08)] backdrop-blur print:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t lg:left-[var(--admin-sidebar-w,0px)] border-[#d5e3ec] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(18,50,110,0.08)] backdrop-blur print:hidden"
       >
         <input type="hidden" name="returnTo" value={returnTo} />
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2">

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export type KpiTone = "brand" | "navy" | "success" | "warning" | "danger" | "neutral";
+export type KpiTone = "brand" | "navy" | "info" | "success" | "warning" | "danger" | "neutral";
 
 const TONE: Record<KpiTone, string> = {
   brand: "bg-[var(--brand)] text-white",
   navy: "bg-[var(--brand-deep)] text-white",
+  info: "bg-sky-500 text-white",
   success: "bg-emerald-500 text-white",
   warning: "bg-amber-500 text-white",
   danger: "bg-red-500 text-white",

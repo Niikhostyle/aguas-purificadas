@@ -10,3 +10,4 @@ export { Panel } from "./panel";
 export { ORDER_STATUS_TONE, StatusBadge, type StatusTone } from "./status-badge";
 export { StatsTable, type StatsRow } from "./stats-table";
 export { SelectAllCheckbox } from "./select-all";
+export { AutoBreadcrumbs } from "./auto-breadcrumbs";

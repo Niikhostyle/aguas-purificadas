@@ -9,6 +9,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import {
@@ -570,7 +571,10 @@ export function AdminShell({
   }, [drawerOpen, closeDrawer]);
 
   return (
-    <div className="min-h-screen bg-[#f2f6f9] text-[#12233d] print:bg-white">
+    <div
+      className="min-h-screen bg-[#f2f6f9] text-[#12233d] print:bg-white"
+      style={{ "--admin-sidebar-w": collapsed ? "72px" : "256px" } as CSSProperties}
+    >
       <a
         href="#admin-main"
         className="sr-only z-[60] rounded-md bg-white print:hidden px-3 py-2 text-sm font-semibold focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
