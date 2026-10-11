@@ -61,56 +61,6 @@ function resolveTenantSlug(request: NextRequest): {
   return { slug: null, fromHost: false };
 }
 
-/** Absolute URL for middleware rewrite/redirect with a public host. */
-function publicAbsoluteUrl(request: NextRequest, pathname: string): URL {
-  const url = request.nextUrl.clone();
-  url.pathname = pathname;
-
-  const forwardedHost = (
-    request.headers.get("x-forwarded-host") ||
-    request.headers.get("host") ||
-    ""
-  )
-    .split(",")[0]
-    ?.trim();
-  const hostname = (forwardedHost || "").replace(/:\d+$/, "").toLowerCase();
-  const unusable =
-    !hostname ||
-    hostname === "0.0.0.0" ||
-    hostname === "::" ||
-    hostname === "[::]";
-
-  if (forwardedHost && !unusable) {
-    url.host = forwardedHost;
-    const proto = (
-      request.headers.get("x-forwarded-proto") || ""
-    )
-      .split(",")[0]
-      ?.trim()
-      .toLowerCase();
-    if (proto === "http" || proto === "https") {
-      url.protocol = `${proto}:`;
-    } else if (process.env.NODE_ENV === "production") {
-      url.protocol = "https:";
-    }
-    return url;
-  }
-
-  const appUrl = process.env.APP_URL?.trim();
-  if (appUrl) {
-    try {
-      const base = new URL(appUrl);
-      url.protocol = base.protocol;
-      url.host = base.host;
-      return url;
-    } catch {
-      /* ignore */
-    }
-  }
-
-  return url;
-}
-
 export function middleware(request: NextRequest) {
   const { slug, fromHost } = resolveTenantSlug(request);
   const host = request.headers.get("host") || "";
@@ -131,11 +81,13 @@ export function middleware(request: NextRequest) {
   }
 
   // Apex marketing: keep URL `/` but serve /mibidon landing.
-  // Next.js 16 middleware rewrites require absolute URLs. Build one from the
-  // public Host / x-forwarded-* (never the Docker bind address 0.0.0.0).
+  // Rewrite on request.nextUrl's own origin: a public host keeps the internal
+  // :3000 port and Next proxies it externally (500 behind nginx).
   if (platformHost && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/mibidon";
     return applySecurityHeaders(
-      NextResponse.rewrite(publicAbsoluteUrl(request, "/mibidon"), {
+      NextResponse.rewrite(url, {
         request: { headers: requestHeaders },
       }),
     );
