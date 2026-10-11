@@ -37,12 +37,12 @@ export function FaqAccordion() {
             key={item.q}
             type="button"
             onClick={() => setOpen(isOpen ? null : i)}
-            className="flex flex-col gap-1 rounded-xl bg-[#f2f3ff] p-3 text-left transition-colors hover:bg-[#eaedff]"
+            className="flex flex-col gap-1 rounded-xl border border-[#0f2b5c]/06 bg-white/80 p-3 text-left shadow-sm transition-colors hover:border-[#00a3e0]/35 hover:bg-[#e8f4fb]"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-[#00163d]">{item.q}</span>
+              <span className="text-xs font-bold text-[#0a1c3c]">{item.q}</span>
               <span
-                className={`material-symbols-outlined shrink-0 text-[20px] text-[#00658d] transition-transform duration-200 ${
+                className={`material-symbols-outlined shrink-0 text-[20px] text-[#00a3e0] transition-transform duration-200 ${
                   isOpen ? "rotate-180" : ""
                 }`}
               >
@@ -50,7 +50,7 @@ export function FaqAccordion() {
               </span>
             </div>
             {isOpen ? (
-              <p className="mt-1 text-[13px] leading-5 text-[#44464f]">
+              <p className="mt-1 text-[13px] leading-5 text-[#475569]">
                 {item.a}
               </p>
             ) : null}

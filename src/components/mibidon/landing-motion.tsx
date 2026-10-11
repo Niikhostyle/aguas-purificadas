@@ -8,45 +8,6 @@ import {
   type ReactNode,
 } from "react";
 
-/** Hero background with subtle parallax + slow ken-burns. */
-export function HeroParallax({
-  src,
-  alt = "",
-}: {
-  src: string;
-  alt?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-    const onScroll = () => {
-      const y = Math.min(window.scrollY, 480);
-      el.style.transform = `translate3d(0, ${y * 0.28}px, 0) scale(1.08)`;
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div ref={ref} className="absolute inset-[-8%] will-change-transform">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          className="mb-hero-kenburns h-full w-full object-cover"
-        />
-      </div>
-      <div className="absolute inset-0 bg-[linear-gradient(115deg,#12326ef5_0%,#00b1e2cc_48%,#12326ee6_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(0,177,226,0.35),transparent_55%)]" />
-    </div>
-  );
-}
-
 /** Scroll-triggered reveal. */
 export function Reveal({
   children,
@@ -74,7 +35,7 @@ export function Reveal({
           obs.disconnect();
         }
       },
-      { threshold: 0.14, rootMargin: "0px 0px -48px 0px" },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -87,7 +48,7 @@ export function Reveal({
       ref={ref}
       style={style}
       className={`transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        on ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        on ? "translate-y-0 opacity-100" : "translate-y-9 opacity-0"
       } ${className}`}
     >
       {children}
@@ -95,14 +56,40 @@ export function Reveal({
   );
 }
 
+/** Sticky header that densifies after scroll. */
+export function ScrollHeader({ children }: { children: ReactNode }) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 18);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "border-b border-white/10 bg-[#061229]/92 shadow-[0_8px_28px_-8px_rgba(6,18,41,0.55)] backdrop-blur-xl"
+          : "border-b border-transparent bg-[#061229]/55 backdrop-blur-md"
+      }`}
+    >
+      {children}
+    </header>
+  );
+}
+
 /** Animated integer counter when in view. */
 export function CountUp({
   value,
   suffix = "",
-  durationMs = 1200,
+  prefix = "",
+  durationMs = 1400,
 }: {
   value: number;
   suffix?: string;
+  prefix?: string;
   durationMs?: number;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -131,7 +118,7 @@ export function CountUp({
         raf = requestAnimationFrame(tick);
         obs.disconnect();
       },
-      { threshold: 0.4 },
+      { threshold: 0.35 },
     );
     obs.observe(el);
     return () => {
@@ -142,8 +129,53 @@ export function CountUp({
 
   return (
     <span ref={ref} className="tabular-nums">
-      {n}
+      {prefix}
+      {n.toLocaleString("es-CL")}
       {suffix}
     </span>
+  );
+}
+
+/** Soft mouse-tilt for the ROI glass panel. */
+export function TiltPanel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(900px) rotateY(${x * 5}deg) rotateX(${-y * 4}deg)`;
+    };
+    const onLeave = () => {
+      el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+    };
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-transform duration-200 ease-out will-change-transform ${className}`}
+    >
+      {children}
+    </div>
   );
 }

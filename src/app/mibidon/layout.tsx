@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
+import "./landing.css";
 
 const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -26,14 +27,13 @@ export default function MiBidonLayout({
 }) {
   return (
     <>
-      {/* Material Symbols used by Stitch landing icons */}
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         rel="stylesheet"
       />
       <div
-        className={`${display.variable} ${body.variable} min-h-screen bg-[#faf8ff] text-[#131b2e] antialiased`}
+        className={`${display.variable} ${body.variable} mb-shell min-h-screen antialiased`}
         style={{
           fontFamily: "var(--font-mb-body), 'Source Sans 3', sans-serif",
         }}
