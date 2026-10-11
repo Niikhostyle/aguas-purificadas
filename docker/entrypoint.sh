@@ -14,8 +14,9 @@ until npx prisma migrate deploy; do
   sleep 2
 done
 
-if [ "${RUN_SEED:-true}" = "true" ]; then
-  echo "Seeding database (idempotent upserts)..."
+# Production must NOT auto-seed weak demos. Opt-in only.
+if [ "${RUN_SEED:-false}" = "true" ]; then
+  echo "Seeding database (requires SEED_* env; fails closed if missing)..."
   npx tsx prisma/seed.ts || echo "Seed skipped/failed (continuing)"
 fi
 

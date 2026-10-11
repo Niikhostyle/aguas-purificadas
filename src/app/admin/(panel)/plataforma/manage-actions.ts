@@ -84,10 +84,10 @@ export async function resetAdminPasswordAction(formData: FormData) {
   const adminId = String(formData.get("adminId") || "");
   const tenantId = String(formData.get("tenantId") || "");
   const password = String(formData.get("password") || "");
-  if (!adminId || password.length < 6) {
+  if (!adminId || password.length < 12) {
     redirect(
       `/admin/plataforma/${tenantId}?error=` +
-        encodeURIComponent("Clave mínimo 6 caracteres"),
+        encodeURIComponent("Clave mínimo 12 caracteres"),
     );
   }
 
@@ -103,7 +103,7 @@ export async function resetAdminPasswordAction(formData: FormData) {
 
   await prisma.adminUser.update({
     where: { id: adminId },
-    data: { passwordHash: hashSync(password, 10) },
+    data: { passwordHash: hashSync(password, 12) },
   });
 
   revalidatePath(`/admin/plataforma/${tenantId}`);
@@ -125,15 +125,15 @@ export async function createCompanyAdminAction(formData: FormData) {
   const password = String(formData.get("password") || "");
 
   try {
-    if (!tenantId || name.length < 2 || !email || password.length < 6) {
-      throw new Error("Completá nombre, email y clave (mín. 6)");
+    if (!tenantId || name.length < 2 || !email || password.length < 12) {
+      throw new Error("Completá nombre, email y clave (mín. 12)");
     }
     await prisma.adminUser.create({
       data: {
         tenantId,
         name,
         email,
-        passwordHash: hashSync(password, 10),
+        passwordHash: hashSync(password, 12),
         role: "admin",
       },
     });

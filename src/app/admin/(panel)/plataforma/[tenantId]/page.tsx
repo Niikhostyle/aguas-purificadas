@@ -162,10 +162,12 @@ export default async function PlatformTenantDetailPage({
                 <input type="hidden" name="tenantId" value={tenant.id} />
                 <Input
                   name="password"
-                  placeholder="Nueva clave"
+                  type="password"
+                  placeholder="Nueva clave (12+)"
                   required
-                  minLength={6}
-                  className="w-40"
+                  minLength={12}
+                  className="w-44"
+                  autoComplete="new-password"
                 />
                 <Button type="submit" variant="outline" size="sm">
                   Reset clave
@@ -187,10 +189,11 @@ export default async function PlatformTenantDetailPage({
           <Input name="email" type="email" placeholder="Email" required />
           <Input
             name="password"
-            placeholder="Contraseña temporal"
+            type="password"
+            placeholder="Contraseña temporal (mín. 12)"
             required
-            minLength={6}
-            defaultValue="admin123"
+            minLength={12}
+            autoComplete="new-password"
           />
           <Button type="submit">Crear admin</Button>
         </form>

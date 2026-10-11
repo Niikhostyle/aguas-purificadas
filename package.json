@@ -10,6 +10,7 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:secure-bootstrap": "tsx scripts/secure-prod-bootstrap.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },

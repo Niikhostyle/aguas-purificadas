@@ -1,49 +1,49 @@
-# Aguas Purificadas
+# MiBidón (aguas-purificadas)
 
-Plataforma ecommerce white-label. La plantilla storefront del tenant demo **`rio-claro`** clona módulos de [aguasrioclaro.cl](https://aguasrioclaro.cl/).
+Plataforma ecommerce multi-tenant para agua purificada en Chile.
 
-Entrega: Fases 1–5 + clon visual + upload de imágenes + super-admin de N empresas.
+- Landing comercial: `mibidon.cl`
+- Tenants: `slug.mibidon.cl`
+- Demo pública: `demo.mibidon.cl` (marca **Demo**)
 
-## Arranque
+Storefront inspirado en experiencias tipo Manantial (hogar/empresa, región, carrusel, módulos activables).
+
+## Arranque local
 
 ```bash
 docker compose up -d
 cp .env.example .env
+# Definí secretos fuertes + SEED_* en .env (ver .env.example)
 npm install
-npx prisma db push   # o migrate deploy
+npx prisma migrate deploy
 npm run db:seed
-npm run dev          # http://127.0.0.1:43123
+npm run dev          # http://127.0.0.1:43123/?tenant=demo
 ```
 
-## Tenants demo
+El seed **no** incluye contraseñas por defecto. Requiere variables `SEED_SUPER_ADMIN_*` y `SEED_DEMO_ADMIN_*`.
 
-| Slug | Login | Clave |
-|------|-------|-------|
-| `rio-claro` | `admin@rio-claro.demo` | `admin123` |
-| `manantial-andes` | `admin@manantial-andes.demo` | `admin123` |
-| `plataforma` (super) | `super@plataforma.demo` | `admin123` |
+## Producción
 
-- Tienda Río Claro: http://127.0.0.1:43123/?tenant=rio-claro  
-- Super-admin: http://127.0.0.1:43123/admin/login?tenant=plataforma  
+1. Desplegar con `docker-compose.prod.yml` (ver `deploy/`).
+2. Migraciones: `prisma migrate deploy`.
+3. Bootstrap seguro (una vez): `npx tsx scripts/secure-prod-bootstrap.ts` con env en el servidor:
+   - `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD`
+   - `DEMO_ADMIN_EMAIL` / `DEMO_ADMIN_PASSWORD` (si `KEEP_DEMO_TENANT=1`)
+4. `RUN_SEED` debe estar en `false` en producción para no re-sembrar.
 
-## Crear N sitios (webs) de empresa
+## Admin
 
-1. Login super-admin (`plataforma`).
-2. **Empresas → Nueva empresa** (`/admin/plataforma/nueva`): slug, marca, admin dueño, catálogo demo, WebPay sandbox.
-3. **Gestionar** cada empresa (`/admin/plataforma/[id]`): editar/suspender, alta de admins, reset de clave.
-4. Cada empresa = un tenant = una tienda en `/?tenant=<slug>` (o subdominio).
-5. El admin de la empresa carga productos (con imagen), marca y atiende pedidos. No ve datos de otras empresas.
+| Rol | Entrada |
+|-----|---------|
+| Super-admin plataforma | `/admin/login` (modo plataforma, sin slug) |
+| Admin empresa | `/admin/login` con slug del tenant |
 
-## Imágenes de producto
+Módulos storefront (admin empresa → **Módulos**): `descuentos`, `planes`, `kits`, `redes`, `certificaciones`, `loginClientes`, `selectorRegion`, `hogarEmpresa`. Banners del hero: **Marca**.
 
-- En admin **Productos → Nuevo/Editar**: campo archivo → se guarda en `public/uploads/<slug>/…`
-- Formatos: JPG/PNG/WEBP/GIF, máx. 5 MB.
-- El seed de `rio-claro` usa imágenes bajadas de la referencia en `public/brand/rio-claro/products/`.
+## Seguridad
 
-## WebPay
-
-`WEBPAY_MODE=auto|sandbox|mock` — ver sección previa; tarjeta sandbox `4051885600446623`.
-
-## Módulos clonados (vs aguasrioclaro.cl)
-
-Ver checklist en el handoff interno / respuesta del agente. Plantilla: top bars despacho/horarios, logo, nav, hero, grilla productos+precios, beneficios (Libre de Sodio…), nosotros, footer teléfonos/cobertura.
+- Secretos solo en `.env` del servidor (gitignored).
+- Cookies de sesión `httpOnly` + `secure` en producción.
+- Rate-limit en login admin/cliente.
+- Uploads: tipo/tamaño/magic bytes, sin path traversal.
+- WebPay API keys cifradas en DB (`WEBPAY_CREDENTIALS_KEY` / `ADMIN_SESSION_SECRET`).

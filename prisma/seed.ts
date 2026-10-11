@@ -1,3 +1,13 @@
+/**
+ * Local/dev seed. NEVER embeds production passwords.
+ *
+ * Required for admin users (local):
+ *   SEED_SUPER_ADMIN_EMAIL, SEED_SUPER_ADMIN_PASSWORD
+ *   SEED_DEMO_ADMIN_EMAIL, SEED_DEMO_ADMIN_PASSWORD
+ *
+ * Production: use `scripts/secure-prod-bootstrap.ts` with env on the server.
+ * Set SEED_ALLOW_DEV=1 to allow this seed outside development.
+ */
 import { PrismaClient } from "@prisma/client";
 import { hashSync } from "bcryptjs";
 import { createCipheriv, createHash, randomBytes } from "crypto";
@@ -5,6 +15,10 @@ import {
   IntegrationApiKeys,
   IntegrationCommerceCodes,
 } from "transbank-sdk";
+import {
+  DEFAULT_MODULE_FLAGS,
+  defaultDemoModulesContent,
+} from "../src/lib/modules";
 
 const prisma = new PrismaClient();
 
@@ -21,81 +35,110 @@ function encryptSecret(plain: string): string {
   return Buffer.concat([iv, tag, enc]).toString("base64url");
 }
 
-async function main() {
-  const passwordHash = hashSync("admin123", 10);
+function requireEnv(name: string): string {
+  const v = process.env[name]?.trim();
+  if (!v) {
+    throw new Error(
+      `Missing ${name}. Dev seed refuses weak defaults — set env vars or run secure-prod-bootstrap on the server.`,
+    );
+  }
+  if (v.length < 12 && name.includes("PASSWORD")) {
+    throw new Error(`${name} must be at least 12 characters`);
+  }
+  if (/admin123|password|changeme/i.test(v)) {
+    throw new Error(`${name} looks like a weak/default password`);
+  }
+  return v;
+}
 
-  const rioClaroBrand = {
-    name: "Aguas Río Claro",
-    tagline: "Agua purificada libre de sodio y de alta pureza",
+async function main() {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SEED_ALLOW_DEV !== "1"
+  ) {
+    throw new Error(
+      "Refusing to run prisma/seed.ts in production. Use scripts/secure-prod-bootstrap.ts",
+    );
+  }
+
+  const superEmail = requireEnv("SEED_SUPER_ADMIN_EMAIL").toLowerCase();
+  const superPassword = requireEnv("SEED_SUPER_ADMIN_PASSWORD");
+  const demoEmail = requireEnv("SEED_DEMO_ADMIN_EMAIL").toLowerCase();
+  const demoPassword = requireEnv("SEED_DEMO_ADMIN_PASSWORD");
+
+  const superHash = hashSync(superPassword, 12);
+  const demoHash = hashSync(demoPassword, 12);
+
+  const demoBrand = {
+    name: "Demo MiBidón",
+    tagline: "Agua purificada para hogar y empresa",
     about:
-      "El proceso de purificación es por multietapas, comenzando por agua de red domiciliaria que luego de pasar por 5 etapas o procesos de purificación se obtiene como resultado Agua Purificada no mineral y libre de sodio. Desde Curicó y Talca atendemos hogares y empresas del Maule con contacto garantizado semanal (CGS).",
+      "Tienda demo de MiBidón: experiencia inspirada en marcas líderes de agua en Chile, con módulos activables (hogar/empresa, descuentos, planes, kits, redes y certificaciones).",
     primaryColor: "#00B1E2",
     secondaryColor: "#12326E",
     logoUrl: "/brand/rio-claro/logo.png",
-    phone: "+56 75 2 544575",
-    phoneSecondary: "+56 75 2 380007",
-    email: "contacto@aguasrioclaro.demo",
+    phone: "+56 2 2123 4567",
+    phoneSecondary: null as string | null,
+    email: "hola@demo.mibidon.cl",
     whatsapp: "+56912345678",
-    address: "Curicó / Talca",
-    city: "Curicó",
-    region: "Maule",
+    address: "Chile",
+    city: "Santiago",
+    region: "Región Metropolitana",
     deliveryBanner:
-      "Despacho para Talca, Curicó, Linares, San Javier, San Clemente, San Rafael, Molina, Lontué, Teno, Rauco, Hualañé, Licantén, San Fernando, Chimbarongo, Sagrada Familia y Romeral.",
+      "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector de región.",
     hoursBanner:
-      "Horario de atención telefónica, Lunes a Viernes de 8:30 a 13:00 hrs y 14:00 a 17:30 hrs. - Sábado de 09:00 a 13:00 hrs.",
-    heroImageUrl: "/brand/rio-claro/hero.jpg",
-    heroHeadline: "Soluciones integrales de agua purificada",
+      "Horario de atención: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00",
+    heroImageUrl: "/brand/rio-claro/destacado-01.jpg",
+    heroHeadline: "Agua purificada para tu hogar y tu empresa",
     heroBody:
-      "El proceso de purificación es por multietapas, comenzando por agua de red domiciliaria que luego de pasar por 5 etapas o procesos de purificación se obtiene como resultado Agua Purificada no mineral y libre de sodio.",
+      "Pedí online, activá los módulos que necesites desde el admin y cobrá con WebPay.",
     coverageText:
-      "Nos esmeramos día a día por nuestros clientes, sabemos que para ellos el agua debe llegar a tiempo. (Contacto garantizado semanal CGS). Despacho a Talca, Curicó, Linares, San Javier, San Clemente, San Rafael, Molina, Lontué, Teno, Rauco, Hualañé, Licantén, San Fernando, Chimbarongo, Sagrada Familia, Romeral.",
-    facebookUrl: "https://www.facebook.com/aguasrioclaro/",
-    instagramUrl: "https://www.instagram.com/aguasrioclaro/",
-    twitterUrl: "https://twitter.com/aguasrioclaro",
+      "Cobertura demo en Santiago, Valparaíso, Maule, Biobío y Araucanía.",
+    facebookUrl: "https://www.facebook.com/",
+    instagramUrl: "https://www.instagram.com/",
+    twitterUrl: null as string | null,
+    youtubeUrl: "https://www.youtube.com/",
+    modulesEnabled: DEFAULT_MODULE_FLAGS,
+    modulesContent: defaultDemoModulesContent(),
     active: true as const,
   };
 
-  const tenant = await prisma.tenant.upsert({
-    where: { slug: "rio-claro" },
-    update: rioClaroBrand,
+  const demo = await prisma.tenant.upsert({
+    where: { slug: "demo" },
+    update: demoBrand,
     create: {
-      slug: "rio-claro",
-      ...rioClaroBrand,
+      slug: "demo",
+      ...demoBrand,
       adminUsers: {
         create: {
-          email: "admin@rio-claro.demo",
-          passwordHash,
-          name: "Admin Río Claro",
+          email: demoEmail,
+          passwordHash: demoHash,
+          name: "Admin Demo",
           role: "admin",
         },
       },
     },
   });
 
-  // Ensure admin exists on re-seed (upsert path may skip nested create)
   await prisma.adminUser.upsert({
     where: {
-      tenantId_email: {
-        tenantId: tenant.id,
-        email: "admin@rio-claro.demo",
-      },
+      tenantId_email: { tenantId: demo.id, email: demoEmail },
     },
-    update: { passwordHash, name: "Admin Río Claro" },
+    update: { passwordHash: demoHash, name: "Admin Demo", role: "admin" },
     create: {
-      tenantId: tenant.id,
-      email: "admin@rio-claro.demo",
-      passwordHash,
-      name: "Admin Río Claro",
+      tenantId: demo.id,
+      email: demoEmail,
+      passwordHash: demoHash,
+      name: "Admin Demo",
       role: "admin",
     },
   });
 
-  // Sync catalog from reference site assets
   const { RIO_CLARO_PRODUCTS } = await import("../scripts/seed-rio-products");
-  await prisma.product.deleteMany({ where: { tenantId: tenant.id } });
+  await prisma.product.deleteMany({ where: { tenantId: demo.id } });
   await prisma.product.createMany({
-    data: RIO_CLARO_PRODUCTS.map((p) => ({
-      tenantId: tenant.id,
+    data: RIO_CLARO_PRODUCTS.slice(0, 6).map((p) => ({
+      tenantId: demo.id,
       name: p.name,
       slug: p.slug,
       description: p.description,
@@ -107,36 +150,29 @@ async function main() {
   });
 
   const zoneCount = await prisma.deliveryZone.count({
-    where: { tenantId: tenant.id },
+    where: { tenantId: demo.id },
   });
   if (zoneCount === 0) {
     await prisma.deliveryZone.createMany({
       data: [
         {
-          tenantId: tenant.id,
-          name: "Talca centro",
-          communes: "Talca",
+          tenantId: demo.id,
+          name: "Santiago centro",
+          communes: "Santiago, Providencia, Ñuñoa",
           costClp: 0,
         },
         {
-          tenantId: tenant.id,
-          name: "Gran Talca",
-          communes: "Maule, San Clemente, Pencahue",
-          costClp: 1500,
-        },
-        {
-          tenantId: tenant.id,
-          name: "Curicó y Linares",
-          communes: "Curicó, Linares, Villa Alegre",
-          costClp: 2500,
+          tenantId: demo.id,
+          name: "Gran Santiago",
+          communes: "Maipú, La Florida, Puente Alto",
+          costClp: 1990,
         },
       ],
     });
   }
 
-  // Transbank WebPay Plus integration commerce defaults (sandbox)
   await prisma.webPayCredential.upsert({
-    where: { tenantId: tenant.id },
+    where: { tenantId: demo.id },
     update: {
       commerceCode: IntegrationCommerceCodes.WEBPAY_PLUS,
       apiKeyEncrypted: encryptSecret(IntegrationApiKeys.WEBPAY),
@@ -144,7 +180,7 @@ async function main() {
       active: true,
     },
     create: {
-      tenantId: tenant.id,
+      tenantId: demo.id,
       commerceCode: IntegrationCommerceCodes.WEBPAY_PLUS,
       apiKeyEncrypted: encryptSecret(IntegrationApiKeys.WEBPAY),
       environment: "integration",
@@ -152,7 +188,6 @@ async function main() {
     },
   });
 
-  // Platform tenant + super-admin
   const platform = await prisma.tenant.upsert({
     where: { slug: "plataforma" },
     update: {
@@ -171,8 +206,8 @@ async function main() {
       active: true,
       adminUsers: {
         create: {
-          email: "super@plataforma.demo",
-          passwordHash,
+          email: superEmail,
+          passwordHash: superHash,
           name: "Super Admin",
           role: "super_admin",
         },
@@ -182,93 +217,44 @@ async function main() {
 
   await prisma.adminUser.upsert({
     where: {
-      tenantId_email: {
-        tenantId: platform.id,
-        email: "super@plataforma.demo",
-      },
+      tenantId_email: { tenantId: platform.id, email: superEmail },
     },
-    update: { passwordHash, role: "super_admin", name: "Super Admin" },
+    update: {
+      passwordHash: superHash,
+      role: "super_admin",
+      name: "Super Admin",
+    },
     create: {
       tenantId: platform.id,
-      email: "super@plataforma.demo",
-      passwordHash,
+      email: superEmail,
+      passwordHash: superHash,
       name: "Super Admin",
       role: "super_admin",
     },
   });
 
-  // Second company for isolation demos
-  const { createTenantOnboarding } = await import("../src/lib/onboarding");
-  const existingSecond = await prisma.tenant.findUnique({
-    where: { slug: "manantial-andes" },
+  // Remove legacy demo tenants / weak accounts if present
+  await prisma.tenant.deleteMany({
+    where: {
+      slug: { in: ["rio-claro", "manantial-andes"] },
+    },
   });
-  if (!existingSecond) {
-    await createTenantOnboarding({
-      slug: "manantial-andes",
-      name: "Manantial Andes",
-      tagline: "Bidones frescos para el Biobío",
-      about:
-        "Planta en Concepción con rutas a San Pedro, Chiguayante y Talcahuano. Enfocados en oficinas y edificios con suscripción semanal.",
-      primaryColor: "#0B4F6C",
-      secondaryColor: "#01BAEF",
-      logoUrl:
-        "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=128&h=128&q=80",
-      phone: "+56 41 234 1000",
-      email: "hola@manantialandes.demo",
-      whatsapp: "+56987654321",
-      address: "Av. Los Carrera 880",
-      city: "Concepción",
-      region: "Biobío",
-      adminName: "Admin Manantial",
-      adminEmail: "admin@manantial-andes.demo",
-      adminPassword: "admin123",
-      withSampleCatalog: true,
-      withSandboxWebpay: true,
-    });
+  await prisma.adminUser.deleteMany({
+    where: {
+      email: {
+        in: [
+          "super@plataforma.demo",
+          "admin@rio-claro.demo",
+          "admin@manantial-andes.demo",
+        ],
+      },
+    },
+  });
 
-    // Distinct catalog prices vs Río Claro
-    const andes = await prisma.tenant.findUniqueOrThrow({
-      where: { slug: "manantial-andes" },
-    });
-    await prisma.product.deleteMany({ where: { tenantId: andes.id } });
-    await prisma.product.createMany({
-      data: [
-        {
-          tenantId: andes.id,
-          name: "Bidón 12 L",
-          slug: "bidon-12l",
-          description: "Formato liviano para departamentos.",
-          priceClp: 2800,
-          sortOrder: 1,
-        },
-        {
-          tenantId: andes.id,
-          name: "Bidón 20 L premium",
-          slug: "bidon-20l-premium",
-          description: "Agua mineralizada suave, sello de seguridad.",
-          priceClp: 4200,
-          sortOrder: 2,
-        },
-        {
-          tenantId: andes.id,
-          name: "Plan oficina semanal",
-          slug: "plan-oficina-semanal",
-          description: "4 bidones/semana con ruta fija en Concepción.",
-          priceClp: 14990,
-          sortOrder: 3,
-        },
-      ],
-    });
-  }
-
-  console.log("Seed OK");
-  console.log("  rio-claro admin: admin@rio-claro.demo / admin123");
-  console.log("  manantial-andes admin: admin@manantial-andes.demo / admin123");
-  console.log("  plataforma super: super@plataforma.demo / admin123");
-  console.log(
-    "  WebPay sandbox commerce:",
-    IntegrationCommerceCodes.WEBPAY_PLUS,
-  );
+  console.log("Seed OK (passwords from env, not logged)");
+  console.log("  tenants: demo, plataforma");
+  console.log("  super-admin email:", superEmail);
+  console.log("  demo admin email:", demoEmail);
 }
 
 main()

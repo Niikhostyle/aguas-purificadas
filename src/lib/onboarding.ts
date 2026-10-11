@@ -61,7 +61,17 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       ? input.secondaryColor.trim()
       : "#12326E";
 
-  const passwordHash = hashSync(input.adminPassword, 10);
+  if (input.adminPassword.length < 12) {
+    throw new Error("La contraseña del admin debe tener al menos 12 caracteres");
+  }
+  if (/admin123|password|changeme/i.test(input.adminPassword)) {
+    throw new Error("Elegí una contraseña más segura");
+  }
+
+  const passwordHash = hashSync(input.adminPassword, 12);
+  const { DEFAULT_MODULE_FLAGS, defaultDemoModulesContent } = await import(
+    "@/lib/modules"
+  );
 
   const tenant = await prisma.tenant.create({
     data: {
@@ -78,6 +88,8 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       address: input.address?.trim() || null,
       city: input.city?.trim() || null,
       region: input.region?.trim() || null,
+      modulesEnabled: DEFAULT_MODULE_FLAGS,
+      modulesContent: defaultDemoModulesContent(),
       active: true,
       adminUsers: {
         create: {

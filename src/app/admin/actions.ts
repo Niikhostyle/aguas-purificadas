@@ -24,7 +24,21 @@ export async function loginAction(formData: FormData) {
   const tenantSlug =
     loginMode === "platform"
       ? "plataforma"
-      : String(formData.get("tenantSlug") || "rio-claro").trim().toLowerCase();
+      : String(formData.get("tenantSlug") || "demo").trim().toLowerCase();
+
+  const { headers } = await import("next/headers");
+  const { rateLimit } = await import("@/lib/rate-limit");
+  const h = await headers();
+  const ip =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown";
+  const limited = rateLimit(`admin-login:${ip}:${tenantSlug}`, 8, 60_000);
+  if (!limited.ok) {
+    redirect(
+      `/admin/login?tenant=${encodeURIComponent(tenantSlug)}&error=${encodeURIComponent("Demasiados intentos. Probá en un minuto.")}`,
+    );
+  }
 
   const result = await loginAdmin(tenantSlug, email, password);
   if (!result.ok) {

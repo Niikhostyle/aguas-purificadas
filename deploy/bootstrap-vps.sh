@@ -49,12 +49,12 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 ADMIN_SESSION_SECRET=${ADMIN_SESSION_SECRET}
 CREDENTIALS_ENCRYPTION_KEY=${ADMIN_SESSION_SECRET}
 APP_URL=https://mibidon.cl
-DEFAULT_TENANT_SLUG=rio-claro
+DEFAULT_TENANT_SLUG=
 WEBPAY_MODE=mock
-RUN_SEED=true
+RUN_SEED=false
 EOF
   chmod 600 .env
-  echo "Wrote $APP_DIR/.env"
+  echo "Wrote $APP_DIR/.env — run secure-prod-bootstrap with SUPER_ADMIN_* env (never commit secrets)"
 fi
 
 # App+db on loopback:3001 — reuse host nginx if present (avoid clobbering :3000)
@@ -83,4 +83,5 @@ done
 
 docker compose -f docker-compose.prod.yml ps
 echo "Done. Configure Cloudflare A @/www/* → this host, then open https://mibidon.cl"
-echo "Super-admin: /admin/login?tenant=plataforma  (super@plataforma.demo / admin123)"
+echo "Then: docker compose exec app npx tsx scripts/secure-prod-bootstrap.ts (with SUPER_ADMIN_* / DEMO_ADMIN_* env)"
+echo "Super-admin login: /admin/login (modo plataforma). No default passwords."

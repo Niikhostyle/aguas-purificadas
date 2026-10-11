@@ -6,6 +6,11 @@ import { z } from "zod";
 import { isValidHexColor } from "@/lib/branding";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import {
+  parseHeroSlides,
+  type TenantHeroSlide,
+} from "@/lib/hero-slides";
+import { saveBannerImage, saveLogoImage } from "@/lib/uploads";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -23,7 +28,6 @@ const schema = z.object({
   region: z.string().trim().max(80).optional(),
   deliveryBanner: z.string().trim().max(500).optional(),
   hoursBanner: z.string().trim().max(500).optional(),
-  heroImageUrl: z.string().trim().max(500).optional(),
   heroHeadline: z.string().trim().max(200).optional(),
   heroBody: z.string().trim().max(1000).optional(),
   coverageText: z.string().trim().max(1000).optional(),
@@ -54,7 +58,6 @@ export async function updateBrandingAction(formData: FormData) {
     region: str("region") || undefined,
     deliveryBanner: str("deliveryBanner") || undefined,
     hoursBanner: str("hoursBanner") || undefined,
-    heroImageUrl: str("heroImageUrl") || undefined,
     heroHeadline: str("heroHeadline") || undefined,
     heroBody: str("heroBody") || undefined,
     coverageText: str("coverageText") || undefined,
@@ -62,7 +65,8 @@ export async function updateBrandingAction(formData: FormData) {
 
   if (!parsed.success) {
     redirect(
-      "/admin/marca?error=" + encodeURIComponent("Revisá los campos del formulario"),
+      "/admin/marca?error=" +
+        encodeURIComponent("Revisá los campos del formulario"),
     );
   }
 
@@ -76,6 +80,55 @@ export async function updateBrandingAction(formData: FormData) {
     );
   }
 
+  let logoUrl = parsed.data.logoUrl || null;
+  const logoFile = formData.get("logoFile");
+  if (logoFile instanceof File && logoFile.size > 0) {
+    try {
+      logoUrl = await saveLogoImage(admin.tenant.slug, logoFile);
+    } catch (e) {
+      redirect(
+        "/admin/marca?error=" +
+          encodeURIComponent(
+            e instanceof Error ? e.message : "Error al subir el logo",
+          ),
+      );
+    }
+  }
+
+  let heroSlides: TenantHeroSlide[] = [];
+  try {
+    const rawJson = str("heroSlidesJson") || "[]";
+    const draft = parseHeroSlides(JSON.parse(rawJson));
+    for (const slide of draft) {
+      const file = formData.get(`bannerImage_${slide.id}`);
+      let imageUrl =
+        str(`bannerImageUrl_${slide.id}`) || slide.imageUrl || "";
+      if (file instanceof File && file.size > 0) {
+        imageUrl = await saveBannerImage(admin.tenant.slug, file);
+      }
+      if (!imageUrl) continue;
+      heroSlides.push({
+        id: slide.id,
+        imageUrl,
+        title: slide.title,
+        subtitle: slide.subtitle,
+        ctaLabel: slide.ctaLabel,
+        ctaHref: slide.ctaHref,
+      });
+    }
+  } catch (e) {
+    redirect(
+      "/admin/marca?error=" +
+        encodeURIComponent(
+          e instanceof Error
+            ? e.message
+            : "No se pudieron guardar los banners",
+        ),
+    );
+  }
+
+  const firstSlideImage = heroSlides[0]?.imageUrl ?? null;
+
   await prisma.tenant.update({
     where: { id: admin.tenantId },
     data: {
@@ -84,7 +137,7 @@ export async function updateBrandingAction(formData: FormData) {
       about: parsed.data.about ?? null,
       primaryColor: parsed.data.primaryColor,
       secondaryColor: parsed.data.secondaryColor,
-      logoUrl: parsed.data.logoUrl || null,
+      logoUrl,
       phone: parsed.data.phone ?? null,
       phoneSecondary: parsed.data.phoneSecondary ?? null,
       email: parsed.data.email || null,
@@ -94,10 +147,11 @@ export async function updateBrandingAction(formData: FormData) {
       region: parsed.data.region ?? null,
       deliveryBanner: parsed.data.deliveryBanner ?? null,
       hoursBanner: parsed.data.hoursBanner ?? null,
-      heroImageUrl: parsed.data.heroImageUrl ?? null,
+      heroImageUrl: firstSlideImage,
       heroHeadline: parsed.data.heroHeadline ?? null,
       heroBody: parsed.data.heroBody ?? null,
       coverageText: parsed.data.coverageText ?? null,
+      heroSlides,
     },
   });
 

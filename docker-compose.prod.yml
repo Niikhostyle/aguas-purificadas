@@ -24,11 +24,13 @@ services:
     environment:
       DATABASE_URL: postgresql://mibidon:${POSTGRES_PASSWORD}@db:5432/mibidon?schema=public
       APP_URL: ${APP_URL:-https://mibidon.cl}
-      DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-rio-claro}
+      DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-}
       WEBPAY_MODE: ${WEBPAY_MODE:-mock}
       ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}
+      CUSTOMER_SESSION_SECRET: ${CUSTOMER_SESSION_SECRET:-}
+      WEBPAY_CREDENTIALS_KEY: ${WEBPAY_CREDENTIALS_KEY:-}
       CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY:-}
-      RUN_SEED: ${RUN_SEED:-true}
+      RUN_SEED: ${RUN_SEED:-false}
       NODE_OPTIONS: --max-old-space-size=512
     ports:
       # 3000 often taken by other apps on shared VPS (e.g. veotv)

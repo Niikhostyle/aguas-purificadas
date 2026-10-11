@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { applySecurityHeaders } from "@/lib/security-headers";
 
 const TENANT_HEADER = "x-tenant-slug";
 const PLATFORM_HEADER = "x-platform-host";
@@ -15,11 +16,11 @@ function isPlatformHost(hostname: string): boolean {
 
 /**
  * Tenant resolution (storefront only):
- * 1. Subdomain: demo.mibidon.cl (alias → rio-claro) or cliente.mibidon.cl
- * 2. Query: ?tenant=rio-claro
+ * 1. Subdomain: demo.mibidon.cl or cliente.mibidon.cl
+ * 2. Query: ?tenant=demo
  * 3. Header: x-tenant
  *
- * Apex / www / bare IP never fall back to DEFAULT_TENANT_SLUG or cookie —
+ * Apex / www / bare IP never fall back to a storefront tenant —
  * they show the MiBidón marketing landing.
  */
 function resolveTenantSlug(request: NextRequest): string | null {
@@ -33,9 +34,6 @@ function resolveTenantSlug(request: NextRequest): string | null {
       let sub = parts[0];
       if (sub && sub !== "www" && sub !== "app") {
         sub = sub.toLowerCase();
-        // Prospect demo alias
-        if (sub === "demo") return "rio-claro";
-        // Platform admin tenant is not a storefront
         if (sub === "plataforma") return null;
         return sub;
       }
@@ -45,7 +43,6 @@ function resolveTenantSlug(request: NextRequest): string | null {
   const fromQuery = request.nextUrl.searchParams.get("tenant");
   if (fromQuery) {
     const q = fromQuery.toLowerCase();
-    if (q === "demo") return "rio-claro";
     if (q === "plataforma") return null;
     return q;
   }
@@ -53,7 +50,6 @@ function resolveTenantSlug(request: NextRequest): string | null {
   const fromHeader = request.headers.get("x-tenant");
   if (fromHeader) {
     const h = fromHeader.toLowerCase();
-    if (h === "demo") return "rio-claro";
     if (h === "plataforma") return null;
     return h;
   }
@@ -80,9 +76,11 @@ export function middleware(request: NextRequest) {
   if (platformHost && pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/mibidon";
-    return NextResponse.rewrite(url, {
-      request: { headers: requestHeaders },
-    });
+    return applySecurityHeaders(
+      NextResponse.rewrite(url, {
+        request: { headers: requestHeaders },
+      }),
+    );
   }
 
   // Storefront routes without a tenant → back to marketing home
@@ -92,6 +90,7 @@ export function middleware(request: NextRequest) {
     "/checkout",
     "/pedido",
     "/pago",
+    "/cuenta",
   ];
   if (
     platformHost &&
@@ -101,7 +100,7 @@ export function middleware(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
-    return NextResponse.redirect(url);
+    return applySecurityHeaders(NextResponse.redirect(url));
   }
 
   const response = NextResponse.next({
@@ -113,11 +112,13 @@ export function middleware(request: NextRequest) {
     response.cookies.set("aguas_tenant", slug, {
       path: "/",
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
       maxAge: 60 * 60 * 24 * 30,
     });
   }
 
-  return response;
+  return applySecurityHeaders(response);
 }
 
 export const config = {

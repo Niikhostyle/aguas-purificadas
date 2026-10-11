@@ -19,7 +19,7 @@ export default async function AdminLoginPage({
 
   const { error, tenant: tenantQuery } = await searchParams;
   const headerSlug = await getTenantSlugFromHeaders();
-  const tenantSlug = (tenantQuery || headerSlug || "rio-claro").toLowerCase();
+  const tenantSlug = (tenantQuery || headerSlug || "demo").toLowerCase();
   const isPlatform = tenantSlug === "plataforma";
 
   return (
@@ -50,8 +50,8 @@ export default async function AdminLoginPage({
                 id="tenantSlug"
                 name="tenantSlug"
                 required
-                defaultValue={tenantSlug === "plataforma" ? "rio-claro" : tenantSlug}
-                placeholder="rio-claro"
+                defaultValue={tenantSlug === "plataforma" ? "demo" : tenantSlug}
+                placeholder="demo"
               />
             </div>
           )}
@@ -62,9 +62,6 @@ export default async function AdminLoginPage({
               name="email"
               type="email"
               required
-              defaultValue={
-                isPlatform ? "super@plataforma.demo" : "admin@rio-claro.demo"
-              }
               autoComplete="username"
             />
           </div>
@@ -75,7 +72,6 @@ export default async function AdminLoginPage({
               name="password"
               type="password"
               required
-              defaultValue="admin123"
               autoComplete="current-password"
             />
           </div>
@@ -93,16 +89,16 @@ export default async function AdminLoginPage({
           <Link
             href={
               isPlatform
-                ? "/admin/login?tenant=rio-claro"
+                ? "/admin/login?tenant=demo"
                 : "/admin/login?tenant=plataforma"
             }
             className="text-[var(--brand)] hover:underline"
           >
-            {isPlatform ? "Login empresa demo" : "Login MiBidón (super-admin)"}
+            {isPlatform ? "Login empresa" : "Login MiBidón (super-admin)"}
           </Link>
           {" · "}
           <Link href="/" className="text-[var(--brand)] hover:underline">
-            Tienda
+            Inicio
           </Link>
         </p>
       </div>

@@ -1,29 +1,71 @@
+"use client";
+
 import Link from "next/link";
-import type { Tenant } from "@prisma/client";
-import { getResolvedCart } from "@/lib/cart";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AudienceToggle } from "@/components/storefront/audience-toggle";
+import { RegionSelector } from "@/components/storefront/region-selector";
+import type { Audience, ModuleFlags, RegionOption } from "@/lib/modules";
 
-const NAV = [
-  { href: "/", label: "Inicio" },
-  { href: "/productos", label: "Productos" },
-  { href: "/#beneficios", label: "Ofertas" },
-  { href: "/#nosotros", label: "Nosotros" },
-  { href: "/#beneficios", label: "Purificación" },
-  { href: "/#envasado", label: "Envasado" },
-  { href: "/#contacto", label: "Contacto" },
-];
+type NavItem = { href: string; label: string };
 
-export async function SiteHeader({ tenant }: { tenant: Tenant }) {
-  const cart = await getResolvedCart(tenant.id);
+type Props = {
+  brandName: string;
+  logoUrl?: string | null;
+  deliveryBanner?: string | null;
+  hoursBanner?: string | null;
+  cartCount: number;
+  flags: ModuleFlags;
+  regions: RegionOption[];
+  customerName?: string | null;
+};
+
+export function SiteHeader({
+  brandName,
+  logoUrl,
+  deliveryBanner,
+  hoursBanner,
+  cartCount,
+  flags,
+  regions,
+  customerName,
+}: Props) {
+  const searchParams = useSearchParams();
+  const audience: Audience =
+    searchParams.get("audience") === "empresa" ? "empresa" : "hogar";
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const nav: NavItem[] = [
+    { href: "/", label: "Inicio" },
+    { href: "/productos", label: "Productos" },
+  ];
+  if (flags.descuentos) nav.push({ href: "/#descuentos", label: "Descuentos" });
+  if (flags.planes) nav.push({ href: "/#planes", label: "Planes" });
+  if (flags.kits) nav.push({ href: "/#kits", label: "Kits" });
+  nav.push({ href: "/#nosotros", label: "Nosotros" });
+  nav.push({ href: "/#contacto", label: "Contacto" });
+
   const delivery =
-    tenant.deliveryBanner ||
-    "Despacho para Talca, Curicó, Linares y comunas de la región.";
+    deliveryBanner ||
+    "Despacho a comunas seleccionadas. Elegí tu ciudad para confirmar cobertura.";
   const hours =
-    tenant.hoursBanner ||
-    "Horario de atención telefónica, Lunes a Viernes de 8:30 a 13:00 hrs y 14:00 a 17:30 hrs. - Sábado de 09:00 a 13:00 hrs.";
+    hoursBanner ||
+    "Horario de atención: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00";
 
   return (
-    <header className="sticky top-0 z-30 bg-white shadow-sm">
-      {/* Top bars — despacho / horarios */}
+    <header
+      className={`sticky top-0 z-30 bg-white/95 backdrop-blur transition-shadow ${
+        scrolled ? "shadow-md shadow-[#12326e]/10" : "shadow-sm"
+      }`}
+    >
       <div className="bg-[var(--topbar)] text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-1.5 text-[11px] leading-snug sm:flex-row sm:items-center sm:justify-between sm:text-xs md:px-6">
           <p className="flex items-start gap-2">
@@ -38,24 +80,24 @@ export async function SiteHeader({ tenant }: { tenant: Tenant }) {
       </div>
 
       <div className="border-b border-[#d5e3ec]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
           <Link href="/" className="flex shrink-0 items-center gap-3">
-            {tenant.logoUrl ? (
+            {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={tenant.logoUrl}
-                alt={tenant.name}
+                src={logoUrl}
+                alt={brandName}
                 className="h-12 w-auto object-contain md:h-14"
               />
             ) : (
               <span className="rc-display text-2xl font-semibold uppercase text-[var(--brand-deep)]">
-                {tenant.name}
+                {brandName}
               </span>
             )}
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -66,40 +108,85 @@ export async function SiteHeader({ tenant }: { tenant: Tenant }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {flags.selectorRegion ? (
+              <div className="hidden sm:block">
+                <RegionSelector regions={regions} />
+              </div>
+            ) : null}
+            {flags.hogarEmpresa ? (
+              <div className="hidden md:block">
+                <AudienceToggle audience={audience} />
+              </div>
+            ) : null}
+            {flags.loginClientes ? (
+              <Link
+                href="/cuenta"
+                className="hidden text-xs font-bold uppercase text-[var(--brand-deep)] hover:text-[var(--brand)] sm:inline"
+              >
+                {customerName ? customerName.split(" ")[0] : "Mi cuenta"}
+              </Link>
+            ) : null}
             <Link
               href="/carrito"
               className="relative inline-flex items-center gap-1.5 text-sm font-bold uppercase text-[var(--brand-deep)] hover:text-[var(--brand)]"
             >
               <span aria-hidden>🛒</span>
-              Carrito
-              {cart.itemCount > 0 ? (
+              <span className="hidden sm:inline">Carrito</span>
+              {cartCount > 0 ? (
                 <span className="absolute -right-3 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--brand)] px-1 text-[10px] text-white">
-                  {cart.itemCount}
+                  {cartCount}
                 </span>
               ) : null}
             </Link>
-            <Link
-              href="/admin"
-              className="hidden text-xs font-bold uppercase text-[#5a6578] hover:text-[var(--brand)] sm:inline"
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#d5e3ec] text-[var(--brand-deep)] lg:hidden"
+              aria-label={open ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
             >
-              Admin
-            </Link>
+              <span className="text-lg">{open ? "✕" : "☰"}</span>
+            </button>
           </div>
         </div>
 
-        {/* Mobile nav */}
-        <nav className="flex gap-1 overflow-x-auto border-t border-[#e8f0f5] px-4 py-2 lg:hidden">
-          {NAV.slice(0, 5).map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="whitespace-nowrap px-2 py-1 text-[11px] font-bold uppercase text-[var(--nav-text)]"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Mobile panel */}
+        <div
+          className={`overflow-hidden border-t border-[#e8f0f5] transition-[max-height,opacity] duration-300 lg:hidden ${
+            open ? "max-h-[480px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="space-y-4 px-4 py-4">
+            {flags.hogarEmpresa ? (
+              <AudienceToggle audience={audience} />
+            ) : null}
+            {flags.selectorRegion ? (
+              <RegionSelector regions={regions} />
+            ) : null}
+            <nav className="flex flex-col gap-1">
+              {nav.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-bold uppercase text-[var(--nav-text)] hover:bg-[#e8f7fc] hover:text-[var(--brand)]"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              {flags.loginClientes ? (
+                <Link
+                  href="/cuenta"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-bold uppercase text-[var(--brand-deep)] hover:bg-[#e8f7fc]"
+                >
+                  {customerName ? "Mi cuenta" : "Ingresar"}
+                </Link>
+              ) : null}
+            </nav>
+          </div>
+        </div>
       </div>
     </header>
   );

@@ -120,14 +120,14 @@ export default async function NewTenantPage({
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="adminPassword">Contraseña temporal</Label>
+              <Label htmlFor="adminPassword">Contraseña temporal (mín. 12)</Label>
               <Input
                 id="adminPassword"
                 name="adminPassword"
-                type="text"
+                type="password"
                 required
-                minLength={6}
-                defaultValue="admin123"
+                minLength={12}
+                autoComplete="new-password"
               />
             </div>
           </div>

@@ -50,10 +50,11 @@ export async function loginAdmin(
   email: string,
   password: string,
 ) {
+  const generic = "Credenciales inválidas";
   const tenant = await prisma.tenant.findFirst({
     where: { slug: tenantSlug, active: true },
   });
-  if (!tenant) return { ok: false as const, error: "Empresa no encontrada" };
+  if (!tenant) return { ok: false as const, error: generic };
 
   const admin = await prisma.adminUser.findUnique({
     where: {
@@ -61,7 +62,7 @@ export async function loginAdmin(
     },
   });
   if (!admin || !compareSync(password, admin.passwordHash)) {
-    return { ok: false as const, error: "Credenciales inválidas" };
+    return { ok: false as const, error: generic };
   }
 
   const token = sign({

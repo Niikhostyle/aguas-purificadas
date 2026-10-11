@@ -31,26 +31,52 @@ model Tenant {
   deliveryBanner String?
   /// Top bar: horarios
   hoursBanner    String?
-  /// Hero
+  /// Hero (legacy single-image fields; prefer heroSlides)
   heroImageUrl   String?
   heroHeadline   String?
   heroBody       String?
+  /// Carrusel de inicio: [{ id, imageUrl, title?, subtitle?, ctaLabel?, ctaHref? }]
+  heroSlides     Json?
+  /// Feature flags storefront: descuentos, planes, kits, redes, certificaciones, loginClientes, selectorRegion, hogarEmpresa
+  modulesEnabled Json?
+  /// Contenido editable de módulos (regiones, ofertas, planes, kits, redes, certs, copy hogar/empresa)
+  modulesContent Json?
   /// Footer coverage blurb
   coverageText   String?
   facebookUrl    String?
   instagramUrl   String?
   twitterUrl     String?
+  youtubeUrl     String?
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   adminUsers        AdminUser[]
+  customers         Customer[]
   products          Product[]
   deliveryZones     DeliveryZone[]
   orders            Order[]
   webpayCredential  WebPayCredential?
 
   @@map("tenants")
+}
+
+/// Buyer accounts (optional module loginClientes)
+model Customer {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  name         String
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("customers")
 }
 
 /// Per-tenant WebPay Plus credentials (API key encrypted at rest)

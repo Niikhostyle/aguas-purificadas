@@ -72,6 +72,12 @@ export default async function AdminPanelLayout({
                   Marca
                 </Link>
                 <Link
+                  href="/admin/modulos"
+                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
+                >
+                  Módulos
+                </Link>
+                <Link
                   href="/"
                   className="text-[#5a6578] hover:text-[var(--brand)] hover:underline"
                 >
