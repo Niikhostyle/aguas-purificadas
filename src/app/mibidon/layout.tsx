@@ -9,7 +9,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MiBidón · Tiendas online para purificadoras y embotelladoras de agua",
+  title: {
+    absolute: "MiBidón · Tiendas online para purificadoras y embotelladoras de agua",
+  },
   description:
     "Tu propia tienda online de agua purificada con tu marca: pedidos, despachos por comuna, suscripciones de recarga y cobro con WebPay. Activa en 24 horas, 0% comisión.",
 };

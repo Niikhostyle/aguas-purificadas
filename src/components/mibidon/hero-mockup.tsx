@@ -141,7 +141,7 @@ export function HeroMockup() {
 
       {/* Floating: new order */}
       <div
-        className="mb-layer absolute -left-3 top-[18%] sm:-left-10"
+        className="mb-layer absolute -left-3 top-[30%] sm:-left-10"
         style={v({ "--depth": 22 })}
       >
         <div className="mb-pop" style={v({ "--d": "800ms" })}>
@@ -165,7 +165,7 @@ export function HeroMockup() {
 
       {/* Floating: WebPay approved */}
       <div
-        className="mb-layer absolute -right-2 top-[2%] sm:-right-8 lg:top-[-6%]"
+        className="mb-layer absolute -bottom-4 left-0 sm:-right-8 sm:bottom-auto sm:left-auto sm:top-[2%] lg:top-[-6%]"
         style={v({ "--depth": 28 })}
       >
         <div className="mb-pop" style={v({ "--d": "1050ms" })}>

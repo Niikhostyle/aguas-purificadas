@@ -50,8 +50,9 @@ const HEADLINE: Array<{ text: string; accent?: boolean }> = [
   { text: "tienda" },
   { text: "online" },
   { text: "de" },
-  { text: "agua," },
-  { text: "vendiendo", accent: true },
+  { text: "agua" },
+  { text: "que" },
+  { text: "vende", accent: true },
   { text: "en", accent: true },
   { text: "piloto", accent: true },
   { text: "automático", accent: true },
@@ -258,7 +259,7 @@ export default function MiBidonLandingPage() {
             </span>
             <span className="flex flex-col leading-none">
               <span className="mb-display text-lg font-extrabold text-white">MiBidón</span>
-              <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-300/90">
+              <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-300/90 sm:block">
                 Tiendas para purificadoras
               </span>
             </span>
@@ -291,7 +292,7 @@ export default function MiBidonLandingPage() {
             </Link>
             <a
               href="#precios"
-              className="mb-cta flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold"
+              className="mb-cta flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-bold sm:px-4"
             >
               <span>Empieza gratis</span>
               <ArrowRight className="size-4" />
