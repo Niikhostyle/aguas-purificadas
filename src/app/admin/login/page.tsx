@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminSession, isSuperAdmin } from "@/lib/auth";
+import {
+  DEMO_TENANT_SLUG,
+  getAdminSession,
+  isDemoTenantSlug,
+  isSuperAdmin,
+} from "@/lib/auth";
 import { getTenantSlugFromHeaders } from "@/lib/tenant";
 import { loginAction } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -19,8 +24,36 @@ export default async function AdminLoginPage({
 
   const { error, tenant: tenantQuery } = await searchParams;
   const headerSlug = await getTenantSlugFromHeaders();
-  const tenantSlug = (tenantQuery || headerSlug || "demo").toLowerCase();
+  const tenantSlug = (tenantQuery || headerSlug || DEMO_TENANT_SLUG).toLowerCase();
   const isPlatform = tenantSlug === "plataforma";
+
+  const wantsDemo =
+    isDemoTenantSlug(tenantSlug) || isDemoTenantSlug(headerSlug);
+
+  // Public demo: skip credentials entirely (unless demo-access already failed)
+  if (!error && wantsDemo) {
+    redirect("/admin/demo-access");
+  }
+
+  if (error && wantsDemo) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] px-5">
+        <div className="w-full max-w-md">
+          <p className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
+            Demo
+          </p>
+          <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+          <p className="mt-6 text-center text-sm text-[#5a6578]">
+            <Link href="/" className="text-[var(--brand)] hover:underline">
+              Volver a la tienda demo
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] px-5">
@@ -50,8 +83,8 @@ export default async function AdminLoginPage({
                 id="tenantSlug"
                 name="tenantSlug"
                 required
-                defaultValue={tenantSlug === "plataforma" ? "demo" : tenantSlug}
-                placeholder="demo"
+                defaultValue={tenantSlug}
+                placeholder="mi-empresa"
               />
             </div>
           )}
@@ -86,6 +119,13 @@ export default async function AdminLoginPage({
         </form>
 
         <p className="mt-6 text-center text-sm text-[#5a6578]">
+          <Link
+            href="/admin/demo-access"
+            className="text-[var(--brand)] hover:underline"
+          >
+            Abrir demo (sin login)
+          </Link>
+          {" · "}
           <Link
             href={
               isPlatform

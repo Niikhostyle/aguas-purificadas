@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { isSuperAdmin, requireAdmin } from "@/lib/auth";
+import { isDemoTenantSlug, isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { parseModuleFlags, type ModuleFlags } from "@/lib/modules";
+import { getTenantSlugFromHeaders } from "@/lib/tenant";
 
 /**
  * Company (tenant) admin guard for pages and server actions.
@@ -8,7 +9,11 @@ import { parseModuleFlags, type ModuleFlags } from "@/lib/modules";
  */
 export async function requireTenantAdmin() {
   const admin = await requireAdmin();
-  if (!admin) redirect("/admin/login");
+  if (!admin) {
+    const slug = await getTenantSlugFromHeaders();
+    if (isDemoTenantSlug(slug)) redirect("/admin/demo-access");
+    redirect("/admin/login");
+  }
   if (isSuperAdmin(admin)) redirect("/admin/plataforma");
   const flags = parseModuleFlags(admin.tenant.modulesEnabled);
   return { admin, tenantId: admin.tenantId, flags };

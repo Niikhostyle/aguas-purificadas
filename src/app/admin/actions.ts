@@ -26,6 +26,11 @@ export async function loginAction(formData: FormData) {
       ? "plataforma"
       : String(formData.get("tenantSlug") || "demo").trim().toLowerCase();
 
+  // Public demo never asks for credentials
+  if (tenantSlug === "demo") {
+    redirect("/admin/demo-access");
+  }
+
   const { headers } = await import("next/headers");
   const { rateLimit } = await import("@/lib/rate-limit");
   const h = await headers();
@@ -55,8 +60,11 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
+  const admin = await requireAdmin();
+  const wasDemo = admin?.tenant.slug === "demo";
   await logoutAdmin();
-  redirect("/admin/login");
+  // Demo is open: leave the storefront, don't bounce back into the panel
+  redirect(wasDemo ? "/" : "/admin/login");
 }
 
 const productSchema = z.object({
