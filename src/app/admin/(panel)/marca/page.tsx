@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { updateBrandingAction } from "@/app/admin/(panel)/marca/actions";
 import { BannerSlidesEditor } from "@/components/admin/banner-slides-editor";
+import { PageHeader } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,14 +25,12 @@ export default async function BrandingAdminPage({
   const slides = parseHeroSlides(tenant.heroSlides);
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="rc-display text-3xl uppercase text-[var(--brand-deep)]">
-        Marca y contenido
-      </h1>
-      <p className="mt-2 text-sm text-[#5a6578]">
-        Personalizá toda tu tienda: logo, colores, barras, banners del inicio y
-        textos de contacto.
-      </p>
+    <div className="max-w-4xl">
+      <PageHeader
+        title="Marca y contenido"
+        description="Personaliza toda tu tienda: logo, colores, barras, banners del inicio y textos de contacto."
+        breadcrumbs={[{ label: "Configuración" }, { label: "Marca" }]}
+      />
 
       {ok ? (
         <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -47,10 +46,10 @@ export default async function BrandingAdminPage({
       <form
         action={updateBrandingAction}
         encType="multipart/form-data"
-        className="mt-8 space-y-8"
+        className="space-y-6"
       >
-        <section className="space-y-5">
-          <h2 className="text-base font-bold text-[var(--brand-deep)]">
+        <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
             Identidad
           </h2>
           <div className="space-y-2">
@@ -123,8 +122,8 @@ export default async function BrandingAdminPage({
           </div>
         </section>
 
-        <section className="space-y-5">
-          <h2 className="text-base font-bold text-[var(--brand-deep)]">
+        <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
             Barras superiores
           </h2>
           <div className="space-y-2">
@@ -149,8 +148,8 @@ export default async function BrandingAdminPage({
 
         <BannerSlidesEditor initialSlides={slides} />
 
-        <section className="space-y-5">
-          <h2 className="text-base font-bold text-[var(--brand-deep)]">
+        <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
             Textos de respaldo del hero
           </h2>
           <p className="text-sm text-[#5a6578]">
@@ -176,8 +175,8 @@ export default async function BrandingAdminPage({
           </div>
         </section>
 
-        <section className="space-y-5">
-          <h2 className="text-base font-bold text-[var(--brand-deep)]">
+        <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
             Contacto y cobertura
           </h2>
           <div className="space-y-2">

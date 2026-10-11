@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateProductAction } from "../../../actions";
+import { PageHeader, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,20 +25,15 @@ export default async function EditProductPage({ params, searchParams }: Props) {
   if (!product) notFound();
 
   return (
-    <div className="max-w-xl">
-      <Link
-        href="/admin/productos"
-        className="text-sm text-[var(--brand)] hover:underline"
-      >
-        ← Productos
-      </Link>
-      <h1 className="mt-3 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-        Editar producto
-      </h1>
-
+    <>
+      <PageHeader
+        title="Editar producto"
+        breadcrumbs={[{ label: "Catálogo" }, { label: "Productos", href: "/admin/productos" }, { label: "Editar" }]}
+      />
+      <Panel className="max-w-2xl">
       <form
         action={updateProductAction}
-        className="mt-8 space-y-4"
+        className="space-y-4"
         encType="multipart/form-data"
       >
         <input type="hidden" name="id" value={product.id} />
@@ -104,6 +99,7 @@ export default async function EditProductPage({ params, searchParams }: Props) {
         ) : null}
         <Button type="submit">Guardar cambios</Button>
       </form>
-    </div>
+      </Panel>
+    </>
   );
 }

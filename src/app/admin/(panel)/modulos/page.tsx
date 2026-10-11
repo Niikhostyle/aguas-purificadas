@@ -3,6 +3,7 @@ import {
   loadDefaultDemoContentAction,
   updateModulesAction,
 } from "@/app/admin/(panel)/modulos/actions";
+import { PageHeader } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,14 +41,12 @@ export default async function ModulesAdminPage({
   const flagKeys = Object.keys(MODULE_LABELS) as (keyof ModuleFlags)[];
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="rc-display text-3xl uppercase text-[var(--brand-deep)]">
-        Módulos de la tienda
-      </h1>
-      <p className="mt-2 text-sm text-[#5a6578]">
-        Activá o desactivá secciones estilo Manantial y editá su contenido en
-        español. Los cambios se ven de inmediato en la tienda.
-      </p>
+    <div className="max-w-4xl">
+      <PageHeader
+        title="Módulos de la tienda"
+        description="Activa o desactiva secciones de la tienda y edita su contenido. Los cambios se ven de inmediato en la tienda."
+        breadcrumbs={[{ label: "Configuración" }, { label: "Módulos" }]}
+      />
 
       {ok ? (
         <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -61,9 +60,9 @@ export default async function ModulesAdminPage({
         </Button>
       </form>
 
-      <form action={updateModulesAction} className="mt-8 space-y-8">
-        <section className="rounded-xl border border-[#d5e3ec] bg-white p-5">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)]">
+      <form action={updateModulesAction} className="mt-6 space-y-6">
+        <section className="rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="text-[15px] font-semibold text-[#12233d]">
             Activar módulos
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -84,8 +83,8 @@ export default async function ModulesAdminPage({
           </div>
         </section>
 
-        <section className="space-y-3 rounded-xl border border-[#d5e3ec] bg-white p-5">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)]">
+        <section className="space-y-3 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="text-[15px] font-semibold text-[#12233d]">
             Ciudades / regiones
           </h2>
           <p className="text-xs text-[#5a6578]">
@@ -99,8 +98,8 @@ export default async function ModulesAdminPage({
           />
         </section>
 
-        <section className="grid gap-4 rounded-xl border border-[#d5e3ec] bg-white p-5 sm:grid-cols-2">
-          <h2 className="sm:col-span-2 text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)]">
+        <section className="grid gap-4 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)] sm:grid-cols-2">
+          <h2 className="sm:col-span-2 text-[15px] font-semibold text-[#12233d]">
             Copy Hogar / Empresa
           </h2>
           <div className="space-y-2">
@@ -171,8 +170,8 @@ export default async function ModulesAdminPage({
           </div>
         </section>
 
-        <section className="space-y-3 rounded-xl border border-[#d5e3ec] bg-white p-5">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)]">
+        <section className="space-y-3 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+          <h2 className="text-[15px] font-semibold text-[#12233d]">
             URLs redes (tenant)
           </h2>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -218,7 +217,7 @@ export default async function ModulesAdminPage({
         ).map(([name, label, value]) => (
           <section
             key={name}
-            className="space-y-2 rounded-xl border border-[#d5e3ec] bg-white p-5"
+            className="space-y-2 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]"
           >
             <Label htmlFor={name}>{label}</Label>
             <p className="text-xs text-[#5a6578]">

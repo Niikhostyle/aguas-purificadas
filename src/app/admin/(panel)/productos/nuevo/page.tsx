@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createProductAction } from "../../../actions";
+import { PageHeader, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,20 +17,15 @@ export default async function NewProductPage({
   const { error } = await searchParams;
 
   return (
-    <div className="max-w-xl">
-      <Link
-        href="/admin/productos"
-        className="text-sm text-[var(--brand)] hover:underline"
-      >
-        ← Productos
-      </Link>
-      <h1 className="mt-3 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-        Nuevo producto
-      </h1>
-
+    <>
+      <PageHeader
+        title="Nuevo producto"
+        breadcrumbs={[{ label: "Catálogo" }, { label: "Productos", href: "/admin/productos" }, { label: "Nuevo" }]}
+      />
+      <Panel className="max-w-2xl">
       <form
         action={createProductAction}
-        className="mt-8 space-y-4"
+        className="space-y-4"
         encType="multipart/form-data"
       >
         <div className="space-y-2">
@@ -85,6 +80,7 @@ export default async function NewProductPage({
         ) : null}
         <Button type="submit">Crear producto</Button>
       </form>
-    </div>
+      </Panel>
+    </>
   );
 }
