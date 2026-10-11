@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { platformUrl } from "@/lib/platform-url";
 import { applySecurityHeaders } from "@/lib/security-headers";
 
 const TENANT_HEADER = "x-tenant-slug";
+const TENANT_FROM_HOST_HEADER = "x-tenant-from-host";
 const PLATFORM_HEADER = "x-platform-host";
+const DEMO_TENANT_SLUG = "demo";
 
 /** Hosts that serve the MiBidón marketing site (not a client storefront). */
 function isPlatformHost(hostname: string): boolean {
@@ -23,7 +26,10 @@ function isPlatformHost(hostname: string): boolean {
  * Apex / www / bare IP never fall back to a storefront tenant —
  * they show the MiBidón marketing landing.
  */
-function resolveTenantSlug(request: NextRequest): string | null {
+function resolveTenantSlug(request: NextRequest): {
+  slug: string | null;
+  fromHost: boolean;
+} {
   const host = request.headers.get("host") || "";
   const hostname = (host.split(":")[0] || "").toLowerCase();
 
@@ -34,8 +40,8 @@ function resolveTenantSlug(request: NextRequest): string | null {
       let sub = parts[0];
       if (sub && sub !== "www" && sub !== "app") {
         sub = sub.toLowerCase();
-        if (sub === "plataforma") return null;
-        return sub;
+        if (sub === "plataforma") return { slug: null, fromHost: false };
+        return { slug: sub, fromHost: true };
       }
     }
   }
@@ -43,18 +49,16 @@ function resolveTenantSlug(request: NextRequest): string | null {
   const fromQuery = request.nextUrl.searchParams.get("tenant");
   if (fromQuery) {
     const q = fromQuery.toLowerCase();
-    if (q === "plataforma") return null;
-    return q;
+    return { slug: q === "plataforma" ? null : q, fromHost: false };
   }
 
   const fromHeader = request.headers.get("x-tenant");
   if (fromHeader) {
     const h = fromHeader.toLowerCase();
-    if (h === "plataforma") return null;
-    return h;
+    return { slug: h === "plataforma" ? null : h, fromHost: false };
   }
 
-  return null;
+  return { slug: null, fromHost: false };
 }
 
 /** Absolute URL for middleware rewrite/redirect with a public host. */
@@ -108,15 +112,19 @@ function publicAbsoluteUrl(request: NextRequest, pathname: string): URL {
 }
 
 export function middleware(request: NextRequest) {
-  const slug = resolveTenantSlug(request);
+  const { slug, fromHost } = resolveTenantSlug(request);
   const host = request.headers.get("host") || "";
   const hostname = (host.split(":")[0] || "").toLowerCase();
   const platformHost = isPlatformHost(hostname) && !slug;
   const { pathname } = request.nextUrl;
 
   const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete(TENANT_HEADER);
+  requestHeaders.delete(TENANT_FROM_HOST_HEADER);
+  requestHeaders.delete(PLATFORM_HEADER);
   if (slug) {
     requestHeaders.set(TENANT_HEADER, slug);
+    if (fromHost) requestHeaders.set(TENANT_FROM_HOST_HEADER, "1");
   }
   if (platformHost) {
     requestHeaders.set(PLATFORM_HEADER, "1");
@@ -133,7 +141,7 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // Storefront routes without a tenant → back to marketing home
+  // Storefront routes without a tenant → demo account area, else marketing home
   const storefrontPrefixes = [
     "/productos",
     "/carrito",
@@ -148,8 +156,12 @@ export function middleware(request: NextRequest) {
       (p) => pathname === p || pathname.startsWith(`${p}/`),
     )
   ) {
+    const isCuenta = pathname === "/cuenta" || pathname.startsWith("/cuenta/");
+    const location = isCuenta
+      ? platformUrl(pathname, DEMO_TENANT_SLUG)
+      : platformUrl("/");
     return applySecurityHeaders(
-      new NextResponse(null, { status: 307, headers: { Location: "/" } }),
+      new NextResponse(null, { status: 307, headers: { Location: location } }),
     );
   }
 

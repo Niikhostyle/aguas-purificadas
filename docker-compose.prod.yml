@@ -28,6 +28,7 @@ services:
     environment:
       DATABASE_URL: postgresql://mibidon:${POSTGRES_PASSWORD}@db:5432/mibidon?schema=public
       APP_URL: ${APP_URL:-https://mibidon.cl}
+      PLATFORM_BASE_DOMAIN: ${PLATFORM_BASE_DOMAIN:-mibidon.cl}
       DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-}
       WEBPAY_MODE: ${WEBPAY_MODE:-mock}
       ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}

@@ -33,6 +33,7 @@ export type CreateTenantInput = {
 // Slugs double as subdomains of mibidon.cl; these hosts belong to the platform.
 export const RESERVED_TENANT_SLUGS = new Set([
   "plataforma",
+  "demo",
   "www",
   "app",
   "admin",

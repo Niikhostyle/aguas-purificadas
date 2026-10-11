@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/db";
 import { compareSync } from "bcryptjs";
+import { getTenantSlugFromHeaders } from "@/lib/tenant";
 
 const COOKIE_NAME = "aguas_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -151,6 +152,13 @@ export async function getAdminSession() {
     include: { tenant: true },
   });
   if (!admin || admin.tenantId !== payload.tenantId) return null;
+  if (!admin.tenant.active) return null;
+
+  // Bind the session to the host: a tenant host only accepts its own admins, and
+  // super-admin only works on the apex / plataforma host (no tenant slug resolved).
+  const hostSlug = await getTenantSlugFromHeaders();
+  if (hostSlug && hostSlug !== admin.tenant.slug) return null;
+  if (admin.role === "super_admin" && hostSlug) return null;
   return admin;
 }
 

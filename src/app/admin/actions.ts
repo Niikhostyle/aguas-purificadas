@@ -45,7 +45,12 @@ export async function loginAction(formData: FormData) {
     );
   }
 
-  const result = await loginAdmin(tenantSlug, email, password);
+  // A tenant host only issues sessions for itself (see getAdminSession).
+  const hostSlug = h.get("x-tenant-slug");
+  const result =
+    hostSlug && hostSlug !== tenantSlug
+      ? { ok: false as const, error: "Credenciales inválidas" }
+      : await loginAdmin(tenantSlug, email, password);
   if (!result.ok) {
     redirect(
       `/admin/login?tenant=${encodeURIComponent(tenantSlug)}&error=${encodeURIComponent(result.error)}`,

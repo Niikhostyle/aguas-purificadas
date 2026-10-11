@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth";
 import { isValidHexColor } from "@/lib/branding";
 import { prisma } from "@/lib/db";
+import { RESERVED_TENANT_SLUGS } from "@/lib/onboarding";
 
 function rethrowRedirect(e: unknown) {
   if (
@@ -94,7 +95,11 @@ export async function updateCompanyAction(formData: FormData) {
         encodeURIComponent("Nombre y slug son obligatorios"),
     );
   }
-  if (slug === "plataforma") {
+  const current = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { slug: true },
+  });
+  if (RESERVED_TENANT_SLUGS.has(slug) && current?.slug !== slug) {
     redirect(
       `/admin/plataforma/${tenantId}?error=` +
         encodeURIComponent("Slug reservado"),
