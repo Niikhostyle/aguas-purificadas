@@ -71,6 +71,28 @@ export default async function CheckoutPage({
                 className="bg-white"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliveryCommune">Comuna</Label>
+              <Input
+                id="deliveryCommune"
+                name="deliveryCommune"
+                list="checkout-communes"
+                maxLength={80}
+                placeholder="Ej: Providencia"
+                className="bg-white"
+              />
+              <datalist id="checkout-communes">
+                {Array.from(
+                  new Set(
+                    zones.flatMap((z) =>
+                      z.communes.split(",").map((c) => c.trim()).filter(Boolean),
+                    ),
+                  ),
+                ).map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
             <fieldset className="space-y-3">
               <legend className="text-sm font-medium text-[var(--brand-deep)]">
                 Zona de despacho

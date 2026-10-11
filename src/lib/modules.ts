@@ -7,6 +7,9 @@ export type ModuleFlags = {
   loginClientes: boolean;
   selectorRegion: boolean;
   hogarEmpresa: boolean;
+  despacho: boolean;
+  recordatorios: boolean;
+  envases: boolean;
 };
 
 export type Audience = "hogar" | "empresa";
@@ -92,6 +95,9 @@ export const DEFAULT_MODULE_FLAGS: ModuleFlags = {
   loginClientes: true,
   selectorRegion: true,
   hogarEmpresa: true,
+  despacho: true,
+  recordatorios: true,
+  envases: true,
 };
 
 export const MODULE_LABELS: Record<keyof ModuleFlags, string> = {
@@ -103,6 +109,9 @@ export const MODULE_LABELS: Record<keyof ModuleFlags, string> = {
   loginClientes: "Login clientes",
   selectorRegion: "Selector de región",
   hogarEmpresa: "Hogar / Empresa",
+  despacho: "Admin · Ruta de despacho",
+  recordatorios: "Admin · Recordatorios / suscripción",
+  envases: "Admin · Envases retornables",
 };
 
 export function parseModuleFlags(raw: unknown): ModuleFlags {

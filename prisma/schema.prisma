@@ -57,6 +57,10 @@ model Tenant {
   deliveryZones     DeliveryZone[]
   orders            Order[]
   webpayCredential  WebPayCredential?
+  deliveryRoutes    DeliveryRoute[]
+  deliveryCustomers DeliveryCustomer[]
+  orderEvents       OrderEvent[]
+  bottleMovements   BottleMovement[]
 
   @@map("tenants")
 }
@@ -183,17 +187,39 @@ model Order {
   /// mock | sandbox
   paymentProvider  String?
   paidAt           DateTime?
+  /// Despacho: por_asignar | programado | en_ruta | entregado | no_entregado
+  fulfillmentStatus String   @default("por_asignar")
+  deliveryCommune   String?
+  deliveryDate      DateTime? @db.Date
+  /// manana | tarde
+  deliverySlot      String?
+  routeId           String?
+  routeStop         Int?
+  deliveryCustomerId String?
+  dispatchNotes     String?
+  bottlesDelivered  Int?
+  bottlesReturned   Int?
+  scheduledAt       DateTime?
+  outForDeliveryAt  DateTime?
+  deliveredAt       DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   deliveryZone DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
+  route        DeliveryRoute? @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  deliveryCustomer DeliveryCustomer? @relation(fields: [deliveryCustomerId], references: [id], onDelete: SetNull)
   items        OrderItem[]
+  events       OrderEvent[]
+  bottleMovements BottleMovement[]
 
   @@unique([tenantId, buyOrder])
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
   @@index([webpayToken])
+  @@index([tenantId, fulfillmentStatus])
+  @@index([tenantId, deliveryDate])
+  @@index([routeId])
   @@map("orders")
 }
 
@@ -224,4 +250,99 @@ model PlatformLandingSection {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@map("platform_landing_sections")
+}
+
+/// Ruta de reparto: agrupa pedidos por día, bloque y sector
+model DeliveryRoute {
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String
+  date       DateTime @db.Date
+  /// manana | tarde
+  slot       String?
+  sector     String?
+  driverName String?
+  /// planificada | en_ruta | completada
+  status     String   @default("planificada")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([tenantId, date])
+  @@map("delivery_routes")
+}
+
+/// Cliente de reparto (por teléfono), independiente del login de la tienda
+model DeliveryCustomer {
+  id               String    @id @default(cuid())
+  tenantId         String
+  name             String
+  /// Solo dígitos, ej. 56912345678
+  phone            String
+  address          String?
+  commune          String?
+  recurring        Boolean   @default(false)
+  /// semanal | quincenal | mensual
+  frequency        String?
+  nextDeliveryDate DateTime? @db.Date
+  lastDeliveredAt  DateTime?
+  lastReminderAt   DateTime?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders          Order[]
+  bottleMovements BottleMovement[]
+
+  @@unique([tenantId, phone])
+  @@index([tenantId, recurring, nextDeliveryDate])
+  @@map("delivery_customers")
+}
+
+/// Auditoría de cambios de despacho por pedido
+model OrderEvent {
+  id         String   @id @default(cuid())
+  tenantId   String
+  orderId    String
+  /// asignado | en_ruta | entregado | no_entregado | nota
+  type       String
+  fromStatus String?
+  toStatus   String?
+  note       String?
+  actorEmail String?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([orderId])
+  @@map("order_events")
+}
+
+/// Libro de envases retornables: salida (entregados) y entrada (devueltos)
+model BottleMovement {
+  id         String   @id @default(cuid())
+  tenantId   String
+  customerId String
+  orderId    String?
+  /// out = entregado al cliente · in = devuelto
+  direction  String
+  quantity   Int
+  /// entrega | devolucion | ajuste
+  reason     String   @default("entrega")
+  note       String?
+  actorEmail String?
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer DeliveryCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  order    Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, customerId])
+  @@index([orderId])
+  @@map("bottle_movements")
 }

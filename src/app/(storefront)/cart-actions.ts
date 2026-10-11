@@ -12,6 +12,7 @@ import {
   writeCartCookie,
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
+import { ensureDeliveryCustomer } from "@/lib/dispatch-server";
 import { startPaymentForOrder } from "@/lib/payments";
 import { requireTenant } from "@/lib/tenant";
 
@@ -77,6 +78,7 @@ const checkoutSchema = z.object({
   customerName: z.string().trim().min(2).max(120),
   customerPhone: z.string().trim().min(8).max(40),
   customerAddress: z.string().trim().min(5).max(240),
+  deliveryCommune: z.string().trim().max(80).optional(),
   customerNotes: z.string().trim().max(500).optional(),
   deliveryZoneId: z.string().min(1),
 });
@@ -93,6 +95,7 @@ export async function placeOrderAction(formData: FormData) {
     customerName: formData.get("customerName"),
     customerPhone: formData.get("customerPhone"),
     customerAddress: formData.get("customerAddress"),
+    deliveryCommune: String(formData.get("deliveryCommune") || "").trim() || undefined,
     customerNotes: String(formData.get("customerNotes") || "").trim() || undefined,
     deliveryZoneId: formData.get("deliveryZoneId"),
   });
@@ -116,10 +119,19 @@ export async function placeOrderAction(formData: FormData) {
   const subtotalClp = cart.subtotalClp;
   const totalClp = subtotalClp + shippingClp;
 
+  const deliveryCustomer = await ensureDeliveryCustomer(prisma, tenant.id, {
+    name: parsed.data.customerName,
+    phone: parsed.data.customerPhone,
+    address: parsed.data.customerAddress,
+    commune: parsed.data.deliveryCommune,
+  });
+
   const order = await prisma.order.create({
     data: {
       tenantId: tenant.id,
       deliveryZoneId: zone.id,
+      deliveryCustomerId: deliveryCustomer.id,
+      deliveryCommune: parsed.data.deliveryCommune,
       status: "pending",
       customerName: parsed.data.customerName,
       customerPhone: parsed.data.customerPhone,

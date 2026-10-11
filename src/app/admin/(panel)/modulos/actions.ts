@@ -31,6 +31,9 @@ export async function updateModulesAction(formData: FormData) {
     loginClientes: flagFromForm(formData, "loginClientes"),
     selectorRegion: flagFromForm(formData, "selectorRegion"),
     hogarEmpresa: flagFromForm(formData, "hogarEmpresa"),
+    despacho: flagFromForm(formData, "despacho"),
+    recordatorios: flagFromForm(formData, "recordatorios"),
+    envases: flagFromForm(formData, "envases"),
   };
 
   // Preserve existing structured content; only overwrite text fields from form

@@ -4,6 +4,7 @@ import { logoutAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { adminThemeStyle } from "@/lib/branding";
+import { parseModuleFlags } from "@/lib/modules";
 
 export default async function AdminPanelLayout({
   children,
@@ -15,21 +16,30 @@ export default async function AdminPanelLayout({
 
   const superAdmin = isSuperAdmin(admin);
   const theme = adminThemeStyle();
+  const flags = parseModuleFlags(admin.tenant.modulesEnabled);
+  const tenantNav = [
+    { href: "/admin", label: "Resumen", show: true },
+    { href: "/admin/despacho", label: "Despacho", show: flags.despacho },
+    { href: "/admin/pedidos", label: "Pedidos", show: true },
+    { href: "/admin/recordatorios", label: "Recordatorios", show: flags.recordatorios },
+    { href: "/admin/envases", label: "Envases", show: flags.envases },
+    { href: "/admin/productos", label: "Productos", show: true },
+    { href: "/admin/marca", label: "Marca", show: true },
+    { href: "/admin/modulos", label: "Módulos", show: true },
+  ].filter((item) => item.show);
 
   return (
     <div
       style={theme}
-      className={`min-h-screen ${
+      className={`min-h-screen print:bg-white ${
         superAdmin
           ? "bg-[linear-gradient(180deg,#e8f7fc_0%,#f7fbfd_28%,#f7fbfd_100%)]"
           : "bg-[#f7fbfd]"
       }`}
     >
-      <header className="border-b border-[#d5e3ec] bg-white/95 backdrop-blur">
+      <header className="border-b border-[#d5e3ec] bg-white/95 backdrop-blur print:hidden">
         <div
-          className={`mx-auto flex flex-wrap items-center justify-between gap-4 px-5 py-4 ${
-            superAdmin ? "max-w-6xl" : "max-w-5xl"
-          }`}
+          className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4"
         >
           <div>
             <p className="font-[family-name:var(--font-display)] text-lg text-[var(--brand-deep)]">
@@ -64,36 +74,15 @@ export default async function AdminPanelLayout({
               </>
             ) : (
               <>
-                <Link
-                  href="/admin"
-                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
-                >
-                  Resumen
-                </Link>
-                <Link
-                  href="/admin/productos"
-                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
-                >
-                  Productos
-                </Link>
-                <Link
-                  href="/admin/pedidos"
-                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
-                >
-                  Pedidos
-                </Link>
-                <Link
-                  href="/admin/marca"
-                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
-                >
-                  Marca
-                </Link>
-                <Link
-                  href="/admin/modulos"
-                  className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
-                >
-                  Módulos
-                </Link>
+                {tenantNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-[var(--brand-deep)] hover:text-[var(--brand)] hover:underline"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
                 <Link
                   href="/"
                   className="text-[#5a6578] hover:text-[var(--brand)] hover:underline"
@@ -110,11 +99,7 @@ export default async function AdminPanelLayout({
           </nav>
         </div>
       </header>
-      <main
-        className={`mx-auto px-5 py-8 ${
-          superAdmin ? "max-w-6xl" : "max-w-5xl"
-        }`}
-      >
+      <main className="mx-auto max-w-6xl px-5 py-8 print:max-w-none print:p-0">
         {children}
       </main>
     </div>
