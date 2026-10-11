@@ -1,16 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import {
   FREQUENCIES,
   addFrequency,
-  customerWhatsappHref,
   dateFromStr,
-  formatDateCl,
   normalizePhone,
   todayCl,
 } from "@/lib/dispatch";
@@ -96,25 +93,13 @@ export async function createRecurringCustomerAction(formData: FormData) {
   redirect(back("Cliente recurrente agregado"));
 }
 
-/** Records the reminder and opens WhatsApp with a prefilled message (no automatic sending). */
-export async function sendReminderAction(formData: FormData) {
-  const { admin, tenantId } = await guard();
-  const customerId = z.string().min(1).max(40).safeParse(formData.get("customerId"));
-  if (!customerId.success) redirect(back("Cliente inválido", "error"));
-  const customer = await prisma.deliveryCustomer.findFirst({
-    where: { id: customerId.data, tenantId },
-  });
-  if (!customer) redirect(back("Cliente no encontrado", "error"));
-  await prisma.deliveryCustomer.update({
-    where: { id: customer.id },
+export async function recordReminderAction(customerId: string) {
+  const { tenantId } = await guard();
+  const parsed = z.string().min(1).max(40).safeParse(customerId);
+  if (!parsed.success) return;
+  await prisma.deliveryCustomer.updateMany({
+    where: { id: parsed.data, tenantId },
     data: { lastReminderAt: new Date() },
   });
   revalidatePath("/admin/recordatorios");
-  const when = customer.nextDeliveryDate
-    ? formatDateCl(customer.nextDeliveryDate.toISOString().slice(0, 10), "long")
-    : "esta semana";
-  const reqHost = (await headers()).get("host");
-  const host = reqHost ? `https://${reqHost}` : "";
-  const text = `Hola ${customer.name.split(" ")[0]}, te saluda ${admin.tenant.name}. Te toca reponer tu agua el ${when}. ¿Te agendamos el despacho? Podés pedir aquí: ${host}/productos`;
-  redirect(customerWhatsappHref(customer.phone, text));
 }

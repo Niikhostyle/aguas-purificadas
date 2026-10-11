@@ -16,7 +16,8 @@ import {
 import {
   assignOrdersAction,
   autoGroupAction,
-  markOrdersAction,
+  bulkEnRutaAction,
+  bulkEntregadoAction,
   startRouteAction,
   updateRouteAction,
 } from "./actions";
@@ -356,8 +357,8 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
         className="fixed inset-x-0 bottom-0 z-30 border-t border-[#d5e3ec] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(18,50,110,0.08)] backdrop-blur print:hidden"
       >
         <input type="hidden" name="returnTo" value={returnTo} />
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#5a6578]">Seleccionados →</span>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#5a6578]">Selección</span>
           <input type="date" name="date" defaultValue={assignDate} className={field} aria-label="Día de entrega" />
           <select name="slot" defaultValue="" className={field} aria-label="Bloque horario">
             <option value="">Bloque</option>
@@ -374,16 +375,16 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
             ))}
             <option value="__new">+ Nueva ruta…</option>
           </select>
-          <input name="newRouteName" placeholder="Nombre nueva ruta" maxLength={80} className={cn(field, "w-40")} aria-label="Nombre de nueva ruta" />
+          <input name="newRouteName" placeholder="Nombre nueva ruta" maxLength={80} className={cn(field, "w-36")} aria-label="Nombre de nueva ruta" />
           <button type="submit" className={btn.primary}>
             <CalendarClock className="size-4" /> Asignar
           </button>
-          <span className="mx-1 h-6 w-px bg-[#d5e3ec]" />
-          <input name="note" placeholder="Nota (opcional)" maxLength={500} className={cn(field, "w-40")} aria-label="Nota" />
-          <button type="submit" formAction={markOrdersAction} name="status" value="en_ruta" className={btn.navy}>
+          <span className="mx-1 hidden h-6 w-px bg-[#d5e3ec] xl:block" />
+          <input name="note" placeholder="Nota (opcional)" maxLength={500} className={cn(field, "w-32")} aria-label="Nota" />
+          <button type="submit" formAction={bulkEnRutaAction} className={btn.navy}>
             <Truck className="size-4" /> En ruta
           </button>
-          <button type="submit" formAction={markOrdersAction} name="status" value="entregado" className={btn.success}>
+          <button type="submit" formAction={bulkEntregadoAction} className={btn.success}>
             <CheckCircle2 className="size-4" /> Entregado
           </button>
         </div>

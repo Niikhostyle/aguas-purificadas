@@ -1,5 +1,7 @@
 "use client";
 
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Printer } from "lucide-react";
 
 /** Toggles every checkbox bound to `formId` (optionally within a group). */
@@ -42,5 +44,38 @@ export function PrintButton({ label = "Imprimir" }: { label?: string }) {
       <Printer className="size-4" />
       {label}
     </button>
+  );
+}
+
+/** Opens WhatsApp in a new tab and records the reminder server-side. */
+export function ReminderLink({
+  href,
+  onRecord,
+  className,
+  children,
+}: {
+  href: string;
+  onRecord: () => Promise<void>;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-busy={pending}
+      className={className}
+      onClick={() =>
+        start(async () => {
+          await onRecord();
+          router.refresh();
+        })
+      }
+    >
+      {children}
+    </a>
   );
 }

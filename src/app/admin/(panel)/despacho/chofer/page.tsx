@@ -51,7 +51,14 @@ export default async function DriverViewPage({
     include: { items: true },
     orderBy: [{ routeStop: "asc" }],
   });
-  if (!selected) orders.sort(compareStops);
+  if (!selected) {
+    orders.sort(
+      (a, b) =>
+        (a.routeId ?? "~").localeCompare(b.routeId ?? "~") ||
+        (a.routeStop ?? 999) - (b.routeStop ?? 999) ||
+        compareStops(a, b),
+    );
+  }
   const pending = orders.filter((o) => o.fulfillmentStatus !== "entregado");
   const done = orders.filter((o) => o.fulfillmentStatus === "entregado");
   const returnTo = selected

@@ -84,11 +84,23 @@ const markSchema = z.object({
 });
 
 export async function markOrdersAction(formData: FormData) {
+  return markWithStatus(formData, formData.get("status"));
+}
+
+export async function bulkEnRutaAction(formData: FormData) {
+  return markWithStatus(formData, "en_ruta");
+}
+
+export async function bulkEntregadoAction(formData: FormData) {
+  return markWithStatus(formData, "entregado");
+}
+
+async function markWithStatus(formData: FormData, status: FormDataEntryValue | null) {
   const { admin, tenantId } = await guard();
   const back = safeReturn(formData.get("returnTo"));
   const parsed = markSchema.safeParse({
     orderIds: formData.getAll("orderIds").map(String),
-    status: formData.get("status"),
+    status,
     note: String(formData.get("note") || "").trim() || undefined,
     bottlesReturned: String(formData.get("bottlesReturned") || "").trim() || undefined,
   });

@@ -1,16 +1,19 @@
 import type { Prisma } from "@prisma/client";
+import { headers } from "next/headers";
 import { BellRing, CalendarClock, MessageCircle, Repeat, UserPlus, Users } from "lucide-react";
 import {
   createRecurringCustomerAction,
-  sendReminderAction,
+  recordReminderAction,
   updateRecurrenceAction,
 } from "./actions";
+import { ReminderLink } from "@/components/admin/client-helpers";
 import { Flash, ModuleDisabled, PageHeader, Pill, StatCard, btn, field } from "@/components/admin/dispatch-ui";
 import { prisma } from "@/lib/db";
 import {
   FREQUENCIES,
   FREQUENCY_LABEL,
   addDaysStr,
+  customerWhatsappHref,
   dateFromStr,
   formatDateCl,
   formatDateTimeCl,
@@ -27,7 +30,7 @@ export default async function RemindersPage({
 }: {
   searchParams: Promise<{ q?: string; ver?: string; ok?: string; error?: string }>;
 }) {
-  const { tenantId, enabled } = await requireTenantModule("recordatorios");
+  const { admin, tenantId, enabled } = await requireTenantModule("recordatorios");
   if (!enabled) return <ModuleDisabled name="Recordatorios / suscripción" />;
   const sp = await searchParams;
   const today = todayCl();
@@ -67,6 +70,10 @@ export default async function RemindersPage({
       _count: true,
     }),
   ]);
+  const host = (await headers()).get("host");
+  const shopUrl = host ? `https://${host}/productos` : "";
+  const reminderText = (name: string, next: string | null) =>
+    `Hola ${name.split(" ")[0]}, te saluda ${admin.tenant.name}. Te toca reponer tu agua el ${formatDateCl(next, "long")}. ¿Te agendamos el despacho? ${shopUrl ? `Podés pedir aquí: ${shopUrl}` : ""}`.trim();
   const overdue = due.filter((c) => toDateStr(c.nextDeliveryDate)! < today).length;
   const freqCount = (f: string) => byFreq.find((r) => r.frequency === f)?._count ?? 0;
 
@@ -119,12 +126,13 @@ export default async function RemindersPage({
                       {late ? "Atrasado · " : next === today ? "Hoy · " : ""}
                       {formatDateCl(next)}
                     </Pill>
-                    <form action={sendReminderAction} target="_blank">
-                      <input type="hidden" name="customerId" value={c.id} />
-                      <button type="submit" className={btn.success}>
-                        <MessageCircle className="size-4" /> Recordar por WhatsApp
-                      </button>
-                    </form>
+                    <ReminderLink
+                      href={customerWhatsappHref(c.phone, reminderText(c.name, next))}
+                      onRecord={recordReminderAction.bind(null, c.id)}
+                      className={btn.success}
+                    >
+                      <MessageCircle className="size-4" /> Recordar por WhatsApp
+                    </ReminderLink>
                   </div>
                 </li>
               );
