@@ -1,0 +1,6 @@
+snapshot_utc=2026-10-11T20:35:50Z
+running_image_id=sha256:857b17b46588b99634942dc81ecac847285e31284201609ae696be1aae3178b5
+deployed_source=fix-origin-354f
+deployed_image=fix-origin-354f
+tags=fix-origin-354f healthy-20261011
+public_status=200

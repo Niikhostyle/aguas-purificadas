@@ -1,10 +1,15 @@
 import { cookies } from "next/headers";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { compareSync, hashSync } from "bcryptjs";
+import { DEMO_TENANT_SLUG } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 const COOKIE_NAME = "aguas_customer_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
+
+/** Stable demo storefront customer — login is credential-free via demo-access. */
+const DEMO_CUSTOMER_EMAIL = "cliente@demo.mibidon.cl";
+const DEMO_CUSTOMER_NAME = "Cliente Demo";
 
 type Payload = {
   customerId: string;
@@ -97,6 +102,46 @@ export async function loginCustomer(
   }
   await setCustomerSession(customer.id, customer.tenantId, customer.email);
   return { ok: true as const, customer };
+}
+
+/**
+ * Open the customer area for the public demo tenant without credentials.
+ * Call only from a Route Handler or Server Action (sets cookies).
+ * Always targets tenant slug `demo` — never other paying tenants.
+ */
+export async function ensureDemoCustomerSession(): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const tenant = await prisma.tenant.findFirst({
+    where: { slug: DEMO_TENANT_SLUG, active: true },
+  });
+  if (!tenant) {
+    return { ok: false, error: "Demo no disponible" };
+  }
+
+  let customer = await prisma.customer.findUnique({
+    where: {
+      tenantId_email: {
+        tenantId: tenant.id,
+        email: DEMO_CUSTOMER_EMAIL,
+      },
+    },
+  });
+
+  if (!customer) {
+    customer = await prisma.customer.create({
+      data: {
+        tenantId: tenant.id,
+        email: DEMO_CUSTOMER_EMAIL,
+        name: DEMO_CUSTOMER_NAME,
+        // Unusable random secret — entry is only via ensureDemoCustomerSession.
+        passwordHash: hashSync(randomBytes(32).toString("hex"), 12),
+      },
+    });
+  }
+
+  await setCustomerSession(customer.id, customer.tenantId, customer.email);
+  return { ok: true };
 }
 
 async function setCustomerSession(

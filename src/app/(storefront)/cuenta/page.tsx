@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   customerLoginAction,
@@ -7,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isDemoTenantSlug } from "@/lib/auth";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { parseModuleFlags } from "@/lib/modules";
 import { requireTenant } from "@/lib/tenant";
@@ -22,6 +24,37 @@ export default async function CuentaPage({
 
   const customer = await getCustomerSession(tenant.id);
   const { ok, error } = await searchParams;
+  const isDemo = isDemoTenantSlug(tenant.slug);
+
+  // Public demo: skip credentials entirely (unless demo-access already failed)
+  if (!customer && isDemo && !error) {
+    redirect("/cuenta/demo-access");
+  }
+
+  if (!customer && isDemo && error) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-12 md:px-6">
+        <h1 className="rc-display text-4xl uppercase text-[var(--brand-deep)]">
+          Área clientes
+        </h1>
+        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+        <p className="mt-6 text-sm text-[#5a6578]">
+          <Link
+            href="/cuenta/demo-access"
+            className="text-[var(--brand)] hover:underline"
+          >
+            Reintentar acceso demo
+          </Link>
+          {" · "}
+          <Link href="/" className="text-[var(--brand)] hover:underline">
+            Volver a la tienda
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12 md:px-6">
@@ -29,8 +62,9 @@ export default async function CuentaPage({
         Área clientes
       </h1>
       <p className="mt-2 text-sm text-[#5a6578]">
-        Registrate o iniciá sesión para guardar tu perfil. El checkout con
-        cuenta es opcional.
+        {isDemo
+          ? "En la demo entrá sin registro. El checkout con cuenta sigue siendo opcional."
+          : "Registrate o iniciá sesión para guardar tu perfil. El checkout con cuenta es opcional."}
       </p>
 
       {ok ? (
@@ -51,11 +85,19 @@ export default async function CuentaPage({
             {customer.name}
           </p>
           <p className="text-sm text-[#5a6578]">{customer.email}</p>
-          <form action={customerLogoutAction} className="mt-6">
-            <Button type="submit" variant="outline">
-              Cerrar sesión
-            </Button>
-          </form>
+          {isDemo ? (
+            <p className="mt-6 text-sm text-[#5a6578]">
+              <Link href="/" className="text-[var(--brand)] hover:underline">
+                Seguir comprando en la demo
+              </Link>
+            </p>
+          ) : (
+            <form action={customerLogoutAction} className="mt-6">
+              <Button type="submit" variant="outline">
+                Cerrar sesión
+              </Button>
+            </form>
+          )}
         </div>
       ) : (
         <div className="mt-8 grid gap-8">
