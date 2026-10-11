@@ -13,10 +13,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    deploy:
-      resources:
-        limits:
-          memory: 384M
     mem_limit: 384m
 
   app:
@@ -35,16 +31,15 @@ services:
       RUN_SEED: ${RUN_SEED:-true}
       NODE_OPTIONS: --max-old-space-size=512
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - mibidon_uploads:/app/public/uploads
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     mem_limit: 768m
 
+  # Optional: only if nothing else owns :80/:443 on the host
+  # docker compose -f docker-compose.prod.yml --profile edge up -d
   caddy:
+    profiles: ["edge"]
     image: caddy:2-alpine
     restart: unless-stopped
     depends_on:
