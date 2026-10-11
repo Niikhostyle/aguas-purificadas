@@ -20,6 +20,7 @@ export function DataTable<T>({
   caption,
   empty,
   rowClassName,
+  minWidth = 560,
 }: {
   columns: DataColumn<T>[];
   rows: T[];
@@ -27,11 +28,13 @@ export function DataTable<T>({
   caption?: string;
   empty?: ReactNode;
   rowClassName?: (row: T) => string;
+  /** Pixel width below which the table scrolls horizontally. */
+  minWidth?: number;
 }) {
   if (rows.length === 0 && empty) return <>{empty}</>;
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[560px] border-collapse text-sm">
+      <table className="w-full border-collapse text-sm" style={{ minWidth }}>
         {caption ? <caption className="sr-only">{caption}</caption> : null}
         <thead>
           <tr className="border-b border-[#e8f0f5] bg-[#f7fafc]">

@@ -11,7 +11,7 @@ export function BarChart({
   height?: number;
 }) {
   const max = Math.max(1, ...data.map((d) => d.value));
-  const labelEvery = data.length > 16 ? Math.ceil(data.length / 8) : 1;
+  const labelEvery = data.length > 8 ? Math.ceil(data.length / 7) : 1;
   return (
     <figure>
       <div

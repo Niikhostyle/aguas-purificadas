@@ -95,7 +95,7 @@ export default async function PlatformAdminPage() {
           <KpiCard
             label="Empresas"
             value={tenants.length}
-            hint={`${newThisMonth} nuevas este mes`}
+            hint={`${newThisMonth} ${newThisMonth === 1 ? "nueva" : "nuevas"} este mes`}
             icon={<Building2 />}
             tone="navy"
             href="/admin/plataforma/empresas"
@@ -202,6 +202,7 @@ export default async function PlatformAdminPage() {
           >
             <DataTable
               caption="Empresas con más pedidos"
+              minWidth={320}
               rows={topTenants}
               rowKey={(r) => r.tenantId}
               empty={
