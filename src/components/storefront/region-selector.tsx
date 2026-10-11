@@ -5,6 +5,10 @@ import type { RegionOption } from "@/lib/modules";
 
 const COOKIE = "mibidon_region";
 
+function writeRegionCookie(id: string) {
+  document.cookie = `${COOKIE}=${encodeURIComponent(id)}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+}
+
 export function RegionSelector({ regions }: { regions: RegionOption[] }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<RegionOption | null>(null);
@@ -15,12 +19,14 @@ export function RegionSelector({ regions }: { regions: RegionOption[] }) {
     );
     const id = match ? decodeURIComponent(match[1]) : "";
     const found = regions.find((r) => r.id === id) || null;
+    // Cookie is only readable after hydration, so it must sync in an effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelected(found);
     if (!found && regions.length) setOpen(true);
   }, [regions]);
 
   const choose = (r: RegionOption) => {
-    document.cookie = `${COOKIE}=${encodeURIComponent(r.id)}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    writeRegionCookie(r.id);
     setSelected(r);
     setOpen(false);
   };

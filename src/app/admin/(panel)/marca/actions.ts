@@ -95,7 +95,7 @@ export async function updateBrandingAction(formData: FormData) {
     }
   }
 
-  let heroSlides: TenantHeroSlide[] = [];
+  const heroSlides: TenantHeroSlide[] = [];
   try {
     const rawJson = str("heroSlidesJson") || "[]";
     const draft = parseHeroSlides(JSON.parse(rawJson));
