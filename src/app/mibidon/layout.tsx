@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./landing.css";
 
-const display = Plus_Jakarta_Sans({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
-  variable: "--font-mb-display",
-});
-
-const body = Source_Sans_3({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-mb-body",
+  variable: "--font-mb-jakarta",
 });
 
 export const metadata: Metadata = {
-  title: "MiBidón · Tienda white-label para embotelladoras de agua",
+  title: "MiBidón · Agua purificada a domicilio en Cauquenes",
   description:
-    "Multiplica tus ventas de agua purificada. eCommerce white-label con WebPay, rutas por comuna y activación en 24 horas.",
+    "Hidratación de primera, directo a tu puerta en Cauquenes. Recargas 20L, envases nuevos y packs. Pedí por WhatsApp.",
 };
 
 export default function MiBidonLayout({
@@ -26,20 +20,13 @@ export default function MiBidonLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-        rel="stylesheet"
-      />
-      <div
-        className={`${display.variable} ${body.variable} mb-shell min-h-screen antialiased`}
-        style={{
-          fontFamily: "var(--font-mb-body), 'Source Sans 3', sans-serif",
-        }}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      className={`${jakarta.variable} mb-shell min-h-screen antialiased`}
+      style={{
+        fontFamily: "var(--font-mb-jakarta), 'Plus Jakarta Sans', sans-serif",
+      }}
+    >
+      {children}
+    </div>
   );
 }
