@@ -57,6 +57,56 @@ function resolveTenantSlug(request: NextRequest): string | null {
   return null;
 }
 
+/** Absolute URL for middleware rewrite/redirect with a public host. */
+function publicAbsoluteUrl(request: NextRequest, pathname: string): URL {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+
+  const forwardedHost = (
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    ""
+  )
+    .split(",")[0]
+    ?.trim();
+  const hostname = (forwardedHost || "").replace(/:\d+$/, "").toLowerCase();
+  const unusable =
+    !hostname ||
+    hostname === "0.0.0.0" ||
+    hostname === "::" ||
+    hostname === "[::]";
+
+  if (forwardedHost && !unusable) {
+    url.host = forwardedHost;
+    const proto = (
+      request.headers.get("x-forwarded-proto") || ""
+    )
+      .split(",")[0]
+      ?.trim()
+      .toLowerCase();
+    if (proto === "http" || proto === "https") {
+      url.protocol = `${proto}:`;
+    } else if (process.env.NODE_ENV === "production") {
+      url.protocol = "https:";
+    }
+    return url;
+  }
+
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    try {
+      const base = new URL(appUrl);
+      url.protocol = base.protocol;
+      url.host = base.host;
+      return url;
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return url;
+}
+
 export function middleware(request: NextRequest) {
   const slug = resolveTenantSlug(request);
   const host = request.headers.get("host") || "";
@@ -72,13 +122,12 @@ export function middleware(request: NextRequest) {
     requestHeaders.set(PLATFORM_HEADER, "1");
   }
 
-  // Apex marketing: keep URL `/` but serve /mibidon landing
+  // Apex marketing: keep URL `/` but serve /mibidon landing.
+  // Next.js 16 middleware rewrites require absolute URLs. Build one from the
+  // public Host / x-forwarded-* (never the Docker bind address 0.0.0.0).
   if (platformHost && pathname === "/") {
-    // Path-only rewrite. Cloning request.nextUrl keeps the Docker bind host
-    // (0.0.0.0:3000); if that absolute URL ever diverges from the public Host,
-    // Next treats the rewrite as an external proxy and HTTPS apex returns 500.
     return applySecurityHeaders(
-      NextResponse.rewrite("/mibidon", {
+      NextResponse.rewrite(publicAbsoluteUrl(request, "/mibidon"), {
         request: { headers: requestHeaders },
       }),
     );
@@ -99,9 +148,9 @@ export function middleware(request: NextRequest) {
       (p) => pathname === p || pathname.startsWith(`${p}/`),
     )
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return applySecurityHeaders(NextResponse.redirect(url));
+    return applySecurityHeaders(
+      new NextResponse(null, { status: 307, headers: { Location: "/" } }),
+    );
   }
 
   const response = NextResponse.next({
