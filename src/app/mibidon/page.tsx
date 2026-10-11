@@ -8,71 +8,98 @@ export const metadata: Metadata = {
 };
 
 const DEMO_HREF = "https://demo.mibidon.cl";
-const DEMO_FALLBACK = "/?tenant=rio-claro";
-const CONTACT_HREF = "mailto:hola@mibidon.cl?subject=Solicitar%20demo%20MiBidón";
+const CONTACT_HREF =
+  "mailto:hola@mibidon.cl?subject=Solicitar%20demo%20MiBidón";
 const ADMIN_HREF = "/admin/login?tenant=plataforma";
 
-const features = [
+const services = [
   {
-    title: "Multi-empresa",
-    body: "Cada cliente de agua opera su propia tienda, catálogo y pedidos, aislados por tenant.",
+    title: "Tienda con tu marca",
+    body: "Colores, logo y textos de tu empresa. El cliente compra sintiendo que está en tu sitio.",
   },
   {
     title: "Subdominio listo",
-    body: "cliente.mibidon.cl desde el día uno. Dominio propio del cliente como plus después.",
+    body: "cliente.mibidon.cl desde el primer día. Dominio propio como plus cuando lo necesites.",
   },
   {
-    title: "Carrito y despacho",
-    body: "Checkout con zonas de entrega y totales claros, pensado para botellones a domicilio.",
+    title: "Catálogo y precios",
+    body: "Botellones, dispensadores y accesorios con fotos, stock activo y orden a tu medida.",
+  },
+  {
+    title: "Carrito y zonas",
+    body: "Checkout con comunas de despacho y costo de envío — pensado para agua a domicilio.",
   },
   {
     title: "WebPay",
-    body: "Cobro con Transbank sandbox o mock para pruebas; listo para credenciales reales.",
+    body: "Cobro online con Transbank (sandbox o producción). También mock para pruebas internas.",
   },
   {
-    title: "Panel de marca",
-    body: "Colores, logo, textos y productos editables por la empresa — sin tocar código.",
+    title: "Panel empresa",
+    body: "Pedidos, productos y marca editables por tu equipo, sin depender de un desarrollador.",
+  },
+  {
+    title: "Multi-empresa",
+    body: "Un hosting, N tiendas aisladas. Ideal si operás varias marcas o franquicias de agua.",
   },
   {
     title: "Super-admin MiBidón",
-    body: "Alta de empresas, admins y supervisión desde un solo panel de plataforma.",
+    body: "Alta de empresas, admins y supervisión centralizada desde un solo panel.",
+  },
+];
+
+const steps = [
+  {
+    n: "01",
+    title: "Alta de tu empresa",
+    body: "Creamos tu tenant, subdominio y acceso de admin en minutos.",
+  },
+  {
+    n: "02",
+    title: "Cargás catálogo y marca",
+    body: "Subís productos, zonas de despacho y la identidad visual de tu flota.",
+  },
+  {
+    n: "03",
+    title: "Vendés online",
+    body: "Tus clientes piden y pagan. Vos gestionás pedidos desde el panel.",
   },
 ];
 
 export default function MiBidonLandingPage() {
   return (
-    <div className="min-h-screen bg-[#f7fbfd] text-[#1d243f]">
-      {/* Ambient water field */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_10%_0%,#00b1e233_0%,transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_10%,#12326e22_0%,transparent_50%),linear-gradient(180deg,#e8f7fc_0%,#f7fbfd_45%,#ffffff_100%)]"
-      />
-
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 md:px-8">
-        <p className="rc-display text-2xl font-semibold tracking-wide text-[#12326e] md:text-3xl">
-          MiBidón
-        </p>
-        <nav className="flex items-center gap-4 text-sm font-medium text-[#12326e]">
-          <a href="#como-funciona" className="hidden hover:text-[#00b1e2] sm:inline">
-            Cómo funciona
-          </a>
-          <Link
-            href={ADMIN_HREF}
-            className="hover:text-[#00b1e2]"
-          >
-            Acceso empresas
-          </Link>
+    <>
+      {/* —— Header (VAO-like nav) —— */}
+      <header className="sticky top-0 z-40 border-b border-[#d5e3ec]/80 bg-[#f7fbfd]/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
           <a
-            href={DEMO_HREF}
-            className="rounded-md bg-[#00b1e2] px-3.5 py-2 text-white transition hover:bg-[#0099c7]"
+            href="/"
+            className="text-2xl tracking-tight text-[#12326e] md:text-[1.75rem]"
+            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
           >
-            Ver demo
+            MiBidón
           </a>
-        </nav>
+          <nav className="flex items-center gap-3 text-sm font-semibold text-[#12326e] sm:gap-5">
+            <a href="#servicios" className="hidden hover:text-[#00b1e2] sm:inline">
+              Qué incluye
+            </a>
+            <a href="#como" className="hidden hover:text-[#00b1e2] md:inline">
+              Cómo funciona
+            </a>
+            <Link href={ADMIN_HREF} className="hover:text-[#00b1e2]">
+              Acceso
+            </Link>
+            <a
+              href={DEMO_HREF}
+              className="rounded-md bg-[#00b1e2] px-3.5 py-2 text-white transition hover:bg-[#0099c7]"
+            >
+              Ver demo
+            </a>
+          </nav>
+        </div>
       </header>
 
-      {/* Hero — one composition, brand first */}
-      <section className="relative overflow-hidden">
+      {/* —— 1. Main banner / hero —— */}
+      <section className="relative min-h-[88vh] overflow-hidden">
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -80,160 +107,297 @@ export default function MiBidonLandingPage() {
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(18,50,110,0.92)_0%,rgba(0,177,226,0.55)_48%,rgba(18,50,110,0.35)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(18,50,110,0.93)_0%,rgba(0,177,226,0.5)_52%,rgba(18,50,110,0.4)_100%)]" />
         </div>
-
-        <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:justify-center md:px-8 md:pb-24 md:pt-20">
-          <p className="animate-fade-up rc-display text-6xl font-semibold leading-none tracking-wide text-white drop-shadow-sm sm:text-7xl md:text-8xl">
-            MiBidón
+        <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-5 pb-16 pt-28 md:justify-center md:px-8 md:pb-28">
+          <p className="animate-fade-up text-xs font-bold uppercase tracking-[0.22em] text-white/80">
+            Ecommerce · Agua a domicilio · White-label
           </p>
-          <h1 className="animate-fade-up mt-5 max-w-xl text-2xl font-light leading-snug text-white/95 sm:text-3xl md:text-4xl [animation-delay:80ms]">
-            Tu tienda de agua online, con tu marca
+          <h1
+            className="animate-fade-up mt-4 max-w-3xl text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl [animation-delay:60ms]"
+            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+          >
+            En un mercado saturado, tu marca de agua necesita su propia tienda
           </h1>
-          <p className="animate-fade-up mt-4 max-w-lg text-base leading-relaxed text-white/85 md:text-lg [animation-delay:140ms]">
-            Plataforma white-label para empresas de agua purificada: catálogo,
-            carrito, WebPay y panel — en subdominio propio.
+          <p className="animate-fade-up mt-5 max-w-xl text-lg text-white/85 md:text-xl [animation-delay:120ms]">
+            MiBidón es la plataforma white-label para vender botellones online:
+            catálogo, carrito, WebPay y panel — con tu identidad.
           </p>
-          <div className="animate-fade-up mt-9 flex flex-wrap gap-3 [animation-delay:200ms]">
+          <div className="animate-fade-up mt-9 flex flex-wrap gap-3 [animation-delay:180ms]">
             <a
               href={DEMO_HREF}
-              className="inline-flex items-center rounded-md bg-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-[#12326e] transition hover:bg-[#e8f7fc]"
+              className="inline-flex items-center rounded-md bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#12326e] transition hover:bg-[#e8f7fc]"
             >
               Ver demo
             </a>
             <a
               href={CONTACT_HREF}
-              className="inline-flex items-center rounded-md border border-white/70 bg-white/10 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition hover:bg-white/20"
+              className="inline-flex items-center rounded-md border border-white/70 bg-white/10 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition hover:bg-white/20"
             >
               Solicitar demo
             </a>
           </div>
-          <p className="animate-fade-up mt-4 text-sm text-white/70 [animation-delay:260ms]">
-            Demo en vivo:{" "}
-            <a href={DEMO_HREF} className="underline decoration-white/40 underline-offset-2 hover:text-white">
-              demo.mibidon.cl
-            </a>
-            <span className="mx-1.5 opacity-50">·</span>
-            <Link href={DEMO_FALLBACK} className="underline decoration-white/40 underline-offset-2 hover:text-white">
-              abrir con ?tenant=
-            </Link>
-          </p>
         </div>
       </section>
 
-      <section
-        id="como-funciona"
-        className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28"
-      >
-        <p className="rc-display text-sm font-semibold uppercase tracking-[0.18em] text-[#00b1e2]">
-          Para tu negocio
-        </p>
-        <h2 className="rc-display mt-2 text-4xl text-[#12326e] md:text-5xl">
-          Todo lo que necesita una flota de botellones
-        </h2>
-        <p className="mt-3 max-w-2xl text-[#5a6578]">
-          MiBidón hospeda N empresas en un solo servidor. Cada una vende con su
-          identidad; vos operás la plataforma.
-        </p>
-
-        <ul className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, i) => (
-            <li
-              key={f.title}
-              className="animate-fade-up border-t border-[#d5e3ec] pt-5"
-              style={{ animationDelay: `${i * 60}ms` }}
+      {/* —— 2. Mid CTA strip (VAO “¿Estás listo…”) —— */}
+      <section className="bg-[#12326e] text-white">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-14 md:flex-row md:items-center md:px-8 md:py-16">
+          <div className="max-w-2xl">
+            <h2
+              className="text-3xl leading-tight tracking-tight md:text-4xl"
+              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
             >
-              <h3 className="rc-display text-2xl text-[#12326e]">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#5a6578]">
-                {f.body}
-              </p>
-            </li>
-          ))}
-        </ul>
+              ¿Listo para que tus clientes pidan agua en dos clics?
+            </h2>
+            <p className="mt-3 text-white/75">
+              No bajes la meta: subí el canal. Probá la demo en vivo y pedí tu
+              espacio MiBidón.
+            </p>
+          </div>
+          <a
+            href={DEMO_HREF}
+            className="shrink-0 rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#33c1e8]"
+          >
+            Entrar a la demo
+          </a>
+        </div>
       </section>
 
+      {/* —— 3. Services grid (VAO services-slide pattern, no client logos) —— */}
+      <section id="servicios" className="bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
+            Qué hace MiBidón
+          </p>
+          <h2
+            className="mt-3 max-w-3xl text-3xl leading-tight tracking-tight text-[#12326e] md:text-5xl"
+            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+          >
+            Una buena plataforma hace a tu marca de agua memorable e
+            indispensable
+          </h2>
+          <p className="mt-4 max-w-2xl text-[#5a6578]">
+            En MiBidón somos especialistas en ecommerce para agua purificada a
+            domicilio. Esto es lo que incluye:
+          </p>
+
+          <ul className="mt-14 grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((s, i) => (
+              <li
+                key={s.title}
+                className="group border border-[#d5e3ec] bg-[#f7fbfd] p-6 transition hover:bg-[#e8f7fc] sm:-ml-px sm:-mt-px"
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <span className="text-xs font-bold text-[#00b1e2]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3
+                  className="mt-3 text-xl tracking-tight text-[#12326e]"
+                  style={{
+                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
+                  }}
+                >
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#5a6578]">
+                  {s.body}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* —— 4. Banner cover / proof (no portfolio logos) —— */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/rio-claro/hero-2.jpg"
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#12326e]/88" />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
+          <h2
+            className="max-w-2xl text-3xl tracking-tight text-white md:text-5xl"
+            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+          >
+            Hecho para flotas de botellones, no para tiendas genéricas
+          </h2>
+          <p className="mt-4 max-w-xl text-lg text-white/80">
+            Multi-tenant, subdominios, zonas de despacho y WebPay. Un solo
+            hosting; cada empresa vende con su marca.
+          </p>
+          <dl className="mt-12 grid gap-8 sm:grid-cols-3">
+            {[
+              { k: "N empresas", v: "Un solo servidor" },
+              { k: "Subdominio", v: "cliente.mibidon.cl" },
+              { k: "Pagos", v: "WebPay listo" },
+            ].map((stat) => (
+              <div key={stat.k} className="border-t border-white/25 pt-4">
+                <dt
+                  className="text-2xl text-white md:text-3xl"
+                  style={{
+                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
+                  }}
+                >
+                  {stat.k}
+                </dt>
+                <dd className="mt-1 text-sm text-white/70">{stat.v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* —— 5. How it works —— */}
+      <section id="como" className="bg-[#f7fbfd]">
+        <div className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
+            Cómo funciona
+          </p>
+          <h2
+            className="mt-3 text-3xl tracking-tight text-[#12326e] md:text-5xl"
+            style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+          >
+            Tres pasos para vender online
+          </h2>
+          <ol className="mt-14 grid gap-10 md:grid-cols-3">
+            {steps.map((step) => (
+              <li key={step.n} className="border-t-2 border-[#00b1e2] pt-6">
+                <span
+                  className="text-4xl text-[#00b1e2]"
+                  style={{
+                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
+                  }}
+                >
+                  {step.n}
+                </span>
+                <h3
+                  className="mt-3 text-2xl text-[#12326e]"
+                  style={{
+                    fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif",
+                  }}
+                >
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-[#5a6578]">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* —— 6. Demo showcase + CTA —— */}
       <section className="border-y border-[#d5e3ec] bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-2 md:items-center md:px-8 md:py-24">
           <div>
-            <p className="rc-display text-sm font-semibold uppercase tracking-[0.18em] text-[#00b1e2]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00b1e2]">
               Demo para prospectos
             </p>
-            <h2 className="rc-display mt-2 text-4xl text-[#12326e] md:text-5xl">
+            <h2
+              className="mt-3 text-3xl tracking-tight text-[#12326e] md:text-5xl"
+              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+            >
               Mirá la tienda como la vería tu cliente
             </h2>
             <p className="mt-4 text-[#5a6578]">
-              Clon funcional al estilo aguasrioclaro.cl: home, grilla, detalle,
-              carrito y checkout. Es el tenant de demostración Río Claro.
+              Demo pública con home, grilla, detalle, carrito y checkout. Entrá
+              a{" "}
+              <a href={DEMO_HREF} className="font-semibold text-[#00b1e2] hover:underline">
+                demo.mibidon.cl
+              </a>
+              .
             </p>
             <a
               href={DEMO_HREF}
-              className="mt-8 inline-flex rounded-md bg-[#00b1e2] px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#0099c7]"
+              className="mt-8 inline-flex rounded-md bg-[#00b1e2] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#0099c7]"
             >
-              Entrar a la demo
+              Abrir demo.mibidon.cl
             </a>
           </div>
           <a
             href={DEMO_HREF}
-            className="group relative block overflow-hidden border border-[#d5e3ec] bg-[#f7fbfd] shadow-[0_20px_50px_-30px_rgba(18,50,110,0.45)] transition"
+            className="group relative block overflow-hidden border border-[#d5e3ec] bg-[#f7fbfd] shadow-[0_24px_60px_-36px_rgba(18,50,110,0.5)]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/rio-claro/hero-2.jpg"
-              alt="Vista previa de la tienda demo Río Claro"
+              alt="Vista previa de la tienda demo MiBidón"
               className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
             />
-            <span className="absolute bottom-4 left-4 rounded-md bg-[#12326e]/px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
+            <span className="absolute bottom-4 left-4 rounded-md bg-[#12326e] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
               demo.mibidon.cl
             </span>
           </a>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-        <div className="relative overflow-hidden rounded-sm bg-[#12326e] px-8 py-14 text-white md:px-14">
-          <div
-            aria-hidden
-            className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#00b1e2]/40 blur-3xl"
-          />
-          <div className="relative max-w-xl">
-            <h2 className="rc-display text-4xl md:text-5xl">
-              ¿Listo para vender agua online?
+      {/* —— 7. Final CTA banner —— */}
+      <section className="bg-[#00b1e2]">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-16 md:flex-row md:items-center md:px-8 md:py-20">
+          <div className="max-w-xl text-white">
+            <h2
+              className="text-3xl tracking-tight md:text-4xl"
+              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+            >
+              Subamos el volumen de tus pedidos
             </h2>
-            <p className="mt-3 text-white/80">
+            <p className="mt-3 text-white/90">
               Pedí una demo guiada o entrá al panel si ya sos partner MiBidón.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={CONTACT_HREF}
-                className="inline-flex rounded-md bg-[#00b1e2] px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#33c1e8]"
-              >
-                Solicitar demo
-              </a>
-              <Link
-                href={ADMIN_HREF}
-                className="inline-flex rounded-md border border-white/40 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/10"
-              >
-                Panel plataforma
-              </Link>
-            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={CONTACT_HREF}
+              className="rounded-md bg-[#12326e] px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#0d2454]"
+            >
+              Solicitar demo
+            </a>
+            <Link
+              href={ADMIN_HREF}
+              className="rounded-md border border-white/80 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/15"
+            >
+              Panel plataforma
+            </Link>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-[#d5e3ec] bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm text-[#5a6578] md:flex-row md:items-center md:justify-between md:px-8">
-          <p className="rc-display text-xl text-[#12326e]">MiBidón</p>
-          <p>
-            mibidon.cl · tiendas en{" "}
-            <span className="text-[#12326e]">cliente.mibidon.cl</span>
-          </p>
-          <p>
-            <a href={CONTACT_HREF} className="text-[#00b1e2] hover:underline">
-              hola@mibidon.cl
-            </a>
-          </p>
+      {/* —— Footer —— */}
+      <footer className="bg-[#12326e] text-white/75">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-10 md:flex-row md:items-end md:justify-between md:px-8">
+          <div>
+            <p
+              className="text-2xl text-white"
+              style={{ fontFamily: "var(--font-mb-display), 'Archivo Black', sans-serif" }}
+            >
+              MiBidón
+            </p>
+            <p className="mt-2 max-w-sm text-sm">
+              Plataforma white-label para empresas de agua purificada.
+              Tiendas en{" "}
+              <span className="text-white">cliente.mibidon.cl</span>.
+            </p>
+          </div>
+          <div className="text-sm">
+            <p>
+              <a href={CONTACT_HREF} className="text-[#7fd4f0] hover:underline">
+                hola@mibidon.cl
+              </a>
+            </p>
+            <p className="mt-1">
+              Demo:{" "}
+              <a href={DEMO_HREF} className="text-[#7fd4f0] hover:underline">
+                demo.mibidon.cl
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
