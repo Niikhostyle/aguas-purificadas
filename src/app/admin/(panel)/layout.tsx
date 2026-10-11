@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { AdminShell, type AdminNotification } from "@/components/admin/shell/admin-shell";
-import { isSuperAdmin, requireAdmin } from "@/lib/auth";
+import { isDemoTenantSlug, isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { adminThemeStyle } from "@/lib/branding";
 import { prisma } from "@/lib/db";
 import { DISPATCHABLE_PAYMENT, addDaysStr, dateFromStr, todayCl } from "@/lib/dispatch";
 import { parseModuleFlags } from "@/lib/modules";
+import { getTenantSlugFromHeaders } from "@/lib/tenant";
 
 export default async function AdminPanelLayout({
   children,
@@ -12,7 +13,11 @@ export default async function AdminPanelLayout({
   children: React.ReactNode;
 }) {
   const admin = await requireAdmin();
-  if (!admin) redirect("/admin/login");
+  if (!admin) {
+    const slug = await getTenantSlugFromHeaders();
+    if (isDemoTenantSlug(slug)) redirect("/admin/demo-access");
+    redirect("/admin/login");
+  }
 
   const superAdmin = isSuperAdmin(admin);
   const theme = adminThemeStyle();

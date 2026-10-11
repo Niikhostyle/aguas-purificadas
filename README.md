@@ -35,6 +35,7 @@ El seed **no** incluye contraseñas por defecto. Requiere variables `SEED_SUPER_
 
 | Rol | Entrada |
 |-----|---------|
+| Demo pública (sin credenciales) | `demo.mibidon.cl/admin` o `/admin/demo-access` |
 | Super-admin plataforma | `/admin/login` (modo plataforma, sin slug) |
 | Admin empresa | `/admin/login` con slug del tenant |
 

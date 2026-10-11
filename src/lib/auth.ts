@@ -6,6 +6,13 @@ import { compareSync } from "bcryptjs";
 const COOKIE_NAME = "aguas_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
+/** Public demo tenant — admin panel is open, no credentials. */
+export const DEMO_TENANT_SLUG = "demo";
+
+export function isDemoTenantSlug(slug: string | null | undefined): boolean {
+  return (slug || "").trim().toLowerCase() === DEMO_TENANT_SLUG;
+}
+
 type SessionPayload = {
   adminId: string;
   tenantId: string;
@@ -45,29 +52,14 @@ function verify(token: string): SessionPayload | null {
   }
 }
 
-export async function loginAdmin(
-  tenantSlug: string,
-  email: string,
-  password: string,
-) {
-  const generic = "Credenciales inválidas";
-  const tenant = await prisma.tenant.findFirst({
-    where: { slug: tenantSlug, active: true },
-  });
-  if (!tenant) return { ok: false as const, error: generic };
-
-  const admin = await prisma.adminUser.findUnique({
-    where: {
-      tenantId_email: { tenantId: tenant.id, email: email.toLowerCase() },
-    },
-  });
-  if (!admin || !compareSync(password, admin.passwordHash)) {
-    return { ok: false as const, error: generic };
-  }
-
+async function setAdminSessionCookie(admin: {
+  id: string;
+  tenantId: string;
+  email: string;
+}) {
   const token = sign({
     adminId: admin.id,
-    tenantId: tenant.id,
+    tenantId: admin.tenantId,
     email: admin.email,
     exp: Date.now() + MAX_AGE_SECONDS * 1000,
   });
@@ -80,7 +72,65 @@ export async function loginAdmin(
     path: "/",
     maxAge: MAX_AGE_SECONDS,
   });
+}
 
+/**
+ * Open the company admin panel for the public demo tenant without credentials.
+ * Call only from a Route Handler or Server Action (sets cookies).
+ */
+export async function ensureDemoAdminSession(): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const tenant = await prisma.tenant.findFirst({
+    where: { slug: DEMO_TENANT_SLUG, active: true },
+  });
+  if (!tenant) {
+    return { ok: false, error: "Demo no disponible" };
+  }
+
+  const admin = await prisma.adminUser.findFirst({
+    where: {
+      tenantId: tenant.id,
+      role: { not: "super_admin" },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!admin) {
+    return { ok: false, error: "Demo no disponible" };
+  }
+
+  await setAdminSessionCookie(admin);
+  return { ok: true };
+}
+
+export async function loginAdmin(
+  tenantSlug: string,
+  email: string,
+  password: string,
+) {
+  const generic = "Credenciales inválidas";
+  const slug = tenantSlug.trim().toLowerCase();
+
+  // Public demo: no password / email required
+  if (isDemoTenantSlug(slug)) {
+    return ensureDemoAdminSession();
+  }
+
+  const tenant = await prisma.tenant.findFirst({
+    where: { slug, active: true },
+  });
+  if (!tenant) return { ok: false as const, error: generic };
+
+  const admin = await prisma.adminUser.findUnique({
+    where: {
+      tenantId_email: { tenantId: tenant.id, email: email.toLowerCase() },
+    },
+  });
+  if (!admin || !compareSync(password, admin.passwordHash)) {
+    return { ok: false as const, error: generic };
+  }
+
+  await setAdminSessionCookie(admin);
   return { ok: true as const, tenant };
 }
 
