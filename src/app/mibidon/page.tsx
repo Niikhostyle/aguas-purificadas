@@ -38,6 +38,7 @@ import { RoiCalculator } from "@/components/mibidon/roi-calculator";
 import { whatsappHref } from "@/lib/whatsapp";
 
 const DEMO_HREF = "https://demo.mibidon.cl";
+const STATIC_EXAMPLE_HREF = "/landing-premium.html";
 const CLIENT_LOGIN_HREF = "/admin/login?tenant=plataforma";
 const CONTACT_MAIL = "mailto:hola@mibidon.cl";
 
@@ -874,6 +875,7 @@ export default function MiBidonLandingPage() {
             <a href="#plataforma" className="hover:text-blue-700">Plataforma</a>
             <a href="#precios" className="hover:text-blue-700">Precios</a>
             <a href={DEMO_HREF} className="hover:text-blue-700">Ejemplo de tienda</a>
+            <a href={STATIC_EXAMPLE_HREF} className="hover:text-blue-700">Otro diseño de tienda</a>
             <Link href={CLIENT_LOGIN_HREF} className="hover:text-blue-700">Acceso clientes</Link>
             <a href={CONTACT_MAIL} className="flex items-center gap-1.5 hover:text-blue-700">
               <Mail className="size-4" /> hola@mibidon.cl
