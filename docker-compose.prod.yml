@@ -31,6 +31,7 @@ services:
       WEBPAY_CREDENTIALS_KEY: ${WEBPAY_CREDENTIALS_KEY:-}
       CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY:-}
       RUN_SEED: ${RUN_SEED:-false}
+      NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-56900000000}
       NODE_OPTIONS: --max-old-space-size=512
     ports:
       # 3000 often taken by other apps on shared VPS (e.g. veotv)
