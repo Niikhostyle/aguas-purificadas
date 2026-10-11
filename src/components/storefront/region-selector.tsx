@@ -75,15 +75,13 @@ export function RegionSelector({ regions }: { regions: RegionOption[] }) {
                 </li>
               ))}
             </ul>
-            {selected ? (
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="mt-4 w-full text-sm font-semibold text-[#5a6578] hover:text-[var(--brand)]"
-              >
-                Cerrar
-              </button>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="mt-4 w-full text-sm font-semibold text-[#5a6578] hover:text-[var(--brand)]"
+            >
+              {selected ? "Cerrar" : "Ahora no"}
+            </button>
           </div>
         </div>
       ) : null}
