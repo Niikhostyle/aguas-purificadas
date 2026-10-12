@@ -49,63 +49,70 @@ export function ProductGrid({
 
   return (
     <ul className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-      {products.map((product, index) => (
+      {products.map((product, index) => {
+        const href = `/productos/${product.slug}`;
+        const soldOut = !product.active || (product.stock !== null && product.stock <= 0);
+        return (
         <li
           key={product.id}
           className="sf-enter sf-card sf-card-hover group flex flex-col overflow-hidden"
           style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
         >
-          <Link href={`/productos/${product.slug}`} className="flex flex-1 flex-col focus-visible:outline-offset-[-2px]">
-            <div className="relative m-2 mb-0 aspect-square overflow-hidden rounded-[calc(var(--radius)*1.4)] bg-[radial-gradient(120%_90%_at_50%_15%,#fff_0%,var(--mist)_100%)]">
-              <DiscountRibbon price={prices?.[product.id]} />
-              {product.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  loading="lazy"
-                  className="h-full w-full object-contain p-5 mix-blend-multiply transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-[var(--brand)]">
-                  <Droplets className="size-16 opacity-40" aria-label="Sin imagen" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-1 flex-col px-5 pb-5 pt-4 text-center">
-              <h3 className="rc-display text-xl uppercase leading-tight text-[var(--brand-deep)]">
-                {product.name}
-              </h3>
-              <p className="mt-2">
-                <PriceTag priceClp={product.priceClp} price={prices?.[product.id]} />
-              </p>
-              {product.description ? (
-                <p className="mt-3 line-clamp-3 text-left text-xs leading-relaxed text-[#5a6578]">
-                  {product.description}
-                </p>
-              ) : null}
-            </div>
+          <Link
+            href={href}
+            tabIndex={-1}
+            aria-hidden
+            className="relative m-2 mb-0 block aspect-square overflow-hidden rounded-[calc(var(--radius)*1.4)] bg-[radial-gradient(120%_90%_at_50%_15%,#fff_0%,var(--mist)_100%)]"
+          >
+            <DiscountRibbon price={prices?.[product.id]} />
+            {product.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                loading="lazy"
+                className="h-full w-full object-contain p-5 mix-blend-multiply transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[var(--brand)]">
+                <Droplets className="size-16 opacity-40" aria-label="Sin imagen" />
+              </div>
+            )}
           </Link>
-          <div className="grid grid-cols-[1fr_auto] gap-2 px-5 pb-5">
+          <div className="flex flex-1 flex-col px-5 pb-4 pt-4 text-center">
+            <h3 className="rc-display text-xl uppercase leading-tight text-[var(--brand-deep)]">
+              <Link href={href} className="hover:text-[var(--brand)] focus-visible:outline-offset-2">
+                {product.name}
+              </Link>
+            </h3>
+            <p className="mt-2">
+              <PriceTag priceClp={product.priceClp} price={prices?.[product.id]} />
+            </p>
+            {product.description ? (
+              <p className="mt-3 line-clamp-3 text-left text-xs leading-relaxed text-[#5a6578]">
+                {product.description}
+              </p>
+            ) : null}
+          </div>
+          <div className="px-5 pb-4">
             <QuickAddButton
               productId={product.id}
               productName={product.name}
               fallbackAction={addToCartAction}
+              soldOut={soldOut}
             />
             <Link
-              href={`/productos/${product.slug}`}
+              href={href}
               aria-label={`Ver detalle de ${product.name}`}
-              className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--sf-line-strong)] px-3.5 text-xs font-bold uppercase tracking-wide text-[var(--brand-deep)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+              className="mx-auto mt-1 flex min-h-9 w-fit items-center gap-1 px-2 text-xs font-semibold text-[#5a6578] underline-offset-4 transition hover:text-[var(--brand)] hover:underline"
             >
-              Ver
-              <ArrowRight
-                className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
-                aria-hidden
-              />
+              Ver detalle
+              <ArrowRight className="size-3" aria-hidden />
             </Link>
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2, ShoppingBag, ShoppingCart } from "lucide-react";
 import { useState, useTransition, type FormEvent } from "react";
 import { addToCartInlineAction, type AddToCartState } from "@/app/(storefront)/cart-actions";
 import { useCart } from "@/components/storefront/cart-drawer";
@@ -71,12 +71,26 @@ export function QuickAddButton({
   productId,
   productName,
   fallbackAction,
+  soldOut = false,
 }: {
   productId: string;
   productName: string;
   fallbackAction: FallbackAction;
+  soldOut?: boolean;
 }) {
   const { state, onSubmit, pending } = useAddToCart();
+  if (soldOut) {
+    return (
+      <button
+        type="button"
+        disabled
+        aria-label={`${productName} sin stock`}
+        className="flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-full bg-[#e3e9ef] px-4 text-xs font-bold uppercase tracking-wide text-[#7a8597]"
+      >
+        Sin stock
+      </button>
+    );
+  }
   return (
     <form action={fallbackAction} onSubmit={onSubmit}>
       <input type="hidden" name="productId" value={productId} />
@@ -86,16 +100,20 @@ export function QuickAddButton({
         disabled={pending}
         aria-busy={pending}
         aria-label={`Agregar ${productName} al carrito`}
-        title={state && !state.ok ? state.error : undefined}
-        className="rc-btn-primary flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wide disabled:opacity-70"
+        className="rc-btn-primary flex min-h-11 w-full items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wide disabled:opacity-70"
       >
         {pending ? (
-          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+          <Loader2 className="size-4 animate-spin" aria-hidden />
         ) : (
-          <ShoppingBag className="size-3.5" aria-hidden />
+          <ShoppingCart className="size-4" aria-hidden />
         )}
-        Agregar
+        {pending ? "Agregando…" : "Agregar al carrito"}
       </button>
+      {state && !state.ok ? (
+        <p role="alert" className="mt-1.5 text-center text-xs text-red-700">
+          {state.error}
+        </p>
+      ) : null}
     </form>
   );
 }
