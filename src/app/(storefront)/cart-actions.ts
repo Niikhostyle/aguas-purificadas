@@ -9,8 +9,10 @@ import {
   getResolvedCart,
   mergeCartLine,
   readCartCookie,
+  resolveCart,
   setCartLineQuantity,
   writeCartCookie,
+  type ResolvedCart,
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
 import { findLiveCoupon, normalizeCouponCode } from "@/lib/discounts";
@@ -101,6 +103,59 @@ export async function removeCouponAction() {
   }
   revalidateStorefront();
   redirect("/carrito");
+}
+
+export type CartSnapshot = Pick<ResolvedCart, "items" | "subtotalClp" | "itemCount">;
+
+export type AddToCartState =
+  | { ok: true; cart: CartSnapshot; productName: string; at: number }
+  | { ok: false; error: string; at: number }
+  | null;
+
+function snapshot(cart: ResolvedCart): CartSnapshot {
+  return { items: cart.items, subtotalClp: cart.subtotalClp, itemCount: cart.itemCount };
+}
+
+/**
+ * Drawer variant of add-to-cart: returns the cart instead of redirecting, so the
+ * shopper stays on the page (and on the tenant host).
+ */
+export async function addToCartInlineAction(formData: FormData): Promise<AddToCartState> {
+  const tenant = await requireTenant();
+  const productId = String(formData.get("productId") || "");
+  const quantity = Math.max(1, Math.min(99, Number(formData.get("quantity") || 1) || 1));
+
+  const product = await prisma.product.findFirst({
+    where: { id: productId, tenantId: tenant.id, active: true },
+  });
+  if (!product) {
+    return { ok: false, error: "Este producto ya no está disponible.", at: Date.now() };
+  }
+
+  const existing = await readCartCookie();
+  const base =
+    existing && existing.tenantId === tenant.id ? existing : { tenantId: tenant.id, items: [] };
+  const next = mergeCartLine(base, productId, quantity);
+  await writeCartCookie(next);
+  return {
+    ok: true,
+    cart: snapshot(await resolveCart(tenant.id, next)),
+    productName: product.name,
+    at: Date.now(),
+  };
+}
+
+/** Sets a line's quantity (0 removes it) and returns the updated cart. */
+export async function setCartLineAction(productId: string, quantity: number): Promise<CartSnapshot> {
+  const tenant = await requireTenant();
+  const existing = await readCartCookie();
+  if (!existing || existing.tenantId !== tenant.id) {
+    return snapshot(await resolveCart(tenant.id, null));
+  }
+  const q = Math.max(0, Math.min(99, Math.floor(Number(quantity) || 0)));
+  const next = setCartLineQuantity(existing, String(productId), q);
+  await writeCartCookie(next);
+  return snapshot(await resolveCart(tenant.id, next));
 }
 
 const checkoutSchema = z.object({

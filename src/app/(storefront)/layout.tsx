@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { CartProvider } from "@/components/storefront/cart-drawer";
 import { SiteFooter } from "@/components/storefront/site-footer";
 import { SiteHeader } from "@/components/storefront/site-header";
 import { WhatsappFloat } from "@/components/storefront/whatsapp-float";
@@ -52,40 +53,43 @@ export default async function StorefrontLayout({
 
   return (
     <div style={theme} data-storefront className="flex min-h-full flex-1 flex-col">
-      <Suspense
-        fallback={
-          <div className="h-24 border-b border-[var(--sf-line)] bg-[var(--header-bg)]" aria-hidden />
-        }
+      <CartProvider
+        initial={{ items: cart.items, subtotalClp: cart.subtotalClp, itemCount: cart.itemCount }}
       >
-        <SiteHeader
-          brandName={brandName}
-          logoUrl={tenant.logoUrl}
-          brandSubtitle={tenant.logoUrl ? null : "Agua purificada"}
-          topbar={topbarMessages(tenant, showcase)}
-          cartCount={cart.itemCount}
-          flags={flags}
-          sections={{
-            descuentos: promoCards(await getLiveDiscounts(tenant.id)).length > 0,
-            planes: content.planes.length > 0,
-            kits: content.kits.length > 0,
-          }}
-          showAudienceToggle={showcase || hasAudienceContent(content)}
-          regions={content.regions}
-          customerName={customer?.name}
+        <Suspense
+          fallback={
+            <div className="h-24 border-b border-[var(--sf-line)] bg-[var(--header-bg)]" aria-hidden />
+          }
+        >
+          <SiteHeader
+            brandName={brandName}
+            logoUrl={tenant.logoUrl}
+            brandSubtitle={tenant.logoUrl ? null : "Agua purificada"}
+            topbar={topbarMessages(tenant, showcase)}
+            flags={flags}
+            sections={{
+              descuentos: promoCards(await getLiveDiscounts(tenant.id)).length > 0,
+              planes: content.planes.length > 0,
+              kits: content.kits.length > 0,
+            }}
+            showAudienceToggle={showcase || hasAudienceContent(content)}
+            regions={content.regions}
+            customerName={customer?.name}
+          />
+        </Suspense>
+        <main className="flex-1">{children}</main>
+        <SiteFooter
+          tenant={tenant}
+          logoDarkUrl={appearance.images.logoDarkUrl}
+          coverage={coverageCopy(tenant, showcase)}
         />
-      </Suspense>
-      <main className="flex-1">{children}</main>
-      <SiteFooter
-        tenant={tenant}
-        logoDarkUrl={appearance.images.logoDarkUrl}
-        coverage={coverageCopy(tenant, showcase)}
-      />
-      <WhatsappFloat
-        href={tenantWhatsappHref(
-          tenant.whatsapp,
-          `Hola ${tenant.name}, quiero hacer una consulta.`,
-        )}
-      />
+        <WhatsappFloat
+          href={tenantWhatsappHref(
+            tenant.whatsapp,
+            `Hola ${tenant.name}, quiero hacer una consulta.`,
+          )}
+        />
+      </CartProvider>
     </div>
   );
 }

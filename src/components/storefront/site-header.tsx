@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Clock, Menu, ShoppingBag, Truck, UserRound, X } from "lucide-react";
 import { AudienceToggle } from "@/components/storefront/audience-toggle";
 import { BrandMark } from "@/components/storefront/brand-mark";
+import { useCart } from "@/components/storefront/cart-drawer";
 import { RegionSelector } from "@/components/storefront/region-selector";
 import type { Audience, ModuleFlags, RegionOption } from "@/lib/modules";
 import type { TopbarMessages } from "@/lib/storefront-defaults";
@@ -17,7 +18,6 @@ type Props = {
   logoUrl?: string | null;
   brandSubtitle?: string | null;
   topbar: TopbarMessages;
-  cartCount: number;
   flags: ModuleFlags;
   /** Home sections that actually have content (nav links to empty anchors are hidden). */
   sections: { descuentos: boolean; planes: boolean; kits: boolean };
@@ -31,7 +31,6 @@ export function SiteHeader({
   logoUrl,
   brandSubtitle,
   topbar,
-  cartCount,
   flags,
   sections,
   showAudienceToggle,
@@ -40,6 +39,8 @@ export function SiteHeader({
 }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { cart, openCart } = useCart();
+  const cartCount = cart.itemCount;
   const audience: Audience =
     searchParams.get("audience") === "empresa" ? "empresa" : "hogar";
   const [open, setOpen] = useState(false);
@@ -145,6 +146,13 @@ export function SiteHeader({
             ) : null}
             <Link
               href="/carrito"
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                e.preventDefault();
+                setOpen(false);
+                openCart();
+              }}
+              aria-haspopup="dialog"
               aria-label={cartCount > 0 ? `Carrito, ${cartCount} productos` : "Carrito"}
               className="group relative inline-flex h-10 items-center gap-1.5 rounded-full px-2.5 text-sm font-bold uppercase text-[var(--nav-text)] transition-colors hover:bg-[var(--mist)] hover:text-[var(--header-hover)] sm:px-3.5"
             >

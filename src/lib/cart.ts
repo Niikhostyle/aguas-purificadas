@@ -130,7 +130,13 @@ function emptyCart(tenantId: string): ResolvedCart {
 
 /** Server-authoritative cart: prices, automatic discounts and coupon always come from the DB. */
 export async function getResolvedCart(tenantId: string): Promise<ResolvedCart> {
-  const cookie = await readCartCookie();
+  return resolveCart(tenantId, await readCartCookie());
+}
+
+export async function resolveCart(
+  tenantId: string,
+  cookie: CartCookie | null,
+): Promise<ResolvedCart> {
   if (!cookie || cookie.tenantId !== tenantId || cookie.items.length === 0) {
     return emptyCart(tenantId);
   }

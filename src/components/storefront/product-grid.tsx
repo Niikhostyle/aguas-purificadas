@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Droplets, MessageCircle, PackageOpen } from "lucide-react";
 import type { Product } from "@prisma/client";
+import { addToCartAction } from "@/app/(storefront)/cart-actions";
+import { QuickAddButton } from "@/components/storefront/add-to-cart-form";
 import { DiscountRibbon, PriceTag } from "@/components/storefront/price-tag";
 import type { ProductPrice } from "@/lib/discounts";
 
@@ -82,17 +84,26 @@ export function ProductGrid({
                   {product.description}
                 </p>
               ) : null}
-              <div className="mt-auto pt-4">
-                <span className="rc-btn-primary flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wide">
-                  Ver detalle
-                  <ArrowRight
-                    className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
-                    aria-hidden
-                  />
-                </span>
-              </div>
             </div>
           </Link>
+          <div className="grid grid-cols-[1fr_auto] gap-2 px-5 pb-5">
+            <QuickAddButton
+              productId={product.id}
+              productName={product.name}
+              fallbackAction={addToCartAction}
+            />
+            <Link
+              href={`/productos/${product.slug}`}
+              aria-label={`Ver detalle de ${product.name}`}
+              className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--sf-line-strong)] px-3.5 text-xs font-bold uppercase tracking-wide text-[var(--brand-deep)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+            >
+              Ver
+              <ArrowRight
+                className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </Link>
+          </div>
         </li>
       ))}
     </ul>

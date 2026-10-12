@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Droplets, Phone } from "lucide-react";
+import { addToCartAction } from "@/app/(storefront)/cart-actions";
 import { AddToCartForm } from "@/components/storefront/add-to-cart-form";
 import { PriceTag } from "@/components/storefront/price-tag";
 import { prisma } from "@/lib/db";
@@ -80,7 +81,7 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           ) : null}
           <div className="mt-8 border-t border-[var(--sf-line)] pt-8">
-            <AddToCartForm productId={product.id} />
+            <AddToCartForm productId={product.id} fallbackAction={addToCartAction} />
           </div>
           {(tenant.phone || whatsapp) && (
             <p className="mt-6 text-sm text-[#5a6578]">
