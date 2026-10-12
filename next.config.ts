@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Tenant resolution uses headers/cookies; keep classic dynamic rendering for Phase 1–2.
   allowedDevOrigins: ["127.0.0.1", "localhost", "*.localhost"],
   poweredByHeader: false,
+  // Admin forms post several images (up to 5 MB each) via Server Actions; keep in sync with nginx client_max_body_size.
+  experimental: {
+    serverActions: { bodySizeLimit: "20mb" },
+    proxyClientMaxBodySize: "20mb",
+  },
   images: {
     remotePatterns: [
       {
