@@ -107,7 +107,7 @@ export default async function AdminPanelLayout({
   }
 
   return (
-    <div style={theme} data-kpi-style={appearance.kpiStyle}>
+    <div style={theme} data-admin-theme data-kpi-style={appearance.kpiStyle}>
       <AdminShell
         variant={superAdmin ? "platform" : "tenant"}
         orgName={admin.tenant.name}
