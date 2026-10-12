@@ -3,7 +3,7 @@ import {
   loadDefaultDemoContentAction,
   updateModulesAction,
 } from "@/app/admin/(panel)/modulos/actions";
-import { PageHeader } from "@/components/admin/ui";
+import { ConfirmSubmitButton, PageHeader, adminButton } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,11 +17,7 @@ import {
   type ModuleFlags,
 } from "@/lib/modules";
 
-export default async function ModulesAdminPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ ok?: string }>;
-}) {
+export default async function ModulesAdminPage() {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin/login");
   if (admin.role === "super_admin" && admin.tenant.slug === "plataforma") {
@@ -32,7 +28,6 @@ export default async function ModulesAdminPage({
     admin.tenant.modulesEnabled ?? DEFAULT_MODULE_FLAGS,
   );
   const content = parseModulesContent(admin.tenant.modulesContent);
-  const { ok } = await searchParams;
 
   const regionsText = content.regions
     .map((r) => (r.zone ? `${r.name} | ${r.zone}` : r.name))
@@ -48,16 +43,16 @@ export default async function ModulesAdminPage({
         breadcrumbs={[{ label: "Configuración" }, { label: "Módulos" }]}
       />
 
-      {ok ? (
-        <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          Módulos guardados.
-        </p>
-      ) : null}
-
       <form action={loadDefaultDemoContentAction} className="mt-4">
-        <Button type="submit" variant="outline" size="sm">
+        <ConfirmSubmitButton
+          tone="warning"
+          confirmTitle="¿Cargar contenido demo?"
+          confirmText="Se reemplazan los textos de Hogar/Empresa, descuentos, planes, kits y certificaciones por el contenido de ejemplo."
+          confirmLabel="Cargar demo"
+          className={adminButton({ variant: "secondary", size: "sm" })}
+        >
           Cargar contenido demo (Hogar/Empresa)
-        </Button>
+        </ConfirmSubmitButton>
       </form>
 
       <form action={updateModulesAction} className="mt-6 space-y-6">

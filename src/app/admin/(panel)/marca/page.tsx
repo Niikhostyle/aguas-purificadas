@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { updateBrandingAction } from "@/app/admin/(panel)/marca/actions";
 import { BannerSlidesEditor } from "@/components/admin/banner-slides-editor";
+import { Flash } from "@/components/admin/dispatch-ui";
 import { PageHeader } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,7 @@ export default async function BrandingAdminPage({
   }
 
   const tenant = admin.tenant;
-  const { ok, error } = await searchParams;
+  const { error } = await searchParams;
   const slides = parseHeroSlides(tenant.heroSlides);
   const whatsappLink = tenantWhatsappHref(tenant.whatsapp);
 
@@ -35,16 +36,7 @@ export default async function BrandingAdminPage({
         breadcrumbs={[{ label: "Configuración" }, { label: "Marca" }]}
       />
 
-      {ok ? (
-        <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          Cambios guardados.
-        </p>
-      ) : null}
-      {error ? (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
+      <Flash error={error} />
 
       <form
         action={updateBrandingAction}

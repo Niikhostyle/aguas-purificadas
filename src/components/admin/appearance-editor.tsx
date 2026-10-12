@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { confirmAction } from "@/lib/alerts";
 import {
   DEFAULT_LOGIN_TITLE,
   DEFAULT_PANEL_SUBTITLE,
@@ -751,14 +752,16 @@ function StickyBar({ dirty }: { dirty: boolean }) {
           variant="outline"
           disabled={pending}
           formAction={resetAppearanceAction}
-          onClick={(e) => {
-            if (
-              !window.confirm(
-                "¿Volver a los valores originales? Se borran los colores personalizados de la tienda y del panel, el ícono, el logo alternativo y la pantalla de acceso. Tu nombre, logo principal y colores de marca se mantienen.",
-              )
-            ) {
-              e.preventDefault();
-            }
+          onClick={async (e) => {
+            e.preventDefault();
+            const button = e.currentTarget;
+            const ok = await confirmAction({
+              title: "¿Volver a los valores originales?",
+              text: "Se borran los colores personalizados de la tienda y del panel, el ícono, el logo alternativo y la pantalla de acceso. Tu nombre, logo principal y colores de marca se mantienen.",
+              confirmText: "Restaurar",
+              tone: "warning",
+            });
+            if (ok) button.form?.requestSubmit(button);
           }}
         >
           <RotateCcw aria-hidden /> Volver a los valores originales

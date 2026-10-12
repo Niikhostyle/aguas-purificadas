@@ -14,7 +14,7 @@ export default async function AppearancePage({
 }) {
   const { admin } = await requireTenantAdmin();
   const tenant = admin.tenant;
-  const { ok, error } = await searchParams;
+  const { error } = await searchParams;
   const overrides = parseAppearance(tenant.appearance);
 
   return (
@@ -24,16 +24,7 @@ export default async function AppearancePage({
         description="Logos, íconos y colores de tu tienda y de este panel. Los cambios se ven en la vista previa y se aplican al guardar."
         breadcrumbs={[{ label: "Configuración" }, { label: "Apariencia" }]}
       />
-      <Flash
-        ok={
-          ok === "reset"
-            ? "Se restauraron los valores originales."
-            : ok
-              ? "Cambios guardados."
-              : undefined
-        }
-        error={error}
-      />
+      <Flash error={error} />
       <AppearanceEditor
         key={tenant.updatedAt.toISOString()}
         initial={{

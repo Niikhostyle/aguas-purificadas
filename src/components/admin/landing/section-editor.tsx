@@ -8,6 +8,7 @@ import {
   saveLandingSectionAction,
 } from "@/app/admin/(panel)/plataforma/landing/actions";
 import { StatusPill, Switch } from "@/components/admin/landing/section-switch";
+import { confirmAction, toast } from "@/lib/alerts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -267,8 +268,14 @@ function ListField({
                       variant="ghost"
                       aria-label="Eliminar"
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => {
-                        if (confirm(`¿Eliminar “${title}”?`)) onChange(items.filter((_, k) => k !== i));
+                      onClick={async () => {
+                        const ok = await confirmAction({
+                          title: `¿Eliminar «${title}»?`,
+                          text: "El elemento se quita de la sección. Se aplica al guardar.",
+                          confirmText: "Eliminar",
+                          tone: "danger",
+                        });
+                        if (ok) onChange(items.filter((_, k) => k !== i));
                       }}
                     >
                       <Trash2 aria-hidden />
@@ -336,15 +343,23 @@ export function SectionEditor({
         setErrors({});
         setBaseline(JSON.stringify([enabled, content]));
         setStatus({ tone: "ok", text: "Guardado. La landing ya muestra los cambios." });
+        void toast.success("Sección guardada");
         router.refresh();
       } else {
         setErrors(Object.fromEntries((res.issues ?? []).map((i) => [i.path, i.message])));
         setStatus({ tone: "error", text: res.error });
+        void toast.error(res.error);
       }
     });
 
-  const reset = () => {
-    if (!confirm("¿Restaurar el contenido original de esta sección? Se perderán tus cambios.")) return;
+  const reset = async () => {
+    const ok = await confirmAction({
+      title: "¿Restaurar el contenido original?",
+      text: "Se perderán los cambios de esta sección.",
+      confirmText: "Restaurar",
+      tone: "warning",
+    });
+    if (!ok) return;
     start(async () => {
       const res = await resetLandingSectionAction(sectionKey);
       if (res.ok) {
@@ -355,9 +370,11 @@ export function SectionEditor({
         setBaseline(JSON.stringify([def.enabled, c]));
         setErrors({});
         setStatus({ tone: "ok", text: "Contenido original restaurado." });
+        void toast.success("Contenido original restaurado");
         router.refresh();
       } else {
         setStatus({ tone: "error", text: res.error });
+        void toast.error(res.error);
       }
     });
   };

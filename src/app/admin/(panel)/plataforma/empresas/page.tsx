@@ -8,6 +8,7 @@ import {
   setTenantActiveAction,
 } from "@/app/admin/(panel)/plataforma/manage-actions";
 import {
+  ConfirmSubmitButton,
   DataTable,
   EmptyState,
   FilterBar,
@@ -204,12 +205,19 @@ export default async function PlatformTenantsPage({
             <input type="hidden" name="tenantId" value={t.id} />
             <input type="hidden" name="active" value={t.active ? "0" : "1"} />
             <input type="hidden" name="returnTo" value={returnTo} />
-            <button
-              type="submit"
+            <ConfirmSubmitButton
+              tone={t.active ? "danger" : "primary"}
+              confirmTitle={t.active ? `¿Suspender «${t.name}»?` : `¿Reactivar «${t.name}»?`}
+              confirmText={
+                t.active
+                  ? "Su tienda y su panel quedan fuera de servicio hasta que la reactives."
+                  : "Su tienda y su panel vuelven a estar disponibles."
+              }
+              confirmLabel={t.active ? "Suspender" : "Activar"}
               className={adminButton({ variant: t.active ? "danger" : "secondary", size: "sm" })}
             >
               {t.active ? "Suspender" : "Activar"}
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       ),
@@ -305,15 +313,19 @@ export default async function PlatformTenantsPage({
                   >
                     Activar
                   </button>
-                  <button
-                    type="submit"
+                  <ConfirmSubmitButton
                     name="op"
                     value="suspend"
                     form={BULK_FORM}
+                    requireSelection="tenantIds"
+                    selectionMessage="Selecciona al menos una empresa."
+                    confirmTitle="¿Suspender {n} empresa(s)?"
+                    confirmText="Sus tiendas y paneles quedan fuera de servicio hasta reactivarlas."
+                    confirmLabel="Suspender"
                     className={adminButton({ variant: "danger", size: "sm" })}
                   >
                     Suspender
-                  </button>
+                  </ConfirmSubmitButton>
                 </form>
               }
             />
