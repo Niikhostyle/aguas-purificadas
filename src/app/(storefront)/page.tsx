@@ -18,6 +18,8 @@ import { Reveal } from "@/components/storefront/reveal";
 import { HeroCarousel, type HeroSlide } from "@/components/hero-carousel";
 import { getAdminSession } from "@/lib/auth";
 import { STOREFRONT_PRIMARY, STOREFRONT_SECONDARY } from "@/lib/branding";
+import { prisma } from "@/lib/db";
+import { zonesNeedSetup } from "@/lib/delivery-zones";
 import { getLiveDiscounts, priceProducts, promoCards } from "@/lib/discounts";
 import { parseHeroSlides, tenantSlidesToCarousel } from "@/lib/hero-slides";
 import { DEFAULT_MODULE_FLAGS, parseModuleFlags, type Audience } from "@/lib/modules";
@@ -54,11 +56,16 @@ async function setupStepsFor(tenant: Tenant, productCount: number): Promise<Setu
     Object.keys(parseAppearance(tenant.appearance)).length > 0 ||
     tenant.primaryColor.toLowerCase() !== STOREFRONT_PRIMARY.toLowerCase() ||
     tenant.secondaryColor.toLowerCase() !== STOREFRONT_SECONDARY.toLowerCase();
+  const zones = await prisma.deliveryZone.findMany({
+    where: { tenantId: tenant.id },
+    select: { active: true, createdAt: true, updatedAt: true },
+  });
   return [
     { label: "Logo", href: "/admin/apariencia", done: Boolean(tenant.logoUrl) },
     { label: "Colores en Apariencia", href: "/admin/apariencia", done: customColors },
     { label: "Productos", href: "/admin/productos", done: productCount > 0 },
     { label: "WhatsApp", href: "/admin/marca", done: Boolean(tenant.whatsapp) },
+    { label: "Zonas de despacho", href: "/admin/zonas", done: !zonesNeedSetup(zones) },
     {
       label: "Cobertura",
       href: "/admin/marca",

@@ -1,23 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { shippingFor, type ZonePricing } from "@/lib/delivery-zones";
 import { formatClp } from "@/lib/utils";
 
-type ZoneOption = { id: string; costClp: number };
+type ZoneOption = ZonePricing & { id: string };
 
 export function CheckoutZoneTotal({
   subtotalClp,
   discountClp = 0,
   couponCode,
   zones,
+  defaultZoneId,
 }: {
   subtotalClp: number;
   /** Coupon amount; already validated server-side. */
   discountClp?: number;
   couponCode?: string | null;
   zones: ZoneOption[];
+  defaultZoneId?: string;
 }) {
-  const [shippingClp, setShippingClp] = useState(zones[0]?.costClp ?? 0);
+  const orderTotal = subtotalClp - discountClp;
+  const initial = zones.find((z) => z.id === defaultZoneId) ?? zones[0];
+  const [zone, setZone] = useState<ZoneOption | undefined>(initial);
 
   useEffect(() => {
     const sync = () => {
@@ -25,13 +30,19 @@ export function CheckoutZoneTotal({
         'input[name="deliveryZoneId"]:checked',
       );
       if (!selected) return;
-      const zone = zones.find((z) => z.id === selected.value);
-      if (zone) setShippingClp(zone.costClp);
+      const next = zones.find((z) => z.id === selected.value);
+      if (next) setZone(next);
     };
     sync();
     document.addEventListener("change", sync);
     return () => document.removeEventListener("change", sync);
   }, [zones]);
+
+  const shippingClp = zone ? shippingFor(zone, orderTotal) : 0;
+  const missingForFree =
+    zone && zone.freeOverClp && zone.costClp > 0 && orderTotal < zone.freeOverClp
+      ? zone.freeOverClp - orderTotal
+      : 0;
 
   return (
     <div className="mt-6 space-y-2 border-t border-dashed border-[var(--sf-line-strong)] pt-4 text-sm">
@@ -51,9 +62,14 @@ export function CheckoutZoneTotal({
           {shippingClp === 0 ? "Gratis" : formatClp(shippingClp)}
         </span>
       </div>
+      {missingForFree > 0 ? (
+        <p className="rounded-lg bg-[var(--mist)] px-3 py-2 text-xs text-[var(--brand-deep)]">
+          Te faltan {formatClp(missingForFree)} para despacho gratis.
+        </p>
+      ) : null}
       <div className="mt-2 flex items-baseline justify-between border-t border-[var(--sf-line)] pt-3 text-base font-semibold text-[var(--brand-deep)]">
         <span>Total</span>
-        <span key={shippingClp} className="sf-pop rc-display inline-block text-3xl">{formatClp(subtotalClp - discountClp + shippingClp)}</span>
+        <span key={shippingClp} className="sf-pop rc-display inline-block text-3xl">{formatClp(orderTotal + shippingClp)}</span>
       </div>
     </div>
   );

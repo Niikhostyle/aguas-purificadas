@@ -52,6 +52,6 @@ export async function getTenantProducts(tenantId: string) {
 export async function getTenantDeliveryZones(tenantId: string) {
   return prisma.deliveryZone.findMany({
     where: { tenantId, active: true },
-    orderBy: { name: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });
 }

@@ -4,6 +4,7 @@ import { AdminShell, type AdminNotification } from "@/components/admin/shell/adm
 import { PLATFORM_APPEARANCE, adminThemeVars, tenantAppearance } from "@/lib/appearance";
 import { isDemoTenantSlug, isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { zonesNeedSetup } from "@/lib/delivery-zones";
 import { DISPATCHABLE_PAYMENT, addDaysStr, dateFromStr, todayCl } from "@/lib/dispatch";
 import { parseModuleFlags } from "@/lib/modules";
 import { getTenantSlugFromHeaders } from "@/lib/tenant";
@@ -57,7 +58,7 @@ export default async function AdminPanelLayout({
     }
   } else {
     const today = todayCl();
-    const [pending, unassigned, dueSoon] = await Promise.all([
+    const [pending, unassigned, dueSoon, zones] = await Promise.all([
       prisma.order.count({ where: { tenantId: admin.tenantId, status: "pending" } }),
       flags.despacho
         ? prisma.order.count({
@@ -77,7 +78,20 @@ export default async function AdminPanelLayout({
             },
           })
         : 0,
+      prisma.deliveryZone.findMany({
+        where: { tenantId: admin.tenantId },
+        select: { active: true, createdAt: true, updatedAt: true },
+      }),
     ]);
+    if (zonesNeedSetup(zones)) {
+      notifications.push({
+        id: "zones-setup",
+        label: "Configura tus zonas de despacho",
+        href: "/admin/zonas",
+        count: 1,
+        tone: "warning",
+      });
+    }
     if (unassigned) {
       notifications.push({
         id: "unassigned",

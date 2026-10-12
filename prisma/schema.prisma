@@ -178,6 +178,9 @@ model DeliveryZone {
   communes    String
   /// Delivery cost in CLP; 0 = gratis
   costClp     Int      @default(0)
+  /// Order total (after discounts) from which delivery is free; null = never
+  freeOverClp Int?
+  sortOrder   Int      @default(0)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

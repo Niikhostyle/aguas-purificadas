@@ -26,6 +26,7 @@ import {
   LayoutTemplate,
   LogOut,
   Map as MapIcon,
+  MapPinned,
   Menu,
   Package,
   Paintbrush,
@@ -62,6 +63,7 @@ const ICONS: Record<AdminNavIcon, LucideIcon> = {
   dashboard: LayoutDashboard,
   dispatch: Truck,
   map: MapIcon,
+  zones: MapPinned,
   orders: ClipboardList,
   reminders: BellRing,
   containers: Recycle,
@@ -265,6 +267,7 @@ function buildActions(variant: Props["variant"], hidden: Set<string>, siteHref: 
       : [
           { id: "new-product", label: "Nuevo producto", icon: Plus, href: "/admin/productos/nuevo", keywords: "crear agregar catalogo" },
           { id: "new-discount", label: "Nuevo descuento o cupón", icon: TicketPercent, href: "/admin/descuentos/nuevo", keywords: "promocion oferta rebaja cupon porcentaje" },
+          { id: "zones", label: "Zonas y costos de despacho", icon: MapPinned, href: "/admin/zonas", keywords: "comunas envio delivery costo gratis" },
           { id: "benefits", label: "Editar beneficios de la tienda", icon: Sparkles, href: "/admin/beneficios", keywords: "por que elegirnos ventajas destacados" },
           { id: "pending-pay", label: "Pedidos con pago pendiente", icon: ClipboardList, href: "/admin/pedidos?pago=pending", keywords: "webpay" },
           { id: "unassigned", label: "Pedidos sin ruta asignada", icon: Truck, href: "/admin/despacho?fecha=todas&estado=por_asignar", requires: "/admin/despacho", keywords: "asignar programar" },

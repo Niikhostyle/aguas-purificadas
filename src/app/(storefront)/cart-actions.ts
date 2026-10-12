@@ -15,6 +15,7 @@ import {
   type ResolvedCart,
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
+import { shippingFor } from "@/lib/delivery-zones";
 import { findLiveCoupon, normalizeCouponCode } from "@/lib/discounts";
 import { ensureDeliveryCustomer } from "@/lib/dispatch-server";
 import { locateOrder } from "@/lib/geocode";
@@ -199,7 +200,7 @@ export async function placeOrderAction(formData: FormData) {
     redirect("/checkout?error=" + encodeURIComponent("Elegí una zona de despacho válida"));
   }
 
-  const shippingClp = zone.costClp;
+  const shippingClp = shippingFor(zone, cart.totalClp);
   const subtotalClp = cart.subtotalClp;
   const discountClp = cart.discountClp;
   const totalClp = cart.totalClp + shippingClp;

@@ -205,23 +205,18 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
         },
       ],
     });
-    await prisma.deliveryZone.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          name: "Zona centro",
-          communes: input.city || "Centro",
-          costClp: 0,
-        },
-        {
-          tenantId: tenant.id,
-          name: "Zona extendida",
-          communes: "Comunas aledañas",
-          costClp: 2000,
-        },
-      ],
-    });
   }
+
+  // One placeholder zone so checkout works; the admin is prompted to set real zones (see zonesNeedSetup).
+  const city = input.city?.trim();
+  await prisma.deliveryZone.create({
+    data: {
+      tenantId: tenant.id,
+      name: city ? `Despacho en ${city}` : "Despacho a domicilio",
+      communes: city || "",
+      costClp: 0,
+    },
+  });
 
   if (input.withSandboxWebpay !== false) {
     await prisma.webPayCredential.create({

@@ -8,7 +8,10 @@ import { SubmitButton } from "@/components/storefront/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cookies } from "next/headers";
 import { getResolvedCart } from "@/lib/cart";
+import { zoneForPlace } from "@/lib/delivery-zones";
+import { parseModulesContent } from "@/lib/modules";
 import { getTenantDeliveryZones, requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
 
@@ -25,6 +28,11 @@ export default async function CheckoutPage({
 
   const zones = await getTenantDeliveryZones(tenant.id);
   const { error } = await searchParams;
+  const regionId = (await cookies()).get("mibidon_region")?.value;
+  const region = regionId
+    ? parseModulesContent(tenant.modulesContent).regions.find((r) => r.id === regionId)
+    : undefined;
+  const defaultZoneId = (region ? zoneForPlace(zones, region.name) : undefined)?.id ?? zones[0]?.id;
 
   return (
     <div className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_420px)]">
@@ -104,7 +112,7 @@ export default async function CheckoutPage({
                 </p>
               ) : (
                 <ul className="space-y-3">
-                  {zones.map((zone, index) => (
+                  {zones.map((zone) => (
                     <li key={zone.id}>
                       <label className="flex cursor-pointer gap-3 rounded-xl border border-[var(--sf-line-strong)] bg-white px-4 py-3.5 transition duration-300 hover:border-[var(--brand)] hover:shadow-[var(--sf-shadow-md)] has-[:checked]:border-[var(--brand)] has-[:checked]:bg-[var(--mist)] has-[:checked]:ring-1 has-[:checked]:ring-[var(--brand)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--brand)]">
                         <input
@@ -112,7 +120,7 @@ export default async function CheckoutPage({
                           name="deliveryZoneId"
                           value={zone.id}
                           required
-                          defaultChecked={index === 0}
+                          defaultChecked={zone.id === defaultZoneId}
                           className="mt-1 size-4 accent-[var(--brand)]"
                         />
                         <span>
@@ -122,10 +130,17 @@ export default async function CheckoutPage({
                           <span className="block text-sm text-[#5a6578]">
                             {zone.communes}
                           </span>
-                          <span className="mt-1.5 inline-flex rounded-full bg-[color-mix(in_srgb,var(--brand)_12%,#fff)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
-                            {zone.costClp === 0
-                              ? "Despacho gratis"
-                              : `Despacho ${formatClp(zone.costClp)}`}
+                          <span className="mt-1.5 flex flex-wrap gap-1.5">
+                            <span className="inline-flex rounded-full bg-[color-mix(in_srgb,var(--brand)_12%,#fff)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
+                              {zone.costClp === 0
+                                ? "Despacho gratis"
+                                : `Despacho ${formatClp(zone.costClp)}`}
+                            </span>
+                            {zone.costClp > 0 && zone.freeOverClp ? (
+                              <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                                Gratis sobre {formatClp(zone.freeOverClp)}
+                              </span>
+                            ) : null}
                           </span>
                         </span>
                       </label>
@@ -188,7 +203,8 @@ export default async function CheckoutPage({
               subtotalClp={cart.subtotalClp}
               discountClp={cart.discountClp}
               couponCode={cart.coupon?.code}
-              zones={zones.map((z) => ({ id: z.id, costClp: z.costClp }))}
+              zones={zones.map((z) => ({ id: z.id, costClp: z.costClp, freeOverClp: z.freeOverClp }))}
+              defaultZoneId={defaultZoneId}
             />
           </aside>
         </div>
