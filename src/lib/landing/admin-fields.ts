@@ -433,10 +433,17 @@ const SECTIONS: SectionMeta[] = [
   {
     key: "footer",
     slug: "footer",
-    title: "Footer",
-    description: "Pie de página.",
+    title: "Footer y logo",
+    description: "Logo de la marca (menú superior y pie) y pie de página.",
     primary: true,
     fields: [
+      {
+        type: "url",
+        key: "logoUrl",
+        label: "URL del logo",
+        max: 500,
+        hint: "Imagen horizontal (PNG/SVG, idealmente ≥ 120 px de alto). Se muestra a altura fija. Vacío = marca de texto “MiBidón”.",
+      },
       { type: "text", key: "brandText", label: "Texto de marca", max: 80 },
       { type: "text", key: "demoLabel", label: "Enlace tienda demo", max: 40, hint: "Vacío = oculto." },
       { type: "text", key: "loginLabel", label: "Enlace acceso clientes", max: 40, hint: "Vacío = oculto." },

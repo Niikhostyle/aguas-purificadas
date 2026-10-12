@@ -201,6 +201,7 @@ export const landingSchemas = {
     whatsappMessage: reqText(300),
   }),
   footer: z.object({
+    logoUrl: url.default("/brand/mibidon/logo.png"),
     brandText: reqText(80),
     demoLabel: text(40),
     loginLabel: text(40),

@@ -21,9 +21,9 @@ import {
   CountUp,
   Parallax,
   Reveal,
-  ScrollHeader,
   SpotlightCard,
 } from "@/components/mibidon/landing-motion";
+import { LandingHeader } from "@/components/mibidon/landing-header";
 import { RevenueSimulator } from "@/components/mibidon/revenue-simulator";
 import { DEMO_STORE_URL } from "@/lib/landing/defaults";
 import { fillTrialTokens, formatClp, isExternalHref, richText } from "@/lib/landing/format";
@@ -44,15 +44,31 @@ function externalProps(href: string) {
     : {};
 }
 
-function BrandLogo({ className, preload = false }: { className: string; preload?: boolean }) {
+/** CMS logo at a fixed height (width follows its aspect ratio); text wordmark when empty. */
+function BrandMark({
+  src,
+  className,
+  priority = false,
+}: {
+  src: string;
+  className: string;
+  priority?: boolean;
+}) {
+  if (!src) {
+    return (
+      <span className="sv-display text-xl font-black whitespace-nowrap text-sv-primary sm:text-2xl">
+        Mi<span className="text-sv-secondary">Bidón</span>
+      </span>
+    );
+  }
   return (
-    <Image
-      src="/brand/mibidon/logo.png"
+    // eslint-disable-next-line @next/next/no-img-element -- CMS logo of unknown size; served as-is so it stays crisp
+    <img
+      src={src}
       alt="MiBidón"
-      width={843}
-      height={280}
-      preload={preload}
-      className={className}
+      decoding="async"
+      fetchPriority={priority ? "high" : undefined}
+      className={`block w-auto max-w-none object-contain object-left ${className}`}
     />
   );
 }
@@ -230,50 +246,17 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
         </div>
       ) : null}
 
-      <ScrollHeader className="sticky top-0 z-40 border-b border-sv-surface-high bg-sv-surface/95 px-4 backdrop-blur-md sm:px-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="mb-nav-logo flex h-10 items-center" aria-label="MiBidón - Inicio">
-            <BrandLogo className="h-12 w-auto" preload />
-          </Link>
-          <nav className="sv-label hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
-            {navLinks.map((l) => (
-              <a key={l.href} className="transition-colors hover:text-sv-primary" href={l.href}>
-                {l.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-sv-primary transition-colors hover:bg-sv-surface-container md:inline-block"
-              href={CLIENT_LOGIN_HREF}
-            >
-              Ingresar
-            </Link>
-            {demoNavOn ? (
-              <a
-                className="group inline-flex items-center gap-2 rounded-full border-2 border-sv-secondary bg-sv-secondary-fixed/50 px-3.5 py-2 text-xs font-bold text-sv-on-secondary-fixed-variant transition-all hover:-translate-y-0.5 hover:bg-sv-secondary hover:text-white sm:text-sm"
-                href={demo.content.storeHref}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="mb-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-70" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                <span>{demo.content.navLabel}</span>
-              </a>
-            ) : null}
-            <a
-              className="sv-shine hidden items-center gap-1.5 rounded-lg bg-sv-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sv-primary-container sm:flex"
-              href={headerCtaHref}
-              {...externalProps(headerCtaHref)}
-            >
-              <span>{trialOn ? fill(t.headerCtaLabel) : t.noTrialCtaLabel}</span>
-              <ArrowRight className="sv-arrow size-4" aria-hidden />
-            </a>
-          </div>
-        </div>
-      </ScrollHeader>
+      <LandingHeader
+        logo={<BrandMark src={footer.content.logoUrl} className="h-9 sm:h-10 lg:h-12" priority />}
+        links={navLinks}
+        loginHref={CLIENT_LOGIN_HREF}
+        demo={demoNavOn ? { href: demo.content.storeHref, label: demo.content.navLabel } : null}
+        cta={{
+          href: headerCtaHref,
+          label: trialOn ? fill(t.headerCtaLabel) : t.noTrialCtaLabel,
+          external: isExternalHref(headerCtaHref) && !headerCtaHref.startsWith("mailto:"),
+        }}
+      />
 
       {hero.enabled ? (
         <HeroSection
@@ -773,7 +756,7 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
         <footer className="border-t border-sv-surface-high bg-sv-surface-low py-8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-sv-on-surface-variant sm:flex-row sm:px-6 lg:px-8">
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-              <BrandLogo className="h-10 w-auto" />
+              <BrandMark src={footer.content.logoUrl} className="h-10" />
               <span>
                 © {new Date().getFullYear()} {footer.content.brandText}
               </span>

@@ -249,6 +249,7 @@ export const LANDING_DEFAULTS: LandingContent = {
   footer: {
     enabled: true,
     content: {
+      logoUrl: "/brand/mibidon/logo.png",
       brandText: "MiBidón · Plataforma para distribuidoras de agua",
       demoLabel: "Demo",
       loginLabel: "Acceso clientes",

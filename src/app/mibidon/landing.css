@@ -15,31 +15,6 @@
   letter-spacing: -0.02em;
 }
 
-/* ---------- Sticky header scroll state ---------- */
-
-.mb-nav {
-  transition:
-    padding 0.35s var(--mb-ease),
-    background-color 0.35s var(--mb-ease),
-    box-shadow 0.35s var(--mb-ease);
-  padding-block: 0.875rem;
-}
-
-.mb-nav[data-scrolled="true"] {
-  padding-block: 0.5rem;
-  background-color: rgba(250, 248, 255, 0.85);
-  box-shadow: 0 12px 30px -18px rgba(0, 22, 61, 0.35);
-}
-
-.mb-nav-logo {
-  transition: transform 0.35s var(--mb-ease);
-  transform-origin: left center;
-}
-
-.mb-nav[data-scrolled="true"] .mb-nav-logo {
-  transform: scale(0.92);
-}
-
 /* ---------- Hero staggered entrance ---------- */
 
 .mb-word {
@@ -419,9 +394,7 @@ button:hover > .sv-arrow {
   .sv-shine,
   .sv-icon-tile,
   .sv-arrow,
-  .sv-faq-icon,
-  .mb-nav,
-  .mb-nav-logo {
+  .sv-faq-icon {
     transition: none !important;
   }
 
