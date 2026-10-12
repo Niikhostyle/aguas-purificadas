@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { MAX_BENEFITS, parseModulesContent, type BenefitItem, type ModulesContent } from "@/lib/modules";
+import { GENERIC_BENEFITS, MAX_BENEFITS, parseModulesContent, type BenefitItem, type ModulesContent } from "@/lib/modules";
 import { saveBenefitImage } from "@/lib/uploads";
 
 const BASE = "/admin/beneficios";
@@ -27,6 +27,13 @@ function text(formData: FormData, key: string, max: number): string {
   return String(formData.get(key) ?? "").trim().slice(0, max);
 }
 
+/** The store shows GENERIC_BENEFITS until it has its own, so editing starts from that list. */
+function editableContent(raw: unknown): ModulesContent {
+  const content = parseModulesContent(raw);
+  if (content.beneficios.length === 0) content.beneficios = GENERIC_BENEFITS.map((b) => ({ ...b }));
+  return content;
+}
+
 async function saveContent(tenantId: string, content: ModulesContent) {
   await prisma.tenant.update({
     where: { id: tenantId },
@@ -46,7 +53,7 @@ export async function saveBenefitsTitleAction(formData: FormData) {
 
 export async function saveBenefitAction(formData: FormData) {
   const admin = await requireTenantAdmin();
-  const content = parseModulesContent(admin.tenant.modulesContent);
+  const content = editableContent(admin.tenant.modulesContent);
   const id = text(formData, "id", 40);
   const title = text(formData, "title", 60);
   const body = text(formData, "body", 220);
@@ -85,7 +92,7 @@ export async function saveBenefitAction(formData: FormData) {
 
 export async function moveBenefitAction(formData: FormData) {
   const admin = await requireTenantAdmin();
-  const content = parseModulesContent(admin.tenant.modulesContent);
+  const content = editableContent(admin.tenant.modulesContent);
   const index = content.beneficios.findIndex((b) => b.id === text(formData, "id", 40));
   const to = index + (formData.get("direction") === "up" ? -1 : 1);
   if (index < 0 || to < 0 || to >= content.beneficios.length) redirect(BASE);
@@ -97,7 +104,7 @@ export async function moveBenefitAction(formData: FormData) {
 
 export async function deleteBenefitAction(formData: FormData) {
   const admin = await requireTenantAdmin();
-  const content = parseModulesContent(admin.tenant.modulesContent);
+  const content = editableContent(admin.tenant.modulesContent);
   const id = text(formData, "id", 40);
   const item = content.beneficios.find((b) => b.id === id);
   if (!item) done("error", "Ese beneficio ya no existe.");

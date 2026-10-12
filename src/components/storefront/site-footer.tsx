@@ -1,6 +1,7 @@
 import type { Tenant } from "@prisma/client";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { BrandMark } from "@/components/storefront/brand-mark";
+import { socialChannels } from "@/components/storefront/social-icons";
 import { formatChileWhatsapp, tenantWhatsappHref } from "@/lib/whatsapp";
 
 export function SiteFooter({
@@ -15,6 +16,11 @@ export function SiteFooter({
   const phones = [tenant.phone, tenant.phoneSecondary].filter(Boolean);
   const whatsapp = tenantWhatsappHref(tenant.whatsapp);
   const hasContact = phones.length > 0 || Boolean(whatsapp) || Boolean(tenant.email);
+  const channels = socialChannels({
+    instagram: tenant.instagramUrl,
+    facebook: tenant.facebookUrl,
+    youtube: tenant.youtubeUrl,
+  });
 
   return (
     <footer
@@ -50,6 +56,24 @@ export function SiteFooter({
           )}
           {tenant.tagline ? (
             <p className="mt-2 max-w-xs text-sm leading-relaxed opacity-80">{tenant.tagline}</p>
+          ) : null}
+          {channels.length ? (
+            <ul className="mt-5 flex gap-2">
+              {channels.map(({ key, label, url, Icon }) => (
+                <li key={key}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className="grid size-10 place-items-center rounded-full ring-1 ring-[color-mix(in_srgb,var(--footer-text)_30%,transparent)] transition duration-300 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--footer-text)_12%,transparent)]"
+                  >
+                    <Icon className="size-5" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           ) : null}
         </div>
         <div>

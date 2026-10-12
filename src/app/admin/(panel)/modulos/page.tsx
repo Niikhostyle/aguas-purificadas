@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import {
   loadDefaultDemoContentAction,
   updateModulesAction,
@@ -42,6 +44,33 @@ export default async function ModulesAdminPage() {
         description="Activa o desactiva secciones de la tienda y edita su contenido. Los cambios se ven de inmediato en la tienda."
         breadcrumbs={[{ label: "Configuración" }, { label: "Módulos" }]}
       />
+
+      <section className="mt-4 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
+        <h2 className="text-[15px] font-semibold text-[#12233d]">Contenido de tu página</h2>
+        <p className="mt-1 text-xs text-[#5a6578]">Cada sección tiene su propio editor, con formularios simples y fotos.</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["/admin/beneficios", "¿Por qué elegirnos?", `${content.beneficios.length || 4} beneficio(s)`],
+            ["/admin/contenido/planes", "Planes", `${content.planes.length} plan(es)`],
+            ["/admin/contenido/kits", "Kits", `${content.kits.length} kit(s)`],
+            ["/admin/contenido/certificaciones", "Certificaciones", `${content.certificaciones.length} certificación(es)`],
+            ["/admin/contenido/redes", "Redes y videos", `${content.redes.length} video(s)`],
+            ["/admin/descuentos", "Descuentos", "Ofertas y cupones"],
+          ].map(([href, label, hint]) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex items-center justify-between gap-3 rounded-lg border border-[#e8f0f5] px-3 py-2.5 transition hover:border-[var(--brand)] hover:bg-[color-mix(in_srgb,var(--brand)_5%,white)]"
+            >
+              <span>
+                <span className="block text-sm font-semibold text-[#12233d]">{label}</span>
+                <span className="block text-xs text-[#5a6578]">{hint}</span>
+              </span>
+              <ChevronRight className="size-4 text-[#9fb3c4] transition group-hover:translate-x-0.5 group-hover:text-[var(--brand)]" aria-hidden />
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <form action={loadDefaultDemoContentAction} className="mt-4">
         <ConfirmSubmitButton
@@ -164,69 +193,6 @@ export default async function ModulesAdminPage() {
             />
           </div>
         </section>
-
-        <section className="space-y-3 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
-          <h2 className="text-[15px] font-semibold text-[#12233d]">
-            URLs redes (tenant)
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="youtubeUrl">YouTube</Label>
-              <Input
-                id="youtubeUrl"
-                name="youtubeUrl"
-                defaultValue={admin.tenant.youtubeUrl ?? ""}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="instagramUrl">Instagram</Label>
-              <Input
-                id="instagramUrl"
-                name="instagramUrl"
-                defaultValue={admin.tenant.instagramUrl ?? ""}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="facebookUrl">Facebook</Label>
-              <Input
-                id="facebookUrl"
-                name="facebookUrl"
-                defaultValue={admin.tenant.facebookUrl ?? ""}
-              />
-            </div>
-          </div>
-        </section>
-
-        {(
-          [
-            ["planesJson", "Planes (JSON)", content.planes],
-            ["kitsJson", "Kits (JSON)", content.kits],
-            ["redesJson", "Redes embeds (JSON)", content.redes],
-            [
-              "certificacionesJson",
-              "Certificaciones (JSON)",
-              content.certificaciones,
-            ],
-          ] as const
-        ).map(([name, label, value]) => (
-          <section
-            key={name}
-            className="space-y-2 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]"
-          >
-            <Label htmlFor={name}>{label}</Label>
-            <p className="text-xs text-[#5a6578]">
-              Array JSON. Usa «Cargar contenido demo» si prefieres no editar a
-              mano.
-            </p>
-            <Textarea
-              id={name}
-              name={name}
-              rows={8}
-              className="font-mono text-xs"
-              defaultValue={JSON.stringify(value, null, 2)}
-            />
-          </section>
-        ))}
 
         <Button type="submit" className="bg-[var(--brand)] hover:bg-[var(--brand-deep)]">
           Guardar módulos

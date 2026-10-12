@@ -67,6 +67,14 @@ export type BenefitItem = {
 
 export const MAX_BENEFITS = 8;
 
+/** What «¿Por qué elegirnos?» shows while a store hasn't written its own benefits. */
+export const GENERIC_BENEFITS: readonly BenefitItem[] = [
+  { id: "b1", title: "Agua purificada", body: "Bidones y botellones listos para tu hogar u oficina." },
+  { id: "b2", title: "Despacho a domicilio", body: "Coordinamos la entrega en tu comuna, sin que tengas que salir." },
+  { id: "b3", title: "Pide en línea", body: "Arma tu pedido en minutos desde el celular o el computador." },
+  { id: "b4", title: "Atención directa", body: "Resolvemos tus dudas por teléfono o WhatsApp." },
+];
+
 export type AudienceCopy = {
   headline?: string;
   body?: string;
@@ -336,7 +344,6 @@ export function defaultDemoModulesContent(): ModulesContent {
         id: "k1",
         title: "Kit inicio hogar",
         description: "Dispensador de mesa + 2 bidones 20 L listos para usar.",
-        imageUrl: "/brand/rio-claro/destacado-04.jpg",
         priceLabel: "$34.990",
         href: "/productos",
         audience: "hogar",
@@ -345,7 +352,6 @@ export function defaultDemoModulesContent(): ModulesContent {
         id: "k2",
         title: "Kit oficina esencial",
         description: "Dispensador de pie + 4 bidones para arrancar la semana.",
-        imageUrl: "/brand/rio-claro/destacado-03.jpg",
         priceLabel: "$89.990",
         href: "/productos",
         audience: "empresa",
@@ -355,34 +361,17 @@ export function defaultDemoModulesContent(): ModulesContent {
         title: "Clientes que ya trabajan con nosotros",
         description:
           "Paquetes pensados para quienes ya tienen dispensador y solo reponen bidones.",
-        imageUrl: "/brand/rio-claro/destacado-02.jpg",
         priceLabel: "Ver packs",
         href: "/productos",
         audience: "ambos",
       },
     ],
-    redes: [
-      {
-        id: "yt1",
-        platform: "youtube",
-        title: "Cómo cuidamos el agua",
-        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        thumbnailUrl: "/brand/rio-claro/destacado-01.jpg",
-      },
-      {
-        id: "ig1",
-        platform: "instagram",
-        title: "Detrás de la ruta",
-        url: "https://www.instagram.com/",
-        thumbnailUrl: "/brand/rio-claro/destacado-02.jpg",
-      },
-    ],
+    redes: [],
     certificaciones: [
       {
         id: "c1",
         name: "Proceso multietapas",
         description: "Purificación en 5 etapas, agua libre de sodio.",
-        logoUrl: "/brand/rio-claro/logo.png",
       },
       {
         id: "c2",
@@ -396,12 +385,7 @@ export function defaultDemoModulesContent(): ModulesContent {
       },
     ],
     beneficiosTitle: "¿Por qué elegirnos?",
-    beneficios: [
-      { id: "b1", title: "Agua purificada", body: "Bidones y botellones listos para tu hogar u oficina." },
-      { id: "b2", title: "Despacho a domicilio", body: "Coordinamos la entrega en tu comuna, sin que tengas que salir." },
-      { id: "b3", title: "Pide en línea", body: "Arma tu pedido en minutos desde el celular o el computador." },
-      { id: "b4", title: "Atención directa", body: "Resolvemos tus dudas por teléfono o WhatsApp." },
-    ],
+    beneficios: GENERIC_BENEFITS.map((b) => ({ ...b })),
     hogar: {
       headline: "Agua pura para tu hogar",
       body: "Bidones, dispensadores y planes pensados para familias. Pide online y recibe en tu comuna.",

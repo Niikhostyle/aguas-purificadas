@@ -11,6 +11,10 @@ export type AdminNavIcon =
   | "discounts"
   | "brand"
   | "benefits"
+  | "plans"
+  | "kits"
+  | "certifications"
+  | "social"
   | "appearance"
   | "modules"
   | "tenants"
@@ -62,12 +66,16 @@ export const TENANT_NAV: AdminNavGroup[] = [
     ],
   },
   {
-    label: "Configuración",
+    label: "Tu página web",
     items: [
       { href: "/admin/apariencia", label: "Apariencia", icon: "appearance" },
       { href: "/admin/marca", label: "Marca y contenido", icon: "brand" },
-      { href: "/admin/beneficios", label: "Beneficios", icon: "benefits" },
-      { href: "/admin/modulos", label: "Módulos", icon: "modules" },
+      { href: "/admin/beneficios", label: "¿Por qué elegirnos?", icon: "benefits" },
+      { href: "/admin/contenido/planes", label: "Planes", icon: "plans" },
+      { href: "/admin/contenido/kits", label: "Kits", icon: "kits" },
+      { href: "/admin/contenido/certificaciones", label: "Certificaciones", icon: "certifications" },
+      { href: "/admin/contenido/redes", label: "Redes y videos", icon: "social" },
+      { href: "/admin/modulos", label: "Secciones visibles", icon: "modules" },
     ],
   },
 ];

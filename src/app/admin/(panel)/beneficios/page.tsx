@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { MAX_BENEFITS, parseModulesContent, type BenefitItem } from "@/lib/modules";
-import { ConfirmSubmitButton, EmptyState, PageHeader, Panel, adminButton } from "@/components/admin/ui";
+import { GENERIC_BENEFITS, MAX_BENEFITS, parseModulesContent, type BenefitItem } from "@/lib/modules";
+import { ConfirmSubmitButton, PageHeader, Panel, adminButton } from "@/components/admin/ui";
 import { ImageDropzone } from "@/components/admin/ui/image-dropzone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,7 +66,8 @@ export default async function BenefitsAdminPage() {
   }
 
   const content = parseModulesContent(admin.tenant.modulesContent);
-  const items = content.beneficios;
+  const usingGeneric = content.beneficios.length === 0;
+  const items = usingGeneric ? GENERIC_BENEFITS : content.beneficios;
   const canAdd = items.length < MAX_BENEFITS;
 
   return (
@@ -102,16 +103,17 @@ export default async function BenefitsAdminPage() {
         </form>
       </Panel>
 
-      {items.length === 0 ? (
-        <Panel>
-          <EmptyState
-            icon={<Sparkles />}
-            title="Aún no tienes beneficios propios"
-            description="Mientras tanto la tienda muestra 4 beneficios genéricos (agua purificada, despacho, pedido en línea y atención). Agrega los tuyos abajo y reemplazarán a los genéricos."
-          />
-        </Panel>
-      ) : (
-        items.map((item, i) => (
+      {usingGeneric ? (
+        <div className="flex items-start gap-3 rounded-xl border border-[#cfe3f1] bg-[#f3f9fd] p-4 text-sm text-[#12233d]">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden />
+          <p>
+            Estos son los beneficios que tu tienda muestra hoy. Cambia el texto, agrega una foto, ordénalos o elimina los que no
+            apliquen: al guardar el primer cambio pasan a ser tuyos.
+          </p>
+        </div>
+      ) : null}
+
+      {items.map((item, i) => (
           <Panel
             key={item.id}
             title={`${i + 1}. ${item.title}`}
@@ -167,8 +169,7 @@ export default async function BenefitsAdminPage() {
               </div>
             </form>
           </Panel>
-        ))
-      )}
+      ))}
 
       {canAdd ? (
         <Panel title="Agregar beneficio" description={`Puedes tener hasta ${MAX_BENEFITS}. Se ven mejor 3, 4 o 6.`}>

@@ -201,7 +201,11 @@ export default async function HomePage({
 
       <BenefitsSection title={content.beneficiosTitle} items={content.beneficios} />
 
-      <RedesSection flags={flags} content={content} />
+      <RedesSection
+        flags={flags}
+        content={content}
+        links={{ instagram: tenant.instagramUrl, facebook: tenant.facebookUrl, youtube: tenant.youtubeUrl }}
+      />
       <CertificacionesSection flags={flags} content={content} />
 
       <section id="nosotros" className="border-t border-[var(--sf-line)] bg-white py-16 md:py-20">

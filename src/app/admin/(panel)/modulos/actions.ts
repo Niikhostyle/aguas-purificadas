@@ -52,26 +52,12 @@ export async function updateModulesAction(formData: FormData) {
       };
     });
 
-  const planesJson = String(formData.get("planesJson") || "").trim();
-  const kitsJson = String(formData.get("kitsJson") || "").trim();
-  const redesJson = String(formData.get("redesJson") || "").trim();
-  const certsJson = String(formData.get("certificacionesJson") || "").trim();
-
-  const safeParse = <T,>(raw: string, fallback: T): T => {
-    if (!raw) return fallback;
-    try {
-      return JSON.parse(raw) as T;
-    } catch {
-      return fallback;
-    }
-  };
-
   const modulesContent: ModulesContent = {
     regions,
-    planes: safeParse(planesJson, prev.planes),
-    kits: safeParse(kitsJson, prev.kits),
-    redes: safeParse(redesJson, prev.redes),
-    certificaciones: safeParse(certsJson, prev.certificaciones),
+    planes: prev.planes,
+    kits: prev.kits,
+    redes: prev.redes,
+    certificaciones: prev.certificaciones,
     beneficios: prev.beneficios,
     beneficiosTitle: prev.beneficiosTitle,
     hogar: {
@@ -88,18 +74,9 @@ export async function updateModulesAction(formData: FormData) {
     },
   };
 
-  // Validate JSON blobs via parser (drops invalid items)
-  const normalized = parseModulesContent(modulesContent);
-
   await prisma.tenant.update({
     where: { id: admin.tenantId },
-    data: {
-      modulesEnabled,
-      modulesContent: normalized,
-      youtubeUrl: String(formData.get("youtubeUrl") || "").trim() || null,
-      instagramUrl: String(formData.get("instagramUrl") || "").trim() || null,
-      facebookUrl: String(formData.get("facebookUrl") || "").trim() || null,
-    },
+    data: { modulesEnabled, modulesContent: parseModulesContent(modulesContent) },
   });
 
   revalidatePath("/");

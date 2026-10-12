@@ -12,6 +12,7 @@ import type {
 import { forAudience } from "@/lib/modules";
 import { OffersCarousel, type PromoCard } from "@/components/storefront/offers-carousel";
 import { Reveal } from "@/components/storefront/reveal";
+import { socialChannels, type SocialLinks } from "@/components/storefront/social-icons";
 
 function youtubeEmbed(url: string): string | null {
   try {
@@ -115,7 +116,7 @@ export function PlanesSection({
             Planes
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
-            Suscripciones y rutas fijas. Activa o edita desde el admin.
+            Elige el plan que mejor se adapta a tu consumo.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {planes.map((p: PlanItem) => (
@@ -231,21 +232,46 @@ export function KitsSection({
 export function RedesSection({
   flags,
   content,
+  links,
 }: {
   flags: ModuleFlags;
   content: ModulesContent;
+  links: SocialLinks;
 }) {
   if (!flags.redes) return null;
   const items = content.redes;
-  if (!items.length) return null;
+  const channels = socialChannels(links);
+  if (!items.length && !channels.length) return null;
   return (
     <Reveal>
       <section id="redes" className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_50%_0%,color-mix(in_srgb,var(--brand-deep)_70%,#051b3f)_0%,#051b3f_70%)] py-16 text-white md:py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
           <h2 className="sf-title rc-display text-center text-4xl uppercase md:text-5xl">Redes</h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm text-white/70">
-            Historias y videos de la marca. Configura URLs en el admin.
+            Síguenos para enterarte de novedades, ofertas y cómo trabajamos.
           </p>
+          {channels.length ? (
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {channels.map(({ key, label, cta, url, Icon }) => (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-3 rounded-full bg-white/10 py-2 pl-2 pr-5 ring-1 ring-white/20 transition duration-300 hover:-translate-y-0.5 hover:bg-white/15 hover:ring-white/40"
+                >
+                  <span className="grid size-10 place-items-center rounded-full bg-white text-[var(--brand-deep)] transition group-hover:scale-105">
+                    <Icon className="size-5" />
+                  </span>
+                  <span className="text-left leading-tight">
+                    <span className="block text-sm font-bold">{label}</span>
+                    <span className="block text-xs text-white/70">{cta}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : null}
+          {items.length ? (
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {items.map((s: SocialEmbed) => {
               const embed = s.platform === "youtube" ? youtubeEmbed(s.url) : null;
@@ -293,6 +319,7 @@ export function RedesSection({
               );
             })}
           </div>
+          ) : null}
         </div>
       </section>
     </Reveal>
@@ -316,7 +343,7 @@ export function CertificacionesSection({
           Certificaciones
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
-          Confianza y estándares que puedes comunicar a tus clientes.
+          Trabajamos con estándares que cuidan tu salud.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {items.map((c: CertificationItem) => (

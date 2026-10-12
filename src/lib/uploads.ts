@@ -109,6 +109,15 @@ export async function saveBenefitImage(
   return saveImageFile(tenantSlug, file, "beneficios");
 }
 
+/** Storefront section images (kits, certificaciones, redes), one folder per section. */
+export async function saveImageUpload(
+  tenantSlug: string,
+  file: File,
+  section: "planes" | "kits" | "certificaciones" | "redes",
+): Promise<string> {
+  return saveImageFile(tenantSlug, file, section);
+}
+
 export async function saveLogoImage(
   tenantSlug: string,
   file: File,

@@ -139,6 +139,12 @@ export const TEMPLATE_TEXTS = new Set(
 
 type WithId = { id: string };
 
+/** Sample videos older demo content copied into tenants. */
+const LEGACY_DEMO_REDES: ModulesContent["redes"] = [
+  { id: "yt1", platform: "youtube", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+  { id: "ig1", platform: "instagram", url: "https://www.instagram.com/" },
+];
+
 function stripMatching<T extends WithId>(items: T[], template: T[], key: (t: T) => string): T[] {
   const known = new Set(template.map((t) => `${t.id}::${key(t)}`));
   return items.filter((i) => !known.has(`${i.id}::${key(i)}`));
@@ -156,7 +162,7 @@ export function stripTemplateModulesContent(content: ModulesContent): ModulesCon
     regions: stripMatching(content.regions, demo.regions, (r) => r.name),
     planes: stripMatching(content.planes, demo.planes, (p) => p.name),
     kits: stripMatching(content.kits, demo.kits, (k) => k.title),
-    redes: stripMatching(content.redes, demo.redes, (s) => s.url),
+    redes: stripMatching(content.redes, [...demo.redes, ...LEGACY_DEMO_REDES], (s) => s.url),
     certificaciones: stripMatching(content.certificaciones, demo.certificaciones, (c) => c.name),
     beneficios: stripMatching(content.beneficios, demo.beneficios, (b) => b.title),
     beneficiosTitle: content.beneficiosTitle,
