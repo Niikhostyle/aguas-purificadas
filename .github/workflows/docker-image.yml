@@ -1,0 +1,81 @@
+# Builds the production image on GitHub and publishes it to GHCR. Does not deploy:
+# on the VPS run `deploy-mibidon.sh ghcr.io/niikhostyle/aguas-purificadas:sha-<commit>`.
+#
+# The image embeds NEXT_SERVER_ACTIONS_ENCRYPTION_KEY (Next writes it into the build
+# output), so the GHCR package must stay private, and no GitHub Actions cache is used:
+# on a public repo, workflows from fork pull requests can read that cache.
+name: Docker image
+
+on:
+  push:
+    branches: [main, cursor/vps-sync-354f]
+    paths-ignore: ["**.md", "deploy/fossbilling/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/niikhostyle/aguas-purificadas
+  NEXT_PUBLIC_WHATSAPP_NUMBER: "56995995720"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Require build secret
+        env:
+          KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Add the NEXT_SERVER_ACTIONS_ENCRYPTION_KEY repository secret (same value as /var/www/mibidon/.env on the VPS)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref_name == 'cursor/vps-sync-354f' }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_WHATSAPP_NUMBER=${{ env.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+            NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+
+      - name: Summary
+        run: |
+          {
+            echo "### Imagen publicada"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo "Desplegar en el VPS: \`/root/deploy-mibidon.sh ${{ env.IMAGE }}:sha-${GITHUB_SHA::7}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

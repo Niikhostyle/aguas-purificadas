@@ -3,9 +3,11 @@
 #
 # Usage:
 #   deploy-mibidon.sh <image.tar[.gz]|image:tag> [release-tag]
+#   deploy-mibidon.sh ghcr.io/niikhostyle/aguas-purificadas:sha-abc1234   # built by GitHub Actions
 #   deploy-mibidon.sh --rollback          # go back to mibidon-app:previous
 #
-# - Loads the image (docker load) when given a tarball, or uses an existing local image.
+# - Loads the image (docker load) when given a tarball, pulls registry refs (e.g. GHCR)
+#   that are not present yet, or uses an existing local image.
 # - Tags it mibidon-app:<release-tag> and mibidon-app:latest (the tag compose runs).
 # - Keeps the outgoing image as mibidon-app:previous.
 # - Swaps with `docker compose up -d --no-build app` (never `docker rm -f`).
@@ -91,6 +93,9 @@ if [[ -f "$SRC" ]]; then
   loaded=$(docker load -i "$SRC" | sed -n 's/^Loaded image: //p; s/^Loaded image ID: //p' | tail -n1)
   [[ -n "$loaded" ]] || die "docker load produced no image"
   SRC=$loaded
+elif [[ "$SRC" == */* ]] && ! docker image inspect "$SRC" >/dev/null 2>&1; then
+  log "pulling $SRC"
+  docker pull "$SRC" || die "docker pull $SRC failed (private GHCR needs: docker login ghcr.io)"
 fi
 NEW_ID=$(docker image inspect -f '{{.Id}}' "$SRC" 2>/dev/null) || die "image $SRC not found"
 
