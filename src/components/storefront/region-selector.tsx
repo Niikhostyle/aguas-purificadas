@@ -1,9 +1,10 @@
 "use client";
 
-import { MapPin, X } from "lucide-react";
+import { LoaderCircle, LocateFixed, MapPin, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { RegionOption } from "@/lib/modules";
+import { type DetectedPlace, matchRegion, placeLabel } from "@/lib/region-match";
 
 const COOKIE = "mibidon_region";
 const DISMISSED_KEY = "mibidon_region_dismissed";
@@ -34,6 +35,31 @@ function rememberDismissed() {
   }
 }
 
+async function fetchPlace(coords?: { lat: number; lng: number }): Promise<DetectedPlace | null> {
+  const qs = coords ? `?lat=${coords.lat.toFixed(5)}&lng=${coords.lng.toFixed(5)}` : "";
+  try {
+    const res = await fetch(`/api/geo/region${qs}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { place?: DetectedPlace | null };
+    return body.place ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function currentPosition(): Promise<{ lat: number; lng: number }> {
+  return new Promise((resolve, reject) => {
+    if (!("geolocation" in navigator)) return reject(new Error("unsupported"));
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      reject,
+      { enableHighAccuracy: false, timeout: 12_000, maximumAge: 10 * 60_000 },
+    );
+  });
+}
+
+type Suggestion = { region: RegionOption; place: DetectedPlace };
+
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
 
 export function RegionSelector({
@@ -50,6 +76,9 @@ export function RegionSelector({
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const [selected, setSelected] = useState<RegionOption | null>(null);
   const [query, setQuery] = useState("");
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locateNote, setLocateNote] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -66,11 +95,19 @@ export function RegionSelector({
       triggerRef.current?.closest<HTMLElement>("[data-storefront]") ?? document.body,
     );
     sync();
-    if (autoOpen && regions.length && !readRegionCookie() && !wasDismissed()) {
-      setOpen(true);
+    let cancelled = false;
+    if (autoOpen && regions.length && !readRegionCookie()) {
+      if (!wasDismissed()) setOpen(true);
+      void fetchPlace().then((place) => {
+        const region = place ? matchRegion(regions, place) : null;
+        if (!cancelled && place && region) setSuggestion({ region, place });
+      });
     }
     window.addEventListener(SYNC_EVENT, sync);
-    return () => window.removeEventListener(SYNC_EVENT, sync);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(SYNC_EVENT, sync);
+    };
   }, [regions, autoOpen]);
 
   const close = useCallback((remember: boolean) => {
@@ -85,6 +122,31 @@ export function RegionSelector({
     setSelected(r);
     window.dispatchEvent(new Event(SYNC_EVENT));
     close(false);
+  };
+
+  const locate = async () => {
+    setLocating(true);
+    setLocateNote(null);
+    try {
+      const place = await fetchPlace(await currentPosition());
+      const region = place ? matchRegion(regions, place) : null;
+      if (place && region) {
+        choose(region);
+      } else if (place) {
+        setLocateNote(`Estás en ${placeLabel(place)}, que aún no aparece en la lista. Elige la zona más cercana.`);
+      } else {
+        setLocateNote("No pudimos reconocer tu ubicación. Elige tu ciudad en la lista.");
+      }
+    } catch (err) {
+      const denied = (err as GeolocationPositionError | undefined)?.code === 1;
+      setLocateNote(
+        denied
+          ? "No diste permiso de ubicación. Puedes elegir tu ciudad en la lista."
+          : "No pudimos obtener tu ubicación. Elige tu ciudad en la lista.",
+      );
+    } finally {
+      setLocating(false);
+    }
   };
 
   useEffect(() => {
@@ -160,6 +222,46 @@ export function RegionSelector({
           >
             <X className="size-5" />
           </button>
+        </div>
+
+        <div className="space-y-2 px-6 pt-2">
+          {suggestion && !selected ? (
+            <button
+              type="button"
+              onClick={() => choose(suggestion.region)}
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--brand)] bg-[color-mix(in_srgb,var(--brand)_8%,#fff)] px-4 py-3 text-left transition duration-300 hover:shadow-[var(--sf-shadow-md)] active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+            >
+              <span className="min-w-0">
+                <span className="block text-xs text-[#5a6578]">
+                  Parece que estás en {placeLabel(suggestion.place)}
+                </span>
+                <span className="block truncate font-semibold text-[var(--brand-deep)]">
+                  Despachar a {suggestion.region.name}
+                </span>
+              </span>
+              <span className="shrink-0 rounded-full bg-[var(--brand)] px-3 py-1 text-xs font-bold text-white">
+                Confirmar
+              </span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={locate}
+            disabled={locating}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--sf-line-strong)] py-2.5 text-sm font-semibold text-[var(--brand-deep)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:opacity-70"
+          >
+            {locating ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <LocateFixed className="size-4 text-[var(--brand)]" aria-hidden />
+            )}
+            {locating ? "Buscando tu ubicación…" : "Usar mi ubicación actual"}
+          </button>
+          {locateNote ? (
+            <p role="status" className="text-center text-xs text-[#5a6578]">
+              {locateNote}
+            </p>
+          ) : null}
         </div>
 
         {regions.length > 6 ? (

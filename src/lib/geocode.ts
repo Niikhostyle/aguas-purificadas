@@ -99,6 +99,54 @@ export async function geocodeQuery(query: string): Promise<GeoHit | undefined> {
   return res.hit;
 }
 
+export type ReversePlace = { places: string[]; state: string | null };
+
+const REVERSE_URL = NOMINATIM_URL.replace(/\/search\/?$/, "/reverse");
+const reverseCache = new Map<string, ReversePlace | null>();
+const REVERSE_CACHE_MAX = 2000;
+
+/**
+ * Town/commune names around a point (most specific first) plus its región. Coordinates are
+ * rounded to ~1 km so nearby visitors share one Nominatim call. Undefined on transient errors.
+ */
+export async function reverseGeocode(lat: number, lng: number): Promise<ReversePlace | null | undefined> {
+  if (!isValidChileCoord(lat, lng)) return null;
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  if (reverseCache.has(key)) return reverseCache.get(key) ?? null;
+
+  const result = await throttled(async (): Promise<ReversePlace | null | undefined> => {
+    const url = new URL(REVERSE_URL);
+    url.searchParams.set("lat", lat.toFixed(4));
+    url.searchParams.set("lon", lng.toFixed(4));
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("zoom", "12");
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("email", CONTACT_EMAIL);
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT, "Accept-Language": "es" },
+        signal: AbortSignal.timeout(10_000),
+        cache: "no-store",
+      });
+      if (!res.ok) return undefined;
+      const body = (await res.json()) as { address?: Record<string, string> };
+      const a = body.address;
+      if (!a || a.country_code !== "cl") return null;
+      const places = [a.city, a.town, a.village, a.suburb, a.municipality, a.city_district, a.county, a.province]
+        .filter((v): v is string => Boolean(v?.trim()));
+      return { places: [...new Set(places)], state: a.state || a.region || null };
+    } catch {
+      return undefined;
+    }
+  });
+
+  if (result !== undefined) {
+    if (reverseCache.size >= REVERSE_CACHE_MAX) reverseCache.clear();
+    reverseCache.set(key, result);
+  }
+  return result;
+}
+
 export type LocateResult = "located" | "reused" | "not_found" | "skipped" | "error";
 
 /** Locates one order (tenant-scoped), reusing the delivery customer's known location when the address matches. */
