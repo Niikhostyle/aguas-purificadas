@@ -8,6 +8,7 @@
  * Plain JS so it runs inside the production image (no tsx).
  */
 import { PrismaClient } from "@prisma/client";
+import { DEMO_COORDS, demoGeoQuery, demoStockFor } from "./demo-geo-data.mjs";
 
 const prisma = new PrismaClient();
 const slug = process.argv[2] || "demo";
@@ -125,9 +126,17 @@ async function main() {
   const extrasP = products.filter((p) => !isReturnable(p.name));
   if (!bottlesP.length) bottlesP.push(FALLBACK_PRODUCTS[0]);
 
+  for (const p of dbProducts) {
+    const stock = demoStockFor(p.name);
+    if (p.stock === null && stock !== null) {
+      await prisma.product.update({ where: { id: p.id }, data: { stock } });
+    }
+  }
+
   const customers = [];
   for (const [i, [name, address, commune]] of CUSTOMERS.entries()) {
     const rec = RECURRING[i];
+    const coords = DEMO_COORDS[address];
     customers.push(
       await prisma.deliveryCustomer.create({
         data: {
@@ -136,6 +145,9 @@ async function main() {
           phone: `${PHONE_PREFIX}${String(100 + i).padStart(3, "0")}`,
           address,
           commune,
+          ...(coords
+            ? { lat: coords[0], lng: coords[1], geoSource: "seed", geoAddress: demoGeoQuery(address, commune) }
+            : {}),
           recurring: Boolean(rec),
           frequency: rec?.[0] ?? null,
           nextDeliveryDate: rec ? day(rec[1]) : null,
@@ -191,6 +203,7 @@ async function main() {
         customerName: c.name,
         customerPhone: `+${c.phone.slice(0, 2)} ${c.phone.slice(2, 3)} ${c.phone.slice(3, 7)} ${c.phone.slice(7)}`,
         customerAddress: c.address,
+        ...(c.lat != null ? { lat: c.lat, lng: c.lng, geoSource: "seed", geocodedAt: created } : {}),
         customerNotes: rand() < 0.25 ? ["Dejar en conserjería", "Tocar timbre 2 veces", "Llamar al llegar", "Horario después de las 10"][Math.floor(rand() * 4)] : null,
         subtotalClp: subtotal,
         shippingClp: zone.costClp,
@@ -310,9 +323,22 @@ async function main() {
   for (const r of routeCache.values()) {
     const list = await prisma.order.findMany({
       where: { tenantId, routeId: r.id },
-      select: { id: true, deliveryCommune: true, customerAddress: true },
+      select: { id: true, deliveryCommune: true, customerAddress: true, lat: true, lng: true },
     });
     list.sort((a, b) => `${a.deliveryCommune}|${a.customerAddress}`.localeCompare(`${b.deliveryCommune}|${b.customerAddress}`, "es", { numeric: true }));
+    // Nearest-neighbour from the first stop so the demo map draws plausible routes
+    if (list.length > 2 && list.every((o) => o.lat != null)) {
+      const rest = list.splice(1);
+      while (rest.length) {
+        const last = list.at(-1);
+        let best = 0;
+        for (let k = 1; k < rest.length; k++) {
+          const d = (o) => (o.lat - last.lat) ** 2 + (o.lng - last.lng) ** 2;
+          if (d(rest[k]) < d(rest[best])) best = k;
+        }
+        list.push(rest.splice(best, 1)[0]);
+      }
+    }
     for (const [i, o] of list.entries()) {
       await prisma.order.update({ where: { id: o.id }, data: { routeStop: i + 1 } });
     }
