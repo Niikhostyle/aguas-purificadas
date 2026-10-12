@@ -49,7 +49,7 @@ function BrandLogo({ className, preload = false }: { className: string; preload?
     <Image
       src="/brand/mibidon/logo.png"
       alt="MiBidón"
-      width={777}
+      width={843}
       height={280}
       preload={preload}
       className={className}
