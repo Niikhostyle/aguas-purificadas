@@ -1,0 +1,10 @@
+{
+  "id": "mibidon",
+  "type": "mod",
+  "name": "MiBidón tiendas",
+  "description": "Crea, suspende, reactiva y da de baja tiendas <slug>.mibidon.cl según el ciclo de vida de las órdenes del plan MiBidón.",
+  "icon_url": "icon.svg",
+  "author": "MiBidón",
+  "author_url": "https://mibidon.cl",
+  "version": "1.0.0"
+}

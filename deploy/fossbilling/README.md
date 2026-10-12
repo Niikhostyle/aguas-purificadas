@@ -13,9 +13,9 @@
 ## Qué hace cada sistema
 
 - **FOSSBilling**: billing de la plataforma. Clientes (empresas de agua que contratan MiBidón), suscripciones al *Plan MiBidón Tienda Online* (CLP 34.990/mes), facturas, pagos, recordatorios y tickets de soporte.
-- **Next.js (`mibidon-app-1`)**: el producto. Landing `mibidon.cl`, tiendas `*.mibidon.cl` y el admin de cada tenant con la operación de la tienda (despacho, pedidos, productos). El super-admin de Next sigue creando el tenant (slug); FOSSBilling solo cobra.
+- **Next.js (`mibidon-app-1`)**: el producto. Landing `mibidon.cl`, tiendas `*.mibidon.cl` y el admin de cada tenant con la operación de la tienda (despacho, pedidos, productos).
 
-No hay integración automática todavía: al activar un pedido en FOSSBilling se crea/activa el tenant a mano en el super-admin de Next. Un paso siguiente natural es un hook de FOSSBilling (o su API admin) que llame al onboarding de Next.
+Integración automática: el módulo `modules/Mibidon` crea, suspende, reactiva y da de baja el tenant según la orden del plan (ver [INSTALL-MIBIDON-MODULE.md](INSTALL-MIBIDON-MODULE.md)). El super-admin de Next puede seguir creando tenants a mano.
 
 ## Stack en el VPS (Ubuntu 22.04, ~2 GB RAM + 3 GB swap)
 
@@ -40,4 +40,3 @@ Todos son idempotentes. Las contraseñas (BD y admin) se generan en el servidor 
 - `config.php` queda en `440`. Los ajustes del admin que escriben el config (idioma, caché) necesitan `chmod u+w` temporal; `basic-setup.sh` lo hace y lo revierte.
 - Actualizar: Sistema → Actualizaciones en el admin, o https://docs.fossbilling.org/maintenance/updating/.
 - Pendiente: pasarela de pago (Flow/Webpay/Mercado Pago no vienen incluidas; hay transferencia manual y PayPal/Stripe), SMTP para correos y logo de MiBidón.
-- Reservar el slug `billing` en el onboarding de Next (`src/lib/onboarding.ts`) para que ningún tenant lo tome (`admin` ya está reservado).

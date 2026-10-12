@@ -1,0 +1,84 @@
+{% extends request.ajax ? 'layout_blank.html.twig' : 'layout_default.html.twig' %}
+
+{% block meta_title %}MiBidón tiendas{% endblock %}
+
+{% set active_menu = 'system' %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ '/'|url }}">
+                <svg class="icon">
+                    <use href="#home" />
+                </svg>
+            </a>
+        </li>
+        <li class="breadcrumb-item"><a href="{{ 'extension'|url }}">{{ 'Extensions'|trans }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">MiBidón tiendas</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    {% set cfg = admin.extension_config_get({ 'ext': 'mod_mibidon' }) %}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h3 class="card-title">MiBidón tiendas</h3>
+                <p class="card-subtitle">Crea, suspende, reactiva y da de baja &lt;slug&gt;.mibidon.cl según las órdenes del plan.</p>
+            </div>
+        </div>
+        <form method="post" action="{{ 'extension/config_save'|api_url }}" {{ fb_api_form({ reload: true }) }}>
+            <input type="hidden" name="ext" value="mod_mibidon">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label required" for="endpoint_url">URL del endpoint de aprovisionamiento</label>
+                    <input class="form-control" type="url" id="endpoint_url" name="endpoint_url" value="{{ cfg.endpoint_url|default('http://127.0.0.1:3001/api/platform/provision') }}" required>
+                    <small class="form-hint">Desde el mismo VPS: http://127.0.0.1:3001/api/platform/provision (puerto APP_HOST_PORT del contenedor MiBidón).</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required" for="secret">Secreto compartido (PLATFORM_PROVISION_SECRET)</label>
+                    <input class="form-control" type="password" id="secret" name="secret" value="{{ cfg.secret|default('') }}" minlength="32" autocomplete="off" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="product_slugs">Slugs de productos MiBidón (separados por coma)</label>
+                    <input class="form-control" type="text" id="product_slugs" name="product_slugs" value="{{ cfg.product_slugs|default('plan-mibidon') }}">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="company_field">Campo del formulario: nombre de la empresa</label>
+                        <input class="form-control" type="text" id="company_field" name="company_field" value="{{ cfg.company_field|default('empresa') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="slug_field">Campo del formulario: subdominio deseado</label>
+                        <input class="form-control" type="text" id="slug_field" name="slug_field" value="{{ cfg.slug_field|default('subdominio') }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="notify_email">Enviar correo con el enlace de activación</label>
+                    <select class="form-select" id="notify_email" name="notify_email">
+                        <option value="1" {% if cfg.notify_email|default('1') == '1' %}selected{% endif %}>Sí</option>
+                        <option value="0" {% if cfg.notify_email|default('1') == '0' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary">{{ 'Update'|trans }}</button>
+                <a class="btn btn-outline-secondary" {{ fb_api_link({ href: 'mibidon/test_connection'|api_url, message: 'Conexión OK' }) }}>Probar conexión</a>
+                <a class="btn btn-outline-secondary" {{ fb_api_link({ href: 'mibidon/reconcile'|api_url, message: 'Sincronización ejecutada', reload: true }) }}>Sincronizar todas las órdenes</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header"><h3 class="card-title">Re-sincronizar una orden</h3></div>
+        <form method="post" action="{{ 'mibidon/sync_order'|api_url }}" {{ fb_api_form({ message: 'Orden sincronizada' }) }}>
+            <div class="card-body">
+                <p class="text-secondary">Crea la tienda si falta (por ejemplo, tras corregir un subdominio en uso en la configuración de la orden) o sincroniza su estado.</p>
+                <div class="input-group">
+                    <input class="form-control" type="number" min="1" name="order_id" placeholder="ID de la orden" required>
+                    <button type="submit" class="btn btn-primary">Sincronizar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
