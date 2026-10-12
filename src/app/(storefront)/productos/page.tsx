@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { getTenantProducts, requireTenant } from "@/lib/tenant";
+import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await requireTenant();
@@ -22,7 +23,13 @@ export default async function ProductsPage() {
         </p>
       </div>
       <div className="mx-auto max-w-6xl px-4 py-12 md:px-6">
-        <ProductGrid products={products} />
+        <ProductGrid
+          products={products}
+          whatsappHref={tenantWhatsappHref(
+            tenant.whatsapp,
+            `Hola ${tenant.name}, quiero hacer un pedido.`,
+          )}
+        />
       </div>
     </div>
   );
