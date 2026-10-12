@@ -62,11 +62,11 @@ export function SiteHeader({
 
   return (
     <header
-      className={`sticky top-0 z-30 bg-white/95 backdrop-blur transition-shadow ${
+      className={`sticky top-0 z-30 bg-[var(--header-bg)]/95 backdrop-blur transition-shadow ${
         scrolled ? "shadow-md shadow-[#12326e]/10" : "shadow-sm"
       }`}
     >
-      <div className="bg-[var(--topbar)] text-white">
+      <div className="bg-[var(--topbar)] text-[var(--topbar-text)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-1.5 text-[11px] leading-snug sm:flex-row sm:items-center sm:justify-between sm:text-xs md:px-6">
           <p className="flex items-start gap-2">
             <span aria-hidden>🚚</span>
@@ -90,7 +90,7 @@ export function SiteHeader({
                 className="h-12 w-auto object-contain md:h-14"
               />
             ) : (
-              <span className="rc-display text-2xl font-semibold uppercase text-[var(--brand-deep)]">
+              <span className="rc-display text-2xl font-semibold uppercase text-[var(--nav-text)]">
                 {brandName}
               </span>
             )}
@@ -101,7 +101,7 @@ export function SiteHeader({
               <Link
                 key={item.label}
                 href={item.href}
-                className="px-2.5 py-1 text-[13px] font-bold uppercase tracking-wide text-[var(--nav-text)] transition hover:text-[var(--brand)]"
+                className="px-2.5 py-1 text-[13px] font-bold uppercase tracking-wide text-[var(--nav-text)] transition hover:text-[var(--header-hover)]"
               >
                 {item.label}
               </Link>
@@ -122,14 +122,14 @@ export function SiteHeader({
             {flags.loginClientes ? (
               <Link
                 href="/cuenta"
-                className="hidden text-xs font-bold uppercase text-[var(--brand-deep)] hover:text-[var(--brand)] sm:inline"
+                className="hidden text-xs font-bold uppercase text-[var(--nav-text)] hover:text-[var(--header-hover)] sm:inline"
               >
                 {customerName ? customerName.split(" ")[0] : "Mi cuenta"}
               </Link>
             ) : null}
             <Link
               href="/carrito"
-              className="relative inline-flex items-center gap-1.5 text-sm font-bold uppercase text-[var(--brand-deep)] hover:text-[var(--brand)]"
+              className="relative inline-flex items-center gap-1.5 text-sm font-bold uppercase text-[var(--nav-text)] hover:text-[var(--header-hover)]"
             >
               <span aria-hidden>🛒</span>
               <span className="hidden sm:inline">Carrito</span>
@@ -141,7 +141,7 @@ export function SiteHeader({
             </Link>
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#d5e3ec] text-[var(--brand-deep)] lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#d5e3ec] text-[var(--nav-text)] lg:hidden"
               aria-label={open ? "Cerrar menú" : "Abrir menú"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -170,7 +170,7 @@ export function SiteHeader({
                   key={item.label}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-bold uppercase text-[var(--nav-text)] hover:bg-[#e8f7fc] hover:text-[var(--brand)]"
+                  className="rounded-lg px-3 py-2.5 text-sm font-bold uppercase text-[var(--nav-text)] hover:bg-[var(--mist)] hover:text-[var(--header-hover)]"
                 >
                   {item.label}
                 </Link>

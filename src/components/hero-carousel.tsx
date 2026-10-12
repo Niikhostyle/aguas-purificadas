@@ -82,7 +82,7 @@ export function HeroCarousel({
                   className={
                     variant === "marketing"
                       ? "absolute inset-0 bg-[linear-gradient(115deg,#12326ef5_0%,#00b1e2cc_48%,#12326ee6_100%)]"
-                      : "absolute inset-0 bg-[linear-gradient(105deg,rgba(18,50,110,0.88)_0%,rgba(0,177,226,0.4)_55%,rgba(0,0,0,0.2)_100%)]"
+                      : "absolute inset-0 bg-[image:var(--hero-overlay,linear-gradient(105deg,rgba(18,50,110,0.88)_0%,rgba(0,177,226,0.4)_55%,rgba(0,0,0,0.2)_100%))]"
                   }
                 />
                 <div
@@ -129,7 +129,7 @@ export function HeroCarousel({
                           className={
                             variant === "marketing"
                               ? "inline-flex rounded-md bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#12326e] hover:bg-[#e8f7fc]"
-                              : "bg-[var(--brand)] px-6 py-3 text-sm font-bold uppercase tracking-wide text-white hover:bg-white hover:text-[var(--brand-deep)]"
+                              : "rc-btn-primary px-6 py-3 text-sm font-bold uppercase tracking-wide"
                           }
                         >
                           {slide.primaryLabel}

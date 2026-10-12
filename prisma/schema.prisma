@@ -47,6 +47,8 @@ model Tenant {
   instagramUrl   String?
   twitterUrl     String?
   youtubeUrl     String?
+  /// Apariencia (overrides validados en src/lib/appearance.ts): colores tienda/panel, favicon, login admin
+  appearance     Json?
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

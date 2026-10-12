@@ -1,16 +1,16 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export type KpiTone = "brand" | "navy" | "info" | "success" | "warning" | "danger" | "neutral";
 
-const TONE: Record<KpiTone, string> = {
-  brand: "bg-[var(--brand)] text-white",
-  navy: "bg-[var(--brand-deep)] text-white",
-  info: "bg-sky-500 text-white",
-  success: "bg-emerald-500 text-white",
-  warning: "bg-amber-500 text-white",
-  danger: "bg-red-500 text-white",
-  neutral: "bg-[#7b8aa0] text-white",
+const TONE_VAR: Record<KpiTone, { bg: string; fill: string; text: string }> = {
+  brand: { bg: "var(--kpi-brand-bg, var(--brand))", fill: "var(--kpi-brand-fill, var(--brand))", text: "var(--kpi-brand-text, #fff)" },
+  navy: { bg: "var(--kpi-navy-bg, var(--brand-deep))", fill: "var(--kpi-navy-fill, var(--brand-deep))", text: "var(--kpi-navy-text, #fff)" },
+  info: { bg: "var(--kpi-info-bg, #00a6f4)", fill: "var(--kpi-info-fill, #00a6f4)", text: "var(--kpi-info-text, #fff)" },
+  success: { bg: "var(--kpi-success-bg, #00bc7d)", fill: "var(--kpi-success-fill, #00bc7d)", text: "var(--kpi-success-text, #fff)" },
+  warning: { bg: "var(--kpi-warning-bg, #fe9a00)", fill: "var(--kpi-warning-fill, #fe9a00)", text: "var(--kpi-warning-text, #fff)" },
+  danger: { bg: "var(--kpi-danger-bg, #fb2c36)", fill: "var(--kpi-danger-fill, #fb2c36)", text: "var(--kpi-danger-text, #fff)" },
+  neutral: { bg: "#7b8aa0", fill: "#7b8aa0", text: "#fff" },
 };
 
 export function KpiCard({
@@ -28,34 +28,39 @@ export function KpiCard({
   tone?: KpiTone;
   href?: string;
 }) {
+  const t = TONE_VAR[tone];
+  const style = { "--kpi-bg": t.bg, "--kpi-fill": t.fill, "--kpi-text": t.text } as CSSProperties;
   const body = (
     <>
       <span
         aria-hidden
-        className={`grid size-11 shrink-0 place-items-center rounded-full [&>svg]:size-5 ${TONE[tone]}`}
+        className="kpi-icon grid size-11 shrink-0 place-items-center rounded-full bg-[var(--kpi-bg)] text-[var(--kpi-text)] [&>svg]:size-5"
       >
         {icon}
       </span>
       <span className="min-w-0">
-        <span className="block text-[13px] text-[#5a6578]">{label}</span>
-        <span className="block text-2xl font-bold tabular-nums leading-tight text-[#12233d]">
+        <span className="kpi-label block text-[13px] text-[#5a6578]">{label}</span>
+        <span className="kpi-value block text-2xl font-bold tabular-nums leading-tight text-[#12233d]">
           {value}
         </span>
-        {hint ? <span className="block truncate text-xs text-[#7b8aa0]">{hint}</span> : null}
+        {hint ? <span className="kpi-hint block truncate text-xs text-[#7b8aa0]">{hint}</span> : null}
       </span>
     </>
   );
   const cls =
-    "flex items-center gap-4 rounded-xl border border-[#dde7ee] bg-white p-4 shadow-[0_1px_2px_rgba(16,40,70,0.04)]";
+    "kpi-card flex items-center gap-4 rounded-xl border border-[#dde7ee] bg-white p-4 shadow-[0_1px_2px_rgba(16,40,70,0.04)]";
   return href ? (
     <Link
       href={href}
+      style={style}
       className={`${cls} transition hover:border-[var(--brand)]/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-[var(--brand)]`}
     >
       {body}
     </Link>
   ) : (
-    <div className={cls}>{body}</div>
+    <div className={cls} style={style}>
+      {body}
+    </div>
   );
 }
 

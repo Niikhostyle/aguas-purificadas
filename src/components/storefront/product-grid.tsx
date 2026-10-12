@@ -46,7 +46,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   {product.description}
                 </p>
               ) : null}
-              <span className="mt-4 inline-flex items-center justify-center bg-[var(--brand)] px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition group-hover:bg-[var(--brand-deep)]">
+              <span className="mt-4 rc-btn-primary inline-flex items-center justify-center px-3 py-2 text-xs font-bold uppercase tracking-wide">
                 Ver detalle
               </span>
             </div>

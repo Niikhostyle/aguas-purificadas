@@ -101,3 +101,107 @@ export async function saveLogoImage(
 ): Promise<string> {
   return saveImageFile(tenantSlug, file, "logo");
 }
+
+type AssetExt = "png" | "jpg" | "webp" | "gif" | "svg" | "ico";
+
+export type AppearanceAssetKind = "logo" | "favicon" | "background";
+
+const ASSET_RULES: Record<
+  AppearanceAssetKind,
+  { exts: AssetExt[]; maxBytes: number; square?: boolean; label: string }
+> = {
+  logo: { exts: ["png", "svg", "jpg", "webp"], maxBytes: 2 * 1024 * 1024, label: "PNG, SVG, JPG o WEBP" },
+  favicon: { exts: ["png", "svg", "ico", "webp"], maxBytes: 1024 * 1024, square: true, label: "PNG, SVG, ICO o WEBP" },
+  background: { exts: ["jpg", "png", "webp"], maxBytes: 5 * 1024 * 1024, label: "JPG, PNG o WEBP" },
+};
+
+const DECLARED_TYPES: Record<AssetExt, string[]> = {
+  png: ["image/png"],
+  jpg: ["image/jpeg", "image/jpg"],
+  webp: ["image/webp"],
+  gif: ["image/gif"],
+  svg: ["image/svg+xml"],
+  ico: ["image/x-icon", "image/vnd.microsoft.icon", "image/ico", "application/octet-stream", ""],
+};
+
+function sniffExt(buf: Buffer): AssetExt | null {
+  if (matchesMagic(buf, "png")) return "png";
+  if (matchesMagic(buf, "jpg")) return "jpg";
+  if (matchesMagic(buf, "gif")) return "gif";
+  if (matchesMagic(buf, "webp") && buf.subarray(8, 12).toString("ascii") === "WEBP") return "webp";
+  if (buf.length > 6 && buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0) return "ico";
+  const head = buf.subarray(0, 512).toString("utf8").replace(/^\uFEFF/, "").trimStart();
+  if (/^(<\?xml[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(head)) return "svg";
+  return null;
+}
+
+/** SVGs are served from our origin, so anything scriptable or external is refused. */
+function assertSafeSvg(buf: Buffer) {
+  const text = buf.toString("utf8");
+  if (
+    /<script|<foreignObject|<!ENTITY|<!DOCTYPE|javascript:|\bon[a-z]+\s*=|<iframe|<embed|<object/i.test(text) ||
+    /(?:href|src)\s*=\s*["']\s*(?!#|data:image\/)/i.test(text)
+  ) {
+    throw new Error("El SVG contiene scripts o referencias externas no permitidas");
+  }
+}
+
+function imageSize(buf: Buffer, ext: AssetExt): { w: number; h: number } | null {
+  try {
+    if (ext === "png") return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+    if (ext === "ico") return { w: buf[6] || 256, h: buf[7] || 256 };
+    if (ext === "webp") {
+      const chunk = buf.subarray(12, 16).toString("ascii");
+      if (chunk === "VP8X") return { w: 1 + buf.readUIntLE(24, 3), h: 1 + buf.readUIntLE(27, 3) };
+      if (chunk === "VP8 ") return { w: buf.readUInt16LE(26) & 0x3fff, h: buf.readUInt16LE(28) & 0x3fff };
+      if (chunk === "VP8L") {
+        const bits = buf.readUInt32LE(21);
+        return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+      }
+      return null;
+    }
+    if (ext === "svg") {
+      const tag = buf.toString("utf8").match(/<svg[^>]*>/i)?.[0] ?? "";
+      const vb = tag.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i);
+      if (vb) return { w: Number(vb[1]), h: Number(vb[2]) };
+      const w = tag.match(/\swidth\s*=\s*["']([\d.]+)(px)?["']/i);
+      const h = tag.match(/\sheight\s*=\s*["']([\d.]+)(px)?["']/i);
+      if (w && h) return { w: Number(w[1]), h: Number(h[1]) };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+export async function saveAppearanceAsset(
+  tenantSlug: string,
+  file: File,
+  kind: AppearanceAssetKind,
+): Promise<string> {
+  const slug = safeSlug(tenantSlug);
+  const rule = ASSET_RULES[kind];
+  if (file.size > rule.maxBytes) {
+    throw new Error(`El archivo no puede superar ${Math.round(rule.maxBytes / 1024 / 1024)} MB`);
+  }
+  const buf = Buffer.from(await file.arrayBuffer());
+  const ext = sniffExt(buf);
+  if (!ext || !rule.exts.includes(ext) || !DECLARED_TYPES[ext].includes(file.type)) {
+    throw new Error(`Formato no permitido (${rule.label})`);
+  }
+  if (ext === "svg") assertSafeSvg(buf);
+  if (rule.square) {
+    const size = imageSize(buf, ext);
+    if (!size || size.w < 16 || Math.abs(size.w - size.h) > 0.5) {
+      throw new Error("El ícono debe ser cuadrado (por ejemplo 512×512 px)");
+    }
+  }
+
+  const uploadsRoot = path.resolve(process.cwd(), "public", "uploads");
+  const dir = path.resolve(uploadsRoot, slug, "appearance");
+  if (!dir.startsWith(uploadsRoot + path.sep)) throw new Error("Ruta de carga inválida");
+  await mkdir(dir, { recursive: true });
+  const name = `${kind}-${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
+  await writeFile(path.join(dir, name), buf, { mode: 0o644 });
+  return `/uploads/${slug}/appearance/${name}`;
+}

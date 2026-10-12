@@ -1,14 +1,21 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { SiteFooter } from "@/components/storefront/site-footer";
 import { SiteHeader } from "@/components/storefront/site-header";
 import { WhatsappFloat } from "@/components/storefront/whatsapp-float";
-import { tenantThemeStyle } from "@/lib/branding";
+import { baseColors, storefrontThemeVars, tenantAppearance } from "@/lib/appearance";
 import { getResolvedCart } from "@/lib/cart";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { parseModuleFlags, parseModulesContent } from "@/lib/modules";
 import { requireTenant } from "@/lib/tenant";
 import { tenantWhatsappHref } from "@/lib/whatsapp";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await requireTenant();
+  const favicon = tenantAppearance(tenant).images.faviconUrl;
+  return favicon ? { icons: { icon: favicon, apple: favicon } } : {};
+}
 
 export default async function StorefrontLayout({
   children,
@@ -16,7 +23,8 @@ export default async function StorefrontLayout({
   children: React.ReactNode;
 }) {
   const tenant = await requireTenant();
-  const theme = tenantThemeStyle(tenant);
+  const appearance = tenantAppearance(tenant);
+  const theme = storefrontThemeVars(baseColors(tenant), appearance);
   const cart = await getResolvedCart(tenant.id);
   const flags = parseModuleFlags(tenant.modulesEnabled);
   const content = parseModulesContent(tenant.modulesContent);
@@ -30,10 +38,10 @@ export default async function StorefrontLayout({
   const brandName = isDemo ? "Demo" : tenant.name;
 
   return (
-    <div style={theme} className="flex min-h-full flex-1 flex-col">
+    <div style={theme} data-storefront className="flex min-h-full flex-1 flex-col">
       <Suspense
         fallback={
-          <div className="h-24 border-b border-[#d5e3ec] bg-white" aria-hidden />
+          <div className="h-24 border-b border-[#d5e3ec] bg-[var(--header-bg)]" aria-hidden />
         }
       >
         <SiteHeader
@@ -48,7 +56,7 @@ export default async function StorefrontLayout({
         />
       </Suspense>
       <main className="flex-1">{children}</main>
-      <SiteFooter tenant={tenant} />
+      <SiteFooter tenant={tenant} logoDarkUrl={appearance.images.logoDarkUrl} />
       <WhatsappFloat
         href={tenantWhatsappHref(
           tenant.whatsapp,

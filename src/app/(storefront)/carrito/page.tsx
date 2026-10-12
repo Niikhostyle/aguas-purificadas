@@ -31,7 +31,7 @@ export default async function CartPage() {
             <p className="text-[#4a655f]">Tu carrito está vacío.</p>
             <Link
               href="/productos"
-              className="mt-6 inline-flex rounded-md bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--brand-deep)]"
+              className="rc-btn-primary mt-6 inline-flex rounded-md px-5 py-2.5 text-sm font-semibold"
             >
               Ver productos
             </Link>
@@ -108,7 +108,7 @@ export default async function CartPage() {
               </div>
               <Link
                 href="/checkout"
-                className="inline-flex items-center justify-center rounded-md bg-[var(--brand)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--brand-deep)]"
+                className="rc-btn-primary inline-flex items-center justify-center rounded-md px-6 py-2.5 text-sm font-semibold"
               >
                 Ir al checkout
               </Link>
