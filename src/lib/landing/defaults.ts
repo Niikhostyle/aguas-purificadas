@@ -194,7 +194,7 @@ export const LANDING_DEFAULTS: LandingContent = {
             { id: "pf-6", text: "Soporte prioritario por WhatsApp en Chile" },
           ],
           ctaLabel: "Quiero mi tienda ahora",
-          ctaUrl: "",
+          ctaUrl: "https://billing.mibidon.cl/order/plan-mibidon",
         },
       ],
     },
