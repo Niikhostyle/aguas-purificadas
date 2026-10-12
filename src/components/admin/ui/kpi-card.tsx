@@ -86,7 +86,7 @@ export function KpiCard({
         <span className="kpi-value block text-2xl font-bold tabular-nums leading-tight text-[#12233d]">
           {value}
         </span>
-        {hint ? <span className="kpi-hint block truncate text-xs text-[#7b8aa0]">{hint}</span> : null}
+        {hint ? <span className="kpi-hint block line-clamp-2 text-xs text-[#7b8aa0]">{hint}</span> : null}
         {trend ? <TrendChip trend={trend} /> : null}
       </span>
     </>
