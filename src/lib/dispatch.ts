@@ -162,6 +162,24 @@ export function shortRef(id: string): string {
   return id.slice(-8).toUpperCase();
 }
 
+/**
+ * Greedy nearest-neighbour ordering from the first stop when every stop has coordinates;
+ * otherwise the input order is kept. Not a full route optimization, but avoids zig-zags.
+ */
+export function orderByProximity<T extends { lat: number | null; lng: number | null }>(stops: T[]): T[] {
+  if (stops.length < 3 || stops.some((s) => s.lat == null || s.lng == null)) return stops;
+  const out = [stops[0]];
+  const rest = stops.slice(1);
+  const dist = (a: T, b: T) => (a.lat! - b.lat!) ** 2 + ((a.lng! - b.lng!) * Math.cos((a.lat! * Math.PI) / 180)) ** 2;
+  while (rest.length) {
+    const last = out[out.length - 1];
+    let best = 0;
+    for (let k = 1; k < rest.length; k++) if (dist(last, rest[k]) < dist(last, rest[best])) best = k;
+    out.push(rest.splice(best, 1)[0]);
+  }
+  return out;
+}
+
 /** Stops are ordered by comuna/sector, then address (not real route optimization). */
 export function compareStops(
   a: { deliveryCommune: string | null; deliveryZoneName: string | null; customerAddress: string },

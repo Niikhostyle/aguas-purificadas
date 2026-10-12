@@ -7,6 +7,7 @@ import {
   compareStops,
   dateFromStr,
   normalizePhone,
+  orderByProximity,
   todayCl,
 } from "@/lib/dispatch";
 
@@ -111,10 +112,10 @@ export async function assignOrders(opts: {
 export async function renumberRoute(tx: Tx, tenantId: string, routeId: string) {
   const orders = await tx.order.findMany({
     where: { tenantId, routeId },
-    select: { id: true, deliveryCommune: true, deliveryZoneName: true, customerAddress: true },
+    select: { id: true, deliveryCommune: true, deliveryZoneName: true, customerAddress: true, lat: true, lng: true },
   });
   orders.sort(compareStops);
-  for (const [i, o] of orders.entries()) {
+  for (const [i, o] of orderByProximity(orders).entries()) {
     await tx.order.update({ where: { id: o.id }, data: { routeStop: i + 1 } });
   }
 }

@@ -1,6 +1,7 @@
 export type AdminNavIcon =
   | "dashboard"
   | "dispatch"
+  | "map"
   | "orders"
   | "reminders"
   | "containers"
@@ -34,7 +35,14 @@ export const TENANT_NAV: AdminNavGroup[] = [
     label: "Operación",
     items: [
       { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
-      { href: "/admin/despacho", label: "Despacho", icon: "dispatch" },
+      {
+        href: "/admin/despacho",
+        label: "Despacho",
+        icon: "dispatch",
+        activeWhen: (pathname) =>
+          pathname.startsWith("/admin/despacho") && !pathname.startsWith("/admin/despacho/mapa"),
+      },
+      { href: "/admin/despacho/mapa", label: "Mapa de entregas", icon: "map" },
       { href: "/admin/pedidos", label: "Pedidos", icon: "orders" },
       { href: "/admin/recordatorios", label: "Recordatorios", icon: "reminders" },
       { href: "/admin/envases", label: "Envases", icon: "containers" },
@@ -85,7 +93,7 @@ export const PLATFORM_NAV: AdminNavGroup[] = [
 ];
 
 export function isNavItemActive(item: AdminNavItem, pathname: string) {
-  if (item.activeWhen?.(pathname)) return true;
+  if (item.activeWhen) return item.activeWhen(pathname) || pathname === item.href;
   if (item.exact) return pathname === item.href;
   const prefixes = [item.href, ...(item.match ?? [])];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));

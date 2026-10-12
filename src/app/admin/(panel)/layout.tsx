@@ -36,6 +36,7 @@ export default async function AdminPanelLayout({
     ? []
     : [
         !flags.despacho && "/admin/despacho",
+        !flags.despacho && "/admin/despacho/mapa",
         !flags.recordatorios && "/admin/recordatorios",
         !flags.envases && "/admin/envases",
       ].filter((h): h is string => Boolean(h));
