@@ -49,8 +49,8 @@ function BrandLogo({ className, preload = false }: { className: string; preload?
     <Image
       src="/brand/mibidon/logo.png"
       alt="MiBidón"
-      width={793}
-      height={296}
+      width={777}
+      height={280}
       preload={preload}
       className={className}
     />
@@ -232,8 +232,8 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
 
       <ScrollHeader className="sticky top-0 z-40 border-b border-sv-surface-high bg-sv-surface/95 px-4 backdrop-blur-md sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="mb-nav-logo flex items-center py-1.5" aria-label="MiBidón - Inicio">
-            <BrandLogo className="h-12 w-auto sm:h-16" preload />
+          <Link href="/" className="mb-nav-logo flex h-10 items-center" aria-label="MiBidón - Inicio">
+            <BrandLogo className="h-12 w-auto" preload />
           </Link>
           <nav className="sv-label hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
             {navLinks.map((l) => (
