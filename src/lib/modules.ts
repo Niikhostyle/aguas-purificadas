@@ -58,6 +58,15 @@ export type CertificationItem = {
   logoUrl?: string;
 };
 
+export type BenefitItem = {
+  id: string;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+};
+
+export const MAX_BENEFITS = 8;
+
 export type AudienceCopy = {
   headline?: string;
   body?: string;
@@ -71,6 +80,8 @@ export type ModulesContent = {
   kits: KitItem[];
   redes: SocialEmbed[];
   certificaciones: CertificationItem[];
+  beneficios: BenefitItem[];
+  beneficiosTitle?: string;
   hogar?: AudienceCopy;
   empresa?: AudienceCopy;
 };
@@ -131,6 +142,7 @@ export function parseModulesContent(raw: unknown): ModulesContent {
     kits: [],
     redes: [],
     certificaciones: [],
+    beneficios: [],
   };
   if (!raw || typeof raw !== "object") return empty;
   const o = raw as Record<string, unknown>;
@@ -228,6 +240,22 @@ export function parseModulesContent(raw: unknown): ModulesContent {
     }
   }
 
+  const beneficios: BenefitItem[] = [];
+  if (Array.isArray(o.beneficios)) {
+    for (const item of o.beneficios) {
+      if (!item || typeof item !== "object" || beneficios.length >= MAX_BENEFITS) continue;
+      const r = item as Record<string, unknown>;
+      const title = str(r.title);
+      if (!title) continue;
+      beneficios.push({
+        id: str(r.id) || `b-${beneficios.length + 1}`,
+        title,
+        body: str(r.body),
+        imageUrl: str(r.imageUrl),
+      });
+    }
+  }
+
   const parseAudience = (v: unknown): AudienceCopy | undefined => {
     if (!v || typeof v !== "object") return undefined;
     const a = v as Record<string, unknown>;
@@ -245,6 +273,8 @@ export function parseModulesContent(raw: unknown): ModulesContent {
     kits,
     redes,
     certificaciones,
+    beneficios,
+    beneficiosTitle: str(o.beneficiosTitle),
     hogar: parseAudience(o.hogar),
     empresa: parseAudience(o.empresa),
   };
@@ -364,6 +394,13 @@ export function defaultDemoModulesContent(): ModulesContent {
         name: "Pago seguro WebPay",
         description: "Transacciones con Transbank en ambiente controlado.",
       },
+    ],
+    beneficiosTitle: "¿Por qué elegirnos?",
+    beneficios: [
+      { id: "b1", title: "Agua purificada", body: "Bidones y botellones listos para tu hogar u oficina." },
+      { id: "b2", title: "Despacho a domicilio", body: "Coordinamos la entrega en tu comuna, sin que tengas que salir." },
+      { id: "b3", title: "Pide en línea", body: "Arma tu pedido en minutos desde el celular o el computador." },
+      { id: "b4", title: "Atención directa", body: "Resolvemos tus dudas por teléfono o WhatsApp." },
     ],
     hogar: {
       headline: "Agua pura para tu hogar",

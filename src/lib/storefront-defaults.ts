@@ -40,6 +40,7 @@ export function emptyModulesContent(): ModulesContent {
     kits: [],
     redes: [],
     certificaciones: [],
+    beneficios: [],
   };
 }
 
@@ -153,6 +154,8 @@ export function stripTemplateModulesContent(content: ModulesContent): ModulesCon
     kits: stripMatching(content.kits, demo.kits, (k) => k.title),
     redes: stripMatching(content.redes, demo.redes, (s) => s.url),
     certificaciones: stripMatching(content.certificaciones, demo.certificaciones, (c) => c.name),
+    beneficios: stripMatching(content.beneficios, demo.beneficios, (b) => b.title),
+    beneficiosTitle: content.beneficiosTitle,
     hogar: sameCopy(content.hogar, demo.hogar) ? undefined : content.hogar,
     empresa: sameCopy(content.empresa, demo.empresa) ? undefined : content.empresa,
   };

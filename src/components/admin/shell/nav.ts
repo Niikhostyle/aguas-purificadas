@@ -8,6 +8,7 @@ export type AdminNavIcon =
   | "products"
   | "discounts"
   | "brand"
+  | "benefits"
   | "appearance"
   | "modules"
   | "tenants"
@@ -61,6 +62,7 @@ export const TENANT_NAV: AdminNavGroup[] = [
     items: [
       { href: "/admin/apariencia", label: "Apariencia", icon: "appearance" },
       { href: "/admin/marca", label: "Marca y contenido", icon: "brand" },
+      { href: "/admin/beneficios", label: "Beneficios", icon: "benefits" },
       { href: "/admin/modulos", label: "Módulos", icon: "modules" },
     ],
   },

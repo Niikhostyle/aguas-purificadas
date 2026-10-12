@@ -25,7 +25,7 @@ const ITEMS = [
 ] as const;
 
 /** Generic benefits for tenants without their own photos (no product claims, no third-party images). */
-export function NeutralBenefits() {
+export function NeutralBenefits({ title }: { title?: string }) {
   return (
     <section
       id="beneficios"
@@ -33,7 +33,7 @@ export function NeutralBenefits() {
     >
       <Reveal className="mx-auto max-w-6xl px-4 md:px-6">
         <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
-          ¿Por qué elegirnos?
+          {title || "¿Por qué elegirnos?"}
         </h2>
         <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {ITEMS.map(({ icon: Icon, title, body }) => (

@@ -102,6 +102,13 @@ export async function saveDiscountImage(
   return saveImageFile(tenantSlug, file, "descuentos");
 }
 
+export async function saveBenefitImage(
+  tenantSlug: string,
+  file: File,
+): Promise<string> {
+  return saveImageFile(tenantSlug, file, "beneficios");
+}
+
 export async function saveLogoImage(
   tenantSlug: string,
   file: File,

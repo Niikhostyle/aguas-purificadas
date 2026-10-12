@@ -72,6 +72,8 @@ export async function updateModulesAction(formData: FormData) {
     kits: safeParse(kitsJson, prev.kits),
     redes: safeParse(redesJson, prev.redes),
     certificaciones: safeParse(certsJson, prev.certificaciones),
+    beneficios: prev.beneficios,
+    beneficiosTitle: prev.beneficiosTitle,
     hogar: {
       headline: String(formData.get("hogarHeadline") || "").trim() || undefined,
       body: String(formData.get("hogarBody") || "").trim() || undefined,

@@ -37,6 +37,7 @@ import {
   Recycle,
   Search,
   Smartphone,
+  Sparkles,
   Store,
   TicketPercent,
   Truck,
@@ -67,6 +68,7 @@ const ICONS: Record<AdminNavIcon, LucideIcon> = {
   products: Package,
   discounts: TicketPercent,
   brand: Palette,
+  benefits: Sparkles,
   appearance: Paintbrush,
   modules: Blocks,
   tenants: Building2,
@@ -263,6 +265,7 @@ function buildActions(variant: Props["variant"], hidden: Set<string>, siteHref: 
       : [
           { id: "new-product", label: "Nuevo producto", icon: Plus, href: "/admin/productos/nuevo", keywords: "crear agregar catalogo" },
           { id: "new-discount", label: "Nuevo descuento o cupón", icon: TicketPercent, href: "/admin/descuentos/nuevo", keywords: "promocion oferta rebaja cupon porcentaje" },
+          { id: "benefits", label: "Editar beneficios de la tienda", icon: Sparkles, href: "/admin/beneficios", keywords: "por que elegirnos ventajas destacados" },
           { id: "pending-pay", label: "Pedidos con pago pendiente", icon: ClipboardList, href: "/admin/pedidos?pago=pending", keywords: "webpay" },
           { id: "unassigned", label: "Pedidos sin ruta asignada", icon: Truck, href: "/admin/despacho?fecha=todas&estado=por_asignar", requires: "/admin/despacho", keywords: "asignar programar" },
           { id: "map", label: "Mapa de entregas", icon: MapIcon, href: "/admin/despacho/mapa", requires: "/admin/despacho", keywords: "ubicar pines rutas choferes" },

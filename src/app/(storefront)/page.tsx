@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { MessageCircle, Phone } from "lucide-react";
 import { BenefitsSection } from "@/components/storefront/benefits";
 import { BrandMark } from "@/components/storefront/brand-mark";
-import { NeutralBenefits } from "@/components/storefront/neutral-benefits";
 import { NeutralHero } from "@/components/storefront/neutral-hero";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { SetupChecklist, type SetupStep } from "@/components/storefront/setup-checklist";
@@ -193,7 +192,7 @@ export default async function HomePage({
       <PlanesSection flags={flags} content={content} audience={audience} />
       <KitsSection flags={flags} content={content} audience={audience} />
 
-      {showcase ? <BenefitsSection /> : <NeutralBenefits />}
+      <BenefitsSection title={content.beneficiosTitle} items={content.beneficios} />
 
       <RedesSection flags={flags} content={content} />
       <CertificacionesSection flags={flags} content={content} />

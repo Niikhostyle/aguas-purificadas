@@ -47,7 +47,7 @@ export default async function ModulesAdminPage() {
         <ConfirmSubmitButton
           tone="warning"
           confirmTitle="¿Cargar contenido demo?"
-          confirmText="Se reemplazan los textos de Hogar/Empresa, planes, kits y certificaciones por el contenido de ejemplo. Los descuentos se configuran en «Descuentos»."
+          confirmText="Se reemplazan los textos de Hogar/Empresa, planes, kits, certificaciones y beneficios por el contenido de ejemplo. Los descuentos se configuran en «Descuentos»."
           confirmLabel="Cargar demo"
           className={adminButton({ variant: "secondary", size: "sm" })}
         >
