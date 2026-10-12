@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import {
   clearCartCookie,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
 import { ensureDeliveryCustomer } from "@/lib/dispatch-server";
+import { locateOrder } from "@/lib/geocode";
 import { startPaymentForOrder } from "@/lib/payments";
 import { requireTenant } from "@/lib/tenant";
 
@@ -153,6 +155,10 @@ export async function placeOrderAction(formData: FormData) {
       },
     },
   });
+
+  after(() =>
+    locateOrder(tenant.id, order.id).catch((e) => console.error("[geocode] order", order.id, e)),
+  );
 
   await clearCartCookie();
   revalidatePath("/admin/pedidos");
