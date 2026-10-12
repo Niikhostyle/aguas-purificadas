@@ -18,6 +18,17 @@ function isPlatformHost(hostname: string): boolean {
 }
 
 /**
+ * Public hostname of the request. X-Forwarded-Host wins over Host: nginx sets it
+ * to the public host, and Next's internal fetch that renders a Server Action
+ * redirect target keeps it while Host becomes the internal origin.
+ */
+function requestHostname(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = forwarded || request.headers.get("host") || "";
+  return (host.split(":")[0] || "").toLowerCase();
+}
+
+/**
  * Tenant resolution (storefront only):
  * 1. Subdomain: demo.mibidon.cl or cliente.mibidon.cl
  * 2. Query: ?tenant=demo
@@ -30,8 +41,7 @@ function resolveTenantSlug(request: NextRequest): {
   slug: string | null;
   fromHost: boolean;
 } {
-  const host = request.headers.get("host") || "";
-  const hostname = (host.split(":")[0] || "").toLowerCase();
+  const hostname = requestHostname(request);
 
   if (!isPlatformHost(hostname)) {
     const parts = hostname.split(".");
@@ -63,8 +73,7 @@ function resolveTenantSlug(request: NextRequest): {
 
 export function middleware(request: NextRequest) {
   const { slug, fromHost } = resolveTenantSlug(request);
-  const host = request.headers.get("host") || "";
-  const hostname = (host.split(":")[0] || "").toLowerCase();
+  const hostname = requestHostname(request);
   const platformHost = isPlatformHost(hostname) && !slug;
   const { pathname } = request.nextUrl;
 
