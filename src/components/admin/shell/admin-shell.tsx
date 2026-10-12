@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   LogOut,
+  Map as MapIcon,
   Menu,
   Package,
   Paintbrush,
@@ -58,6 +59,7 @@ import {
 const ICONS: Record<AdminNavIcon, LucideIcon> = {
   dashboard: LayoutDashboard,
   dispatch: Truck,
+  map: MapIcon,
   orders: ClipboardList,
   reminders: BellRing,
   containers: Recycle,
@@ -260,6 +262,7 @@ function buildActions(variant: Props["variant"], hidden: Set<string>, siteHref: 
           { id: "new-product", label: "Nuevo producto", icon: Plus, href: "/admin/productos/nuevo", keywords: "crear agregar catalogo" },
           { id: "pending-pay", label: "Pedidos con pago pendiente", icon: ClipboardList, href: "/admin/pedidos?pago=pending", keywords: "webpay" },
           { id: "unassigned", label: "Pedidos sin ruta asignada", icon: Truck, href: "/admin/despacho?fecha=todas&estado=por_asignar", requires: "/admin/despacho", keywords: "asignar programar" },
+          { id: "map", label: "Mapa de entregas", icon: MapIcon, href: "/admin/despacho/mapa", requires: "/admin/despacho", keywords: "ubicar pines rutas choferes" },
           { id: "sheets", label: "Hojas de ruta de hoy", icon: Printer, href: "/admin/despacho/hoja", requires: "/admin/despacho", keywords: "imprimir" },
           { id: "driver", label: "Vista chofer", icon: Smartphone, href: "/admin/despacho/chofer", requires: "/admin/despacho", keywords: "movil entregas" },
           { id: "due", label: "Clientes por reponer", icon: BellRing, href: "/admin/recordatorios", requires: "/admin/recordatorios", keywords: "whatsapp recordatorio" },

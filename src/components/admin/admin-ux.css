@@ -166,3 +166,18 @@
     animation: none;
   }
 }
+
+/* Live indicator (dispatch center) */
+.mb-live-dot {
+  animation: mb-live 1.8s ease-in-out infinite;
+}
+@keyframes mb-live {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mb-live-dot {
+    animation: none;
+  }
+}

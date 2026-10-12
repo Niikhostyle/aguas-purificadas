@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CheckCircle2,
   ClipboardList,
+  Map as MapIcon,
   MapPin,
   MessageCircle,
   PackageCheck,
@@ -178,6 +179,9 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
           </>
         }
       >
+        <Link href={`/admin/despacho/mapa?fecha=${assignDate}`} className={btn.outline}>
+          <MapIcon className="size-4" /> Mapa
+        </Link>
         <Link href={`/admin/despacho/chofer?fecha=${assignDate}`} className={btn.outline}>
           <Smartphone className="size-4" /> Vista chofer
         </Link>

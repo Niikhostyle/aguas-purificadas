@@ -229,6 +229,12 @@ model Order {
   scheduledAt       DateTime?
   outForDeliveryAt  DateTime?
   deliveredAt       DateTime?
+  /// Coordenadas de entrega (WGS84); null = aún sin ubicar
+  lat               Float?
+  lng               Float?
+  /// nominatim | cliente | manual | seed | no_encontrado
+  geoSource         String?
+  geocodedAt        DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -248,6 +254,19 @@ model Order {
   @@index([tenantId, deliveryDate])
   @@index([routeId])
   @@map("orders")
+}
+
+/// Caché global de geocodificación (Nominatim/OSM): una consulta por dirección normalizada
+model GeocodeCache {
+  query       String   @id
+  lat         Float?
+  lng         Float?
+  displayName String?
+  /// ok | not_found
+  status      String
+  createdAt   DateTime @default(now())
+
+  @@map("geocode_cache")
 }
 
 model OrderItem {
@@ -317,6 +336,12 @@ model DeliveryCustomer {
   lastDeliveredAt  DateTime?
   lastReminderAt   DateTime?
   notes            String?
+  /// Última ubicación conocida; se reutiliza en pedidos nuevos con la misma dirección
+  lat              Float?
+  lng              Float?
+  geoSource        String?
+  /// Dirección (normalizada) a la que corresponden lat/lng
+  geoAddress       String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
