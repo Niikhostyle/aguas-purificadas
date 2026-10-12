@@ -31,6 +31,7 @@ bash install.sh        # swap si falta, PHP 8.3 + MariaDB 11.4, tuning, BD/usuar
 bash setup-nginx.sh    # backup de /etc/nginx, instala el vhost, nginx -t y recién ahí reload
 bash run-installer.sh  # instalador web vía curl, borra install/, config.php 440, cron
 bash basic-setup.sh    # empresa, locale, formato CLP y producto del plan (token API temporal)
+bash install-mercadopago.sh  # pasarela Mercado Pago (pide el Access Token sin mostrarlo)
 ```
 
 Todos son idempotentes. Las contraseñas (BD y admin) se generan en el servidor y solo se escriben en `/root/fossbilling-credentials.txt`.
@@ -39,4 +40,5 @@ Todos son idempotentes. Las contraseñas (BD y admin) se generan en el servidor 
 
 - `config.php` queda en `440`. Los ajustes del admin que escriben el config (idioma, caché) necesitan `chmod u+w` temporal; `basic-setup.sh` lo hace y lo revierte.
 - Actualizar: Sistema → Actualizaciones en el admin, o https://docs.fossbilling.org/maintenance/updating/.
-- Pendiente: pasarela de pago (Flow/Webpay/Mercado Pago no vienen incluidas; hay transferencia manual y PayPal/Stripe), SMTP para correos y logo de MiBidón.
+- Pagos: adapter propio `gateways/MercadoPago.php` (Checkout Pro, pagos únicos en CLP; cada factura mensual se paga por separado). El pago se confirma consultando la API de Mercado Pago al volver el cliente (`ipn.php?...&redirect=1`) y por webhook (`notification_url` por preferencia, no hace falta configurarlo en el panel de Mercado Pago). Las actualizaciones de FOSSBilling pueden borrar `library/Payment/Adapter/MercadoPago.php`: volver a correr `install-mercadopago.sh` (Enter sin token conserva la configuración).
+- Pendiente: SMTP para correos y logo de MiBidón.

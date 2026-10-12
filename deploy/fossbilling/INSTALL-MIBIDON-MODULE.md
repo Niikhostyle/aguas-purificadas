@@ -105,5 +105,5 @@ docker run --rm -v "$PWD/deploy/fossbilling/modules/Mibidon:/m" \
 
 ## Pendiente del dueño
 
-- **Pasarela de pago** para FOSSBilling (Flow, Mercado Pago o WebPay no vienen en 0.8.8; hoy solo transferencia manual / PayPal / Stripe). Sin pasarela, el staff marca la factura como pagada y la activación es automática desde ahí.
+- **Pasarela de pago**: Mercado Pago vía adapter propio (`install-mercadopago.sh`). Si un cliente paga por otro medio, el staff marca la factura como pagada y la activación es automática desde ahí.
 - **SMTP** (proveedor + credenciales) en FOSSBilling → Configuración → Correo. Mientras tanto el correo de bienvenida queda en cola y el cliente ve su tienda y el botón de acceso en el área de cliente.
