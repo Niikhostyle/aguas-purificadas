@@ -67,7 +67,7 @@ export async function updateBrandingAction(formData: FormData) {
   if (!parsed.success) {
     redirect(
       "/admin/marca?error=" +
-        encodeURIComponent("Revisá los campos del formulario"),
+        encodeURIComponent("Revisa los campos del formulario"),
     );
   }
 

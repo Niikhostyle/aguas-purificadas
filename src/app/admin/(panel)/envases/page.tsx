@@ -115,7 +115,7 @@ export default async function BottlesPage({
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     <a
-                      href={customerWhatsappHref(r.phone, `Hola ${r.name.split(" ")[0]}, te escribe ${admin.tenant.name}. Tenés ${r.balance} bidón(es) nuestro(s); ¿los retiramos en tu próxima entrega?`)}
+                      href={customerWhatsappHref(r.phone, `Hola ${r.name.split(" ")[0]}, te escribe ${admin.tenant.name}. Tienes ${r.balance} bidón(es) nuestro(s); ¿los retiramos en tu próxima entrega?`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cn(btn.ghost, "text-emerald-700")}

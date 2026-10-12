@@ -25,7 +25,7 @@ export async function addBottleMovementAction(formData: FormData) {
     note: String(formData.get("note") || "").trim() || undefined,
   });
   if (!parsed.success) {
-    redirect(`/admin/envases?error=${encodeURIComponent("Revisá cliente y cantidad")}`);
+    redirect(`/admin/envases?error=${encodeURIComponent("Revisa cliente y cantidad")}`);
   }
   const customer = await prisma.deliveryCustomer.findFirst({
     where: { id: parsed.data.customerId, tenantId },

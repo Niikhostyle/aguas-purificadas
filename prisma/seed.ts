@@ -85,13 +85,13 @@ async function main() {
     city: "Santiago",
     region: "Región Metropolitana",
     deliveryBanner:
-      "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector de región.",
+      "Despacho a comunas seleccionadas. Elige tu ciudad en el selector de región.",
     hoursBanner:
       "Horario de atención: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00",
     heroImageUrl: null as string | null,
     heroHeadline: "Agua purificada para tu hogar y tu empresa",
     heroBody:
-      "Pedí online, activá los módulos que necesites desde el admin y cobrá con WebPay.",
+      "Pide online, activa los módulos que necesites desde el admin y cobra con WebPay.",
     coverageText:
       "Cobertura demo en Santiago, Valparaíso, Maule, Biobío y Araucanía.",
     facebookUrl: "https://www.facebook.com/",

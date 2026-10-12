@@ -41,7 +41,7 @@ export default async function CheckoutPage({
           Checkout
         </h1>
         <p className="mt-4 max-w-xl text-[#5a6578]">
-          Completá tus datos y la zona de despacho. Al confirmar te llevamos a
+          Completa tus datos y la zona de despacho. Al confirmar te llevamos a
           WebPay (sandbox o mock) para pagar.
         </p>
 
@@ -108,7 +108,7 @@ export default async function CheckoutPage({
               </legend>
               {zones.length === 0 ? (
                 <p className="text-sm text-red-700">
-                  No hay zonas activas. Contactá a la empresa.
+                  No hay zonas activas. Contacta a la empresa.
                 </p>
               ) : (
                 <ul className="space-y-3">

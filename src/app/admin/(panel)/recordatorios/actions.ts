@@ -41,7 +41,7 @@ export async function updateRecurrenceAction(formData: FormData) {
   });
   if (!parsed.success) redirect(back("Datos inválidos", "error"));
   const d = parsed.data;
-  if (d.recurring && !d.frequency) redirect(back("Elegí una frecuencia", "error"));
+  if (d.recurring && !d.frequency) redirect(back("Elige una frecuencia", "error"));
   const next =
     d.recurring
       ? (d.nextDeliveryDate ?? addFrequency(todayCl(), d.frequency))
@@ -80,7 +80,7 @@ export async function createRecurringCustomerAction(formData: FormData) {
     frequency: formData.get("frequency"),
     nextDeliveryDate: String(formData.get("nextDeliveryDate") || "") || undefined,
   });
-  if (!parsed.success) redirect(back("Revisá nombre, teléfono y frecuencia", "error"));
+  if (!parsed.success) redirect(back("Revisa nombre, teléfono y frecuencia", "error"));
   const d = parsed.data;
   const phone = normalizePhone(d.phone);
   const next = dateFromStr(d.nextDeliveryDate ?? addFrequency(todayCl(), d.frequency));

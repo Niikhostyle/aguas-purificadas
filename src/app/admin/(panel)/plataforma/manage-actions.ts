@@ -185,7 +185,7 @@ export async function createCompanyAdminAction(formData: FormData) {
 
   try {
     if (!tenantId || name.length < 2 || !email || password.length < 12) {
-      throw new Error("Completá nombre, email y clave (mín. 12)");
+      throw new Error("Completa nombre, email y clave (mín. 12)");
     }
     await prisma.adminUser.create({
       data: {

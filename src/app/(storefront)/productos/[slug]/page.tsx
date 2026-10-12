@@ -86,7 +86,7 @@ export default async function ProductDetailPage({ params }: Props) {
           {(tenant.phone || whatsapp) && (
             <p className="mt-6 text-sm text-[#5a6578]">
               <Phone className="mr-1.5 inline size-4 -translate-y-px text-[var(--brand)]" aria-hidden />
-              También podés pedir por teléfono{" "}
+              También puedes pedir por teléfono{" "}
               {tenant.phone ? (
                 <a
                   className="font-bold text-[var(--brand-deep)]"

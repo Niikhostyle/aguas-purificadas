@@ -86,7 +86,7 @@ export function BannerSlidesEditor({
           Banners del inicio (carrusel)
         </h2>
         <p className="mt-1 text-sm text-[#5a6578]">
-          Una imagen por slide. Podés subir JPG/PNG/WEBP (máx. 5 MB). Si no hay
+          Una imagen por slide. Puedes subir JPG/PNG/WEBP (máx. 5 MB). Si no hay
           slides, la tienda muestra una portada con el texto y los colores de tu marca.
         </p>
       </div>
@@ -100,7 +100,7 @@ export function BannerSlidesEditor({
 
       {slides.length === 0 ? (
         <p className="text-sm text-[#5a6578]">
-          Todavía no hay banners. Agregá el primero para personalizar el
+          Todavía no hay banners. Agrega el primero para personalizar el
           carrusel.
         </p>
       ) : null}
@@ -189,7 +189,7 @@ export function BannerSlidesEditor({
                     </p>
                   ) : (
                     <p className="text-xs text-amber-700">
-                      Subí una imagen para que este slide se muestre.
+                      Sube una imagen para que este slide se muestre.
                     </p>
                   )}
                 </div>

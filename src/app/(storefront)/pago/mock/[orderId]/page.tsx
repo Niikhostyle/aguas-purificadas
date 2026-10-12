@@ -36,7 +36,7 @@ export default async function MockPaymentPage({ params }: Props) {
           Modo actual: <code className="rounded bg-white px-1">{mode}</code>.
           Esta pantalla aparece cuando{" "}
           <code className="rounded bg-white px-1">WEBPAY_MODE=mock</code> o si
-          falla la creación en sandbox. Para Transbank real usá{" "}
+          falla la creación en sandbox. Para Transbank real usa{" "}
           <code className="rounded bg-white px-1">WEBPAY_MODE=sandbox</code>{" "}
           (credenciales de integración).
         </p>

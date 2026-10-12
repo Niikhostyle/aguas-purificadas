@@ -182,7 +182,7 @@ export default async function HomePage({
           {products.length > 0 ? (
             <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-[#5a6578]">
               {showcase
-                ? "Precios en pesos chilenos. Agregá al carrito y pagá con WebPay."
+                ? "Precios en pesos chilenos. Agrega al carrito y paga con WebPay."
                 : "Precios en pesos chilenos. Agrega tus productos al carrito y coordina tu despacho."}
             </p>
           ) : null}

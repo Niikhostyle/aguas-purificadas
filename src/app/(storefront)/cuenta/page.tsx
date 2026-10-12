@@ -63,8 +63,8 @@ export default async function CuentaPage({
       </h1>
       <p className="mt-4 text-sm text-[#5a6578]">
         {isDemo
-          ? "En la demo entrá sin registro. El checkout con cuenta sigue siendo opcional."
-          : "Registrate o iniciá sesión para guardar tu perfil. El checkout con cuenta es opcional."}
+          ? "En la demo entra sin registro. El checkout con cuenta sigue siendo opcional."
+          : "Regístrate o inicia sesión para guardar tu perfil. El checkout con cuenta es opcional."}
       </p>
 
       {ok ? (

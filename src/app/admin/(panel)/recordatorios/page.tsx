@@ -83,7 +83,7 @@ export default async function RemindersPage({
   const reminderText = (name: string, next: string | null) =>
     [
       `Hola ${name.split(" ")[0]}, te saluda ${admin.tenant.name}. Te toca reponer tu agua el ${formatDateCl(next, "long")}. ¿Te agendamos el despacho?`,
-      shopUrl ? `Podés pedir aquí: ${shopUrl}` : "",
+      shopUrl ? `Puedes pedir aquí: ${shopUrl}` : "",
       companyWhatsapp ? `o escríbenos al WhatsApp ${formatChileWhatsapp(companyWhatsapp)}.` : "",
     ]
       .filter(Boolean)

@@ -215,7 +215,7 @@ export default async function ModulesAdminPage() {
           >
             <Label htmlFor={name}>{label}</Label>
             <p className="text-xs text-[#5a6578]">
-              Array JSON. Usá «Cargar contenido demo» si preferís no editar a
+              Array JSON. Usa «Cargar contenido demo» si prefieres no editar a
               mano.
             </p>
             <Textarea

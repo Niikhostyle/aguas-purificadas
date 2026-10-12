@@ -186,7 +186,7 @@ export async function placeOrderAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect("/checkout?error=" + encodeURIComponent("Revisá los datos del formulario"));
+    redirect("/checkout?error=" + encodeURIComponent("Revisa los datos del formulario"));
   }
 
   const zone = await prisma.deliveryZone.findFirst({
@@ -197,7 +197,7 @@ export async function placeOrderAction(formData: FormData) {
     },
   });
   if (!zone) {
-    redirect("/checkout?error=" + encodeURIComponent("Elegí una zona de despacho válida"));
+    redirect("/checkout?error=" + encodeURIComponent("Elige una zona de despacho válida"));
   }
 
   const shippingClp = shippingFor(zone, cart.totalClp);

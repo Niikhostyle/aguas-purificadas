@@ -121,12 +121,12 @@ async function main() {
       city: "Santiago",
       region: "Región Metropolitana",
       deliveryBanner:
-        "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector.",
+        "Despacho a comunas seleccionadas. Elige tu ciudad en el selector.",
       hoursBanner:
         "Horario: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00",
       heroHeadline: "Agua purificada para tu hogar y tu empresa",
       heroBody:
-        "Pedí online, personalizá módulos desde el admin y cobrá con WebPay.",
+        "Pide online, personaliza módulos desde el admin y cobra con WebPay.",
       coverageText: "Cobertura demo en principales ciudades de Chile.",
       instagramUrl: "https://www.instagram.com/",
       youtubeUrl: "https://www.youtube.com/",

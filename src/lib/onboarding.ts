@@ -124,7 +124,7 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       throw new Error("La contraseña del admin debe tener al menos 12 caracteres");
     }
     if (/admin123|password|changeme/i.test(input.adminPassword)) {
-      throw new Error("Elegí una contraseña más segura");
+      throw new Error("Elige una contraseña más segura");
     }
   }
 

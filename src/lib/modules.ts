@@ -324,7 +324,7 @@ export function defaultDemoModulesContent(): ModulesContent {
         id: "p3",
         name: "Plan Flexible",
         priceLabel: "según consumo",
-        description: "Pedís cuando necesitás, con precio preferente.",
+        description: "Pides cuando lo necesitas, con precio preferente.",
         features: ["Sin permanencia", "Catálogo completo", "Soporte WhatsApp"],
         ctaLabel: "Ver productos",
         ctaHref: "/productos",
@@ -404,7 +404,7 @@ export function defaultDemoModulesContent(): ModulesContent {
     ],
     hogar: {
       headline: "Agua pura para tu hogar",
-      body: "Bidones, dispensadores y planes pensados para familias. Pedí online y recibí en tu comuna.",
+      body: "Bidones, dispensadores y planes pensados para familias. Pide online y recibe en tu comuna.",
       ctaLabel: "Ver productos",
       ctaHref: "/#productos",
     },

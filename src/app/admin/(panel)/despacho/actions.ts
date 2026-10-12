@@ -39,7 +39,7 @@ async function guard() {
 }
 
 const assignSchema = z.object({
-  orderIds: z.array(id).min(1, "Seleccioná al menos un pedido").max(500),
+  orderIds: z.array(id).min(1, "Selecciona al menos un pedido").max(500),
   date: dateStr,
   slot: z.enum(SLOTS).optional(),
   routeId: id.optional(),
@@ -64,7 +64,7 @@ export async function assignOrdersAction(formData: FormData) {
     redirect(withFlash(back, "error", parsed.error.issues[0]?.message ?? "Datos inválidos"));
   }
   if (routeChoice === "__new" && !parsed.data.newRouteName) {
-    redirect(withFlash(back, "error", "Ingresá un nombre para la nueva ruta"));
+    redirect(withFlash(back, "error", "Ingresa un nombre para la nueva ruta"));
   }
   let n = 0;
   try {
@@ -77,7 +77,7 @@ export async function assignOrdersAction(formData: FormData) {
 }
 
 const markSchema = z.object({
-  orderIds: z.array(id).min(1, "Seleccioná al menos un pedido").max(500),
+  orderIds: z.array(id).min(1, "Selecciona al menos un pedido").max(500),
   status: z.enum(["en_ruta", "entregado", "no_entregado"]),
   note: z.string().trim().max(500).optional(),
   bottlesReturned: z.coerce.number().int().min(0).max(200).optional(),
@@ -122,7 +122,7 @@ export async function autoGroupAction(formData: FormData) {
   const { admin, tenantId } = await guard();
   const back = safeReturn(formData.get("returnTo"));
   const parsed = dateStr.safeParse(String(formData.get("date") || ""));
-  if (!parsed.success) redirect(withFlash(back, "error", "Elegí un día para agrupar"));
+  if (!parsed.success) redirect(withFlash(back, "error", "Elige un día para agrupar"));
   const res = await autoGroupDay({ tenantId, actorEmail: admin.email, date: parsed.data });
   revalidateDispatch();
   redirect(

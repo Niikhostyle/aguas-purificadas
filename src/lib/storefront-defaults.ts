@@ -79,7 +79,7 @@ export function monogramFaviconDataUri(name: string, bg: string, fg = "#ffffff")
 }
 
 const SHOWCASE_DELIVERY =
-  "Despacho a comunas seleccionadas. Elegí tu ciudad para confirmar cobertura.";
+  "Despacho a comunas seleccionadas. Elige tu ciudad para confirmar cobertura.";
 const SHOWCASE_HOURS =
   "Horario de atención: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00";
 const SHOWCASE_COVERAGE =
@@ -124,12 +124,16 @@ export const TEMPLATE_TEXTS = new Set(
     SHOWCASE_DELIVERY,
     SHOWCASE_HOURS,
     SHOWCASE_COVERAGE,
+    "Despacho a comunas seleccionadas. Elegí tu ciudad para confirmar cobertura.",
     "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector de región.",
+    "Despacho a comunas seleccionadas. Elige tu ciudad en el selector de región.",
     "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector.",
+    "Despacho a comunas seleccionadas. Elige tu ciudad en el selector.",
     "Horario: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00",
     "Cobertura demo en Santiago, Valparaíso, Maule, Biobío y Araucanía.",
     "Cobertura demo en principales ciudades de Chile.",
     "Purificación multietapas, libre de sodio. Pedí online, elegí tu ciudad y recibí en ruta.",
+    "Purificación multietapas, libre de sodio. Pide online, elige tu ciudad y recibe en ruta.",
   ].map((t) => t.trim()),
 );
 

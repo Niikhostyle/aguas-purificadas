@@ -115,7 +115,7 @@ export function PlanesSection({
             Planes
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
-            Suscripciones y rutas fijas. Activá o editá desde el admin.
+            Suscripciones y rutas fijas. Activa o edita desde el admin.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {planes.map((p: PlanItem) => (
@@ -244,7 +244,7 @@ export function RedesSection({
         <div className="mx-auto max-w-6xl px-4 md:px-6">
           <h2 className="sf-title rc-display text-center text-4xl uppercase md:text-5xl">Redes</h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm text-white/70">
-            Historias y videos de la marca. Configurá URLs en el admin.
+            Historias y videos de la marca. Configura URLs en el admin.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {items.map((s: SocialEmbed) => {
@@ -316,7 +316,7 @@ export function CertificacionesSection({
           Certificaciones
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
-          Confianza y estándares que podés comunicar a tus clientes.
+          Confianza y estándares que puedes comunicar a tus clientes.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {items.map((c: CertificationItem) => (

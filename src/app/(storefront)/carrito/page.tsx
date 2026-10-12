@@ -32,7 +32,7 @@ export default async function CartPage({
             Carrito
           </h1>
           <p className="mt-4 text-[#5a6578]">
-            Revisá cantidades y seguí al checkout para elegir zona de despacho.
+            Revisa cantidades y sigue al checkout para elegir zona de despacho.
           </p>
         </div>
 
