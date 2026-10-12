@@ -4,18 +4,23 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AudienceToggle } from "@/components/storefront/audience-toggle";
+import { BrandMark } from "@/components/storefront/brand-mark";
 import { RegionSelector } from "@/components/storefront/region-selector";
 import type { Audience, ModuleFlags, RegionOption } from "@/lib/modules";
+import type { TopbarMessages } from "@/lib/storefront-defaults";
 
 type NavItem = { href: string; label: string };
 
 type Props = {
   brandName: string;
   logoUrl?: string | null;
-  deliveryBanner?: string | null;
-  hoursBanner?: string | null;
+  brandSubtitle?: string | null;
+  topbar: TopbarMessages;
   cartCount: number;
   flags: ModuleFlags;
+  /** Home sections that actually have content (nav links to empty anchors are hidden). */
+  sections: { descuentos: boolean; planes: boolean; kits: boolean };
+  showAudienceToggle: boolean;
   regions: RegionOption[];
   customerName?: string | null;
 };
@@ -23,10 +28,12 @@ type Props = {
 export function SiteHeader({
   brandName,
   logoUrl,
-  deliveryBanner,
-  hoursBanner,
+  brandSubtitle,
+  topbar,
   cartCount,
   flags,
+  sections,
+  showAudienceToggle,
   regions,
   customerName,
 }: Props) {
@@ -47,18 +54,14 @@ export function SiteHeader({
     { href: "/", label: "Inicio" },
     { href: "/productos", label: "Productos" },
   ];
-  if (flags.descuentos) nav.push({ href: "/#descuentos", label: "Descuentos" });
-  if (flags.planes) nav.push({ href: "/#planes", label: "Planes" });
-  if (flags.kits) nav.push({ href: "/#kits", label: "Kits" });
+  if (flags.descuentos && sections.descuentos) nav.push({ href: "/#descuentos", label: "Descuentos" });
+  if (flags.planes && sections.planes) nav.push({ href: "/#planes", label: "Planes" });
+  if (flags.kits && sections.kits) nav.push({ href: "/#kits", label: "Kits" });
   nav.push({ href: "/#nosotros", label: "Nosotros" });
   nav.push({ href: "/#contacto", label: "Contacto" });
 
-  const delivery =
-    deliveryBanner ||
-    "Despacho a comunas seleccionadas. Elegí tu ciudad para confirmar cobertura.";
-  const hours =
-    hoursBanner ||
-    "Horario de atención: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00";
+  const showRegions = flags.selectorRegion && regions.length > 0;
+  const audienceToggle = flags.hogarEmpresa && showAudienceToggle;
 
   return (
     <header
@@ -66,34 +69,33 @@ export function SiteHeader({
         scrolled ? "shadow-md shadow-[#12326e]/10" : "shadow-sm"
       }`}
     >
-      <div className="bg-[var(--topbar)] text-[var(--topbar-text)]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-1.5 text-[11px] leading-snug sm:flex-row sm:items-center sm:justify-between sm:text-xs md:px-6">
-          <p className="flex items-start gap-2">
-            <span aria-hidden>🚚</span>
-            <span>{delivery}</span>
-          </p>
-          <p className="flex items-start gap-2 sm:max-w-md sm:text-right">
-            <span aria-hidden>🕒</span>
-            <span>{hours}</span>
-          </p>
+      {topbar.delivery || topbar.hours ? (
+        <div className="bg-[var(--topbar)] text-[var(--topbar-text)]">
+          <div
+            className={`mx-auto flex max-w-6xl flex-col gap-1 px-4 py-1.5 text-[11px] leading-snug sm:flex-row sm:items-center sm:text-xs md:px-6 ${
+              topbar.delivery && topbar.hours ? "sm:justify-between" : "sm:justify-center"
+            }`}
+          >
+            {topbar.delivery ? (
+              <p className="flex items-start gap-2">
+                <span aria-hidden>🚚</span>
+                <span>{topbar.delivery}</span>
+              </p>
+            ) : null}
+            {topbar.hours ? (
+              <p className="flex items-start gap-2 sm:max-w-md sm:text-right">
+                <span aria-hidden>🕒</span>
+                <span>{topbar.hours}</span>
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <div className="border-b border-[#d5e3ec]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
-            {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoUrl}
-                alt={brandName}
-                className="h-12 w-auto object-contain md:h-14"
-              />
-            ) : (
-              <span className="rc-display text-2xl font-semibold uppercase text-[var(--nav-text)]">
-                {brandName}
-              </span>
-            )}
+          <Link href="/" className="flex min-w-0 shrink items-center gap-3" aria-label={`${brandName} — inicio`}>
+            <BrandMark name={brandName} logoUrl={logoUrl} subtitle={brandSubtitle} />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -109,12 +111,12 @@ export function SiteHeader({
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {flags.selectorRegion ? (
+            {showRegions ? (
               <div className="hidden sm:block">
-                <RegionSelector regions={regions} />
+                <RegionSelector regions={regions} autoOpen />
               </div>
             ) : null}
-            {flags.hogarEmpresa ? (
+            {audienceToggle ? (
               <div className="hidden md:block">
                 <AudienceToggle audience={audience} />
               </div>
@@ -122,7 +124,7 @@ export function SiteHeader({
             {flags.loginClientes ? (
               <Link
                 href="/cuenta"
-                className="hidden text-xs font-bold uppercase text-[var(--nav-text)] hover:text-[var(--header-hover)] sm:inline"
+                className="hidden whitespace-nowrap text-xs font-bold uppercase text-[var(--nav-text)] hover:text-[var(--header-hover)] sm:inline"
               >
                 {customerName ? customerName.split(" ")[0] : "Mi cuenta"}
               </Link>
@@ -158,10 +160,10 @@ export function SiteHeader({
           }`}
         >
           <div className="space-y-4 px-4 py-4">
-            {flags.hogarEmpresa ? (
+            {audienceToggle ? (
               <AudienceToggle audience={audience} />
             ) : null}
-            {flags.selectorRegion ? (
+            {showRegions ? (
               <RegionSelector regions={regions} />
             ) : null}
             <nav className="flex flex-col gap-1">

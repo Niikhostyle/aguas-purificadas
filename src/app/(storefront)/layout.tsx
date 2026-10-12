@@ -7,13 +7,24 @@ import { WhatsappFloat } from "@/components/storefront/whatsapp-float";
 import { baseColors, storefrontThemeVars, tenantAppearance } from "@/lib/appearance";
 import { getResolvedCart } from "@/lib/cart";
 import { getCustomerSession } from "@/lib/customer-auth";
-import { parseModuleFlags, parseModulesContent } from "@/lib/modules";
+import { parseModuleFlags } from "@/lib/modules";
+import {
+  coverageCopy,
+  hasAudienceContent,
+  monogramFaviconDataUri,
+  storefrontModulesContent,
+  topbarMessages,
+  usesTemplateShowcase,
+} from "@/lib/storefront-defaults";
 import { requireTenant } from "@/lib/tenant";
 import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await requireTenant();
-  const favicon = tenantAppearance(tenant).images.faviconUrl;
+  const appearance = tenantAppearance(tenant);
+  const favicon =
+    appearance.images.faviconUrl ??
+    (tenant.logoUrl ? undefined : monogramFaviconDataUri(tenant.name, baseColors(tenant).primary));
   return favicon ? { icons: { icon: favicon, apple: favicon } } : {};
 }
 
@@ -27,7 +38,6 @@ export default async function StorefrontLayout({
   const theme = storefrontThemeVars(baseColors(tenant), appearance);
   const cart = await getResolvedCart(tenant.id);
   const flags = parseModuleFlags(tenant.modulesEnabled);
-  const content = parseModulesContent(tenant.modulesContent);
   const customer = flags.loginClientes
     ? await getCustomerSession(tenant.id)
     : null;
@@ -36,6 +46,8 @@ export default async function StorefrontLayout({
   const host = (h.get("host") || "").split(":")[0].toLowerCase();
   const isDemo = host.startsWith("demo.") || tenant.slug === "demo";
   const brandName = isDemo ? "Demo" : tenant.name;
+  const showcase = usesTemplateShowcase(tenant);
+  const content = storefrontModulesContent(tenant, isDemo);
 
   return (
     <div style={theme} data-storefront className="flex min-h-full flex-1 flex-col">
@@ -47,16 +59,26 @@ export default async function StorefrontLayout({
         <SiteHeader
           brandName={brandName}
           logoUrl={tenant.logoUrl}
-          deliveryBanner={tenant.deliveryBanner}
-          hoursBanner={tenant.hoursBanner}
+          brandSubtitle={tenant.logoUrl ? null : "Agua purificada"}
+          topbar={topbarMessages(tenant, showcase)}
           cartCount={cart.itemCount}
           flags={flags}
+          sections={{
+            descuentos: content.descuentos.length > 0,
+            planes: content.planes.length > 0,
+            kits: content.kits.length > 0,
+          }}
+          showAudienceToggle={showcase || hasAudienceContent(content)}
           regions={content.regions}
           customerName={customer?.name}
         />
       </Suspense>
       <main className="flex-1">{children}</main>
-      <SiteFooter tenant={tenant} logoDarkUrl={appearance.images.logoDarkUrl} />
+      <SiteFooter
+        tenant={tenant}
+        logoDarkUrl={appearance.images.logoDarkUrl}
+        coverage={coverageCopy(tenant, showcase)}
+      />
       <WhatsappFloat
         href={tenantWhatsappHref(
           tenant.whatsapp,

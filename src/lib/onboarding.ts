@@ -139,9 +139,8 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
     input.adminPassword ?? randomBytes(32).toString("base64url"),
     12,
   );
-  const { DEFAULT_MODULE_FLAGS, defaultDemoModulesContent } = await import(
-    "@/lib/modules"
-  );
+  const { DEFAULT_MODULE_FLAGS } = await import("@/lib/modules");
+  const { emptyModulesContent } = await import("@/lib/storefront-defaults");
 
   const tenant = await prisma.tenant.create({
     data: {
@@ -159,7 +158,9 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       city: input.city?.trim() || null,
       region: input.region?.trim() || null,
       modulesEnabled: DEFAULT_MODULE_FLAGS,
-      modulesContent: defaultDemoModulesContent(),
+      // No demo regions/offers: the storefront shows neutral defaults until the
+      // company configures its own coverage and content.
+      modulesContent: emptyModulesContent(),
       active: true,
       ...(input.billing
         ? {
