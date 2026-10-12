@@ -22,6 +22,9 @@ import {
   updateRouteAction,
 } from "./actions";
 import { SelectAllCheckbox } from "@/components/admin/client-helpers";
+import { BulkBar, ListQuickFilter } from "@/components/admin/dispatch-client";
+import { ConfirmSubmitButton, EmptyState } from "@/components/admin/ui";
+import { MobileCollapse } from "@/components/admin/ui/mobile-collapse";
 import {
   Flash,
   FulfillmentBadge,
@@ -217,6 +220,7 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
         </div>
         <form method="get" className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           <input type="date" name="fecha" defaultValue={specificDate ?? ""} className={field} aria-label="Fecha de entrega" />
+          <MobileCollapse activeCount={[zona, estado, pago].filter(Boolean).length}>
           <select name="zona" defaultValue={zona ?? ""} className={field} aria-label="Comuna o sector">
             <option value="">Todas las comunas / sectores</option>
             {zoneOptions.map((z) => (
@@ -238,6 +242,7 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
             <option value="paid">Solo pagados</option>
             <option value="pending">Solo pago pendiente</option>
           </select>
+          </MobileCollapse>
           <div className="flex gap-2">
             <button type="submit" className={cn(btn.primary, "flex-1")}>
               Filtrar
@@ -257,17 +262,43 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
             <Sparkles className="mr-1 inline size-4 text-[var(--brand)]" />
             <strong>Ruta inteligente:</strong> agrupa los pedidos sin ruta del {formatDateCl(specificDate)} en una ruta por sector, con paradas ordenadas por comuna y dirección.
           </p>
-          <button type="submit" className={btn.navy}>
+          <ConfirmSubmitButton
+            className={btn.navy}
+            tone="primary"
+            confirmTitle={`¿Agrupar los pedidos del ${formatDateCl(specificDate)}?`}
+            confirmText="Se crearán rutas por sector para los pedidos que aún no tienen ruta. Las rutas existentes no cambian."
+            confirmLabel="Agrupar"
+          >
             <RouteIcon className="size-4" /> Agrupar por sector
-          </button>
+          </ConfirmSubmitButton>
         </form>
       ) : null}
 
-      <div className="mt-6 space-y-5">
+      {orders.length > 0 ? (
+        <div className="mt-6">
+          <ListQuickFilter scope="dispatch-lists" placeholder="Filtrar por cliente, dirección o N° de pedido…" />
+        </div>
+      ) : null}
+
+      <div id="dispatch-lists" className="mt-4 space-y-5">
         {orders.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-[#d5e3ec] bg-white px-6 py-14 text-center text-[#5a6578]">
-            No hay pedidos para estos filtros.
-          </p>
+          <div className="rounded-xl border border-dashed border-[#d5e3ec] bg-white">
+            <EmptyState
+              icon={<Truck />}
+              title="No hay pedidos para estos filtros"
+              description="Cambia el día o el estado, o revisa los pedidos sin fecha de entrega."
+              action={
+                <>
+                  <Link href="/admin/despacho?fecha=sin-fecha" className={btn.outline}>
+                    Ver sin fecha
+                  </Link>
+                  <Link href="/admin/despacho?fecha=todas" className={btn.primary}>
+                    Ver todos los días
+                  </Link>
+                </>
+              }
+            />
+          </div>
         ) : null}
 
         {Array.from(routed.entries()).map(([routeId, list]) => {
@@ -276,8 +307,8 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
           const bottles = list.reduce((s, o) => s + bottlesForItems(o.items), 0);
           const pct = Math.round((delivered / list.length) * 100);
           return (
-            <section key={routeId} className="overflow-hidden rounded-xl border border-[#d5e3ec] bg-white">
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8f0f5] bg-[#f4fbfe] px-4 py-3">
+            <section key={routeId} data-filter-group className="overflow-visible rounded-xl border border-[#d5e3ec] bg-white">
+              <header className="flex flex-wrap items-center justify-between gap-3 rounded-t-xl border-b border-[#e8f0f5] bg-[#f4fbfe] px-4 py-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <RouteIcon className="size-4 text-[var(--brand)]" />
@@ -320,9 +351,15 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
                     <form action={startRouteAction}>
                       <input type="hidden" name="routeId" value={routeId} />
                       <input type="hidden" name="returnTo" value={returnTo} />
-                      <button type="submit" className={cn(btn.navy, "py-1.5 text-xs")}>
+                      <ConfirmSubmitButton
+                        className={cn(btn.navy, "py-1.5 text-xs")}
+                        tone="primary"
+                        confirmTitle={`¿Iniciar «${route.name}»?`}
+                        confirmText={`Los pedidos programados de esta ruta pasan a «En ruta»${route.driverName ? ` con ${route.driverName}` : ""}.`}
+                        confirmLabel="Iniciar ruta"
+                      >
                         <Truck className="size-3.5" /> Iniciar ruta
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   ) : null}
                 </div>
@@ -335,8 +372,8 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
         {Array.from(unroutedBySector.entries())
           .sort(([a], [b]) => (a === "__sin_fecha" ? 1 : b === "__sin_fecha" ? -1 : a.localeCompare(b, "es")))
           .map(([sector, list]) => (
-            <section key={sector} className="overflow-hidden rounded-xl border border-[#d5e3ec] bg-white">
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8f0f5] bg-[#fbfdfe] px-4 py-3">
+            <section key={sector} data-filter-group className="overflow-visible rounded-xl border border-[#d5e3ec] bg-white">
+              <header className="flex flex-wrap items-center justify-between gap-3 rounded-t-xl border-b border-[#e8f0f5] bg-[#fbfdfe] px-4 py-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="size-4 text-amber-600" />
                   <h2 className="font-semibold text-[var(--brand-deep)]">
@@ -357,8 +394,8 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
         className="fixed inset-x-0 bottom-0 z-30 border-t lg:left-[var(--admin-sidebar-w,0px)] border-[#d5e3ec] bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(18,50,110,0.08)] backdrop-blur print:hidden"
       >
         <input type="hidden" name="returnTo" value={returnTo} />
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#5a6578]">Selección</span>
+        <div className="mx-auto max-w-7xl">
+        <BulkBar formId={BULK_FORM}>
           <input type="date" name="date" defaultValue={assignDate} className={field} aria-label="Día de entrega" />
           <select name="slot" defaultValue="" className={field} aria-label="Bloque horario">
             <option value="">Bloque</option>
@@ -376,17 +413,41 @@ export default async function DespachoPage({ searchParams }: { searchParams: Pro
             <option value="__new">+ Nueva ruta…</option>
           </select>
           <input name="newRouteName" placeholder="Nombre nueva ruta" maxLength={80} className={cn(field, "w-36")} aria-label="Nombre de nueva ruta" />
-          <button type="submit" className={btn.primary}>
+          <ConfirmSubmitButton
+            className={btn.primary}
+            tone="primary"
+            requireSelection="orderIds"
+            confirmTitle="¿Programar {n} pedido(s)?"
+            confirmText="Se asignan al día, bloque y ruta elegidos en esta barra."
+            confirmLabel="Asignar"
+          >
             <CalendarClock className="size-4" /> Asignar
-          </button>
+          </ConfirmSubmitButton>
           <span className="mx-1 hidden h-6 w-px bg-[#d5e3ec] xl:block" />
           <input name="note" placeholder="Nota (opcional)" maxLength={500} className={cn(field, "w-32")} aria-label="Nota" />
-          <button type="submit" formAction={bulkEnRutaAction} className={btn.navy}>
+          <ConfirmSubmitButton
+            formAction={bulkEnRutaAction}
+            className={btn.navy}
+            tone="primary"
+            requireSelection="orderIds"
+            confirmTitle="¿Marcar {n} pedido(s) en ruta?"
+            confirmText="El cambio queda registrado en la auditoría de cada pedido."
+            confirmLabel="Marcar en ruta"
+          >
             <Truck className="size-4" /> En ruta
-          </button>
-          <button type="submit" formAction={bulkEntregadoAction} className={btn.success}>
+          </ConfirmSubmitButton>
+          <ConfirmSubmitButton
+            formAction={bulkEntregadoAction}
+            className={btn.success}
+            tone="warning"
+            requireSelection="orderIds"
+            confirmTitle="¿Marcar {n} pedido(s) como entregados?"
+            confirmText="Se registran los envases según cada pedido y se recalcula la próxima reposición de clientes recurrentes."
+            confirmLabel="Marcar entregados"
+          >
             <CheckCircle2 className="size-4" /> Entregado
-          </button>
+          </ConfirmSubmitButton>
+        </BulkBar>
         </div>
       </form>
     </div>
@@ -410,7 +471,11 @@ function OrderList({
         const bottles = bottlesForItems(o.items);
         const date = toDateStr(o.deliveryDate);
         return (
-          <li key={o.id} className="grid gap-3 px-4 py-3 transition hover:bg-[#fafdfe] md:grid-cols-[auto_minmax(0,1.6fr)_minmax(0,1.3fr)_auto] md:items-center">
+          <li
+            key={o.id}
+            data-filter-text={`${o.customerName} ${o.customerPhone} ${o.customerAddress} ${o.deliveryCommune ?? ""} ${shortRef(o.id)}`}
+            className="grid gap-3 px-4 py-3 transition hover:bg-[#fafdfe] md:grid-cols-[auto_minmax(0,1.6fr)_minmax(0,1.3fr)_auto] md:items-center"
+          >
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"

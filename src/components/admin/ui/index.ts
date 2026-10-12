@@ -1,9 +1,9 @@
 export { BarChart, type BarDatum } from "./bar-chart";
 export { adminButton } from "./button-styles";
-export { DataTable, type DataColumn } from "./data-table";
+export { DataTable, parseSort, type DataColumn, type TableSort } from "./data-table";
 export { EmptyState } from "./empty-state";
 export { FilterBar, type FilterSelect } from "./filter-bar";
-export { KpiCard, KpiGrid, type KpiTone } from "./kpi-card";
+export { KpiCard, KpiGrid, type KpiTone, type KpiTrend } from "./kpi-card";
 export { Breadcrumbs, PageHeader, type Crumb } from "./page-header";
 export { Pagination, paginate } from "./pagination";
 export { Panel } from "./panel";
@@ -11,3 +11,5 @@ export { ORDER_STATUS_TONE, StatusBadge, type StatusTone } from "./status-badge"
 export { StatsTable, type StatsRow } from "./stats-table";
 export { SelectAllCheckbox } from "./select-all";
 export { AutoBreadcrumbs } from "./auto-breadcrumbs";
+export { ConfirmSubmitButton } from "./confirm-submit";
+export { Skeleton, TableSkeleton, PageSkeleton } from "./skeleton";

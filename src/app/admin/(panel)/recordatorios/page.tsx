@@ -1,7 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { BellRing, CalendarClock, MessageCircle, Repeat, UserPlus, Users } from "lucide-react";
+import { BellRing, CalendarClock, MessageCircle, PartyPopper, Repeat, SearchX, UserPlus, Users } from "lucide-react";
+import { EmptyState, Pagination, paginate } from "@/components/admin/ui";
 import {
   createRecurringCustomerAction,
   recordReminderAction,
@@ -26,11 +27,12 @@ import { cn } from "@/lib/utils";
 import { formatChileWhatsapp, normalizeChileWhatsapp } from "@/lib/whatsapp";
 
 const DUE_WINDOW_DAYS = 3;
+const PAGE_SIZE = 20;
 
 export default async function RemindersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; ver?: string; ok?: string; error?: string }>;
+  searchParams: Promise<{ q?: string; ver?: string; page?: string; ok?: string; error?: string }>;
 }) {
   const { admin, tenantId, enabled } = await requireTenantModule("recordatorios");
   if (!enabled) return <ModuleDisabled name="Recordatorios / suscripción" />;
@@ -54,6 +56,8 @@ export default async function RemindersPage({
       : {}),
   };
 
+  const customerTotal = await prisma.deliveryCustomer.count({ where });
+  const { page, pages, skip, take } = paginate(sp.page, customerTotal, PAGE_SIZE);
   const [due, customers, recurringCount, byFreq] = await Promise.all([
     prisma.deliveryCustomer.findMany({
       where: { tenantId, recurring: true, nextDeliveryDate: { lte: horizon } },
@@ -63,7 +67,8 @@ export default async function RemindersPage({
     prisma.deliveryCustomer.findMany({
       where,
       orderBy: [{ recurring: "desc" }, { nextDeliveryDate: "asc" }, { name: "asc" }],
-      take: 200,
+      skip,
+      take,
     }),
     prisma.deliveryCustomer.count({ where: { tenantId, recurring: true } }),
     prisma.deliveryCustomer.groupBy({
@@ -98,7 +103,7 @@ export default async function RemindersPage({
         <StatCard label="Recurrentes" value={recurringCount} hint={`${freqCount("semanal")} sem · ${freqCount("quincenal")} quin · ${freqCount("mensual")} men`} icon={Repeat} tone="navy" />
         <StatCard label="Próximos a reponer" value={due.length} hint={`Próximos ${DUE_WINDOW_DAYS} días`} icon={CalendarClock} tone="brand" />
         <StatCard label="Atrasados" value={overdue} hint="Fecha de reposición vencida" icon={BellRing} tone="rose" />
-        <StatCard label="Clientes" value={customers.length} hint={onlyRecurring ? "Mostrando recurrentes" : "Todos los clientes"} icon={Users} tone="sky" />
+        <StatCard label="Clientes" value={customerTotal} hint={onlyRecurring ? "Mostrando recurrentes" : "Todos los clientes"} icon={Users} tone="sky" />
       </section>
 
       <section className="mt-6 overflow-hidden rounded-xl border border-[#9fdcef] bg-white">
@@ -125,7 +130,12 @@ export default async function RemindersPage({
           )}
         </p>
         {due.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-[#5a6578]">Nadie por reponer en los próximos días.</p>
+          <EmptyState
+            compact
+            icon={<PartyPopper />}
+            title="Nadie por reponer en los próximos días"
+            description="Cuando un cliente recurrente esté por quedarse sin agua, aparecerá aquí con su recordatorio listo."
+          />
         ) : (
           <ul className="divide-y divide-[#eef3f7]">
             {due.map((c) => {
@@ -170,9 +180,22 @@ export default async function RemindersPage({
         <section className="overflow-hidden rounded-xl border border-[#d5e3ec] bg-white">
           <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8f0f5] px-4 py-3">
             <h2 className="font-semibold text-[var(--brand-deep)]">Clientes</h2>
-            <form method="get" className="flex flex-wrap gap-2">
-              <input name="q" defaultValue={q ?? ""} placeholder="Buscar nombre, teléfono o comuna" className={cn(field, "w-56")} />
-              <select name="ver" defaultValue={onlyRecurring ? "" : "todos"} className={field}>
+            <form method="get" role="search" className="flex w-full flex-wrap gap-2 sm:w-auto">
+              <label htmlFor="rem-q" className="sr-only">
+                Buscar cliente
+              </label>
+              <input
+                id="rem-q"
+                name="q"
+                type="search"
+                defaultValue={q ?? ""}
+                placeholder="Buscar nombre, teléfono o comuna"
+                className={cn(field, "min-w-0 flex-1 sm:w-56 sm:flex-none")}
+              />
+              <label htmlFor="rem-ver" className="sr-only">
+                Mostrar
+              </label>
+              <select id="rem-ver" name="ver" defaultValue={onlyRecurring ? "" : "todos"} className={field}>
                 <option value="">Solo recurrentes</option>
                 <option value="todos">Todos</option>
               </select>
@@ -196,21 +219,48 @@ export default async function RemindersPage({
                     <input type="checkbox" name="recurring" defaultChecked={c.recurring} className="size-4 accent-[var(--brand)]" />
                     Recurrente
                   </label>
-                  <select name="frequency" defaultValue={c.frequency ?? ""} className={field} aria-label="Frecuencia">
+                  <select name="frequency" defaultValue={c.frequency ?? ""} className={field} aria-label={`Frecuencia de ${c.name}`}>
                     <option value="">Frecuencia</option>
                     {FREQUENCIES.map((f) => (
                       <option key={f} value={f}>{FREQUENCY_LABEL[f]}</option>
                     ))}
                   </select>
-                  <input type="date" name="nextDeliveryDate" defaultValue={toDateStr(c.nextDeliveryDate) ?? ""} className={field} aria-label="Próxima entrega" />
-                  <button type="submit" className={btn.outline}>Guardar</button>
+                  <input type="date" name="nextDeliveryDate" defaultValue={toDateStr(c.nextDeliveryDate) ?? ""} className={field} aria-label={`Próxima entrega de ${c.name}`} />
+                  <button type="submit" className={btn.outline} aria-label={`Guardar suscripción de ${c.name}`}>Guardar</button>
                 </form>
               </li>
             ))}
             {customers.length === 0 ? (
-              <li className="px-4 py-8 text-center text-sm text-[#5a6578]">Sin clientes para este filtro.</li>
+              <li>
+                <EmptyState
+                  compact
+                  icon={q ? <SearchX /> : <Users />}
+                  title={q ? "Sin clientes para esta búsqueda" : "Aún no hay clientes recurrentes"}
+                  description={q ? "Prueba con otro nombre, teléfono o comuna." : "Agrega el primero con el formulario de la derecha."}
+                  action={
+                    q ? (
+                      <Link href="/admin/recordatorios" className={btn.outline}>
+                        Limpiar búsqueda
+                      </Link>
+                    ) : undefined
+                  }
+                />
+              </li>
             ) : null}
           </ul>
+          {customerTotal > PAGE_SIZE ? (
+            <div className="border-t border-[#e8f0f5] bg-[#fafcfd] px-4 py-3">
+              <Pagination
+                page={page}
+                pages={pages}
+                total={customerTotal}
+                pageSize={PAGE_SIZE}
+                basePath="/admin/recordatorios"
+                params={{ q, ver: sp.ver }}
+                noun="clientes"
+              />
+            </div>
+          ) : null}
         </section>
 
         <aside className="space-y-4">
@@ -218,17 +268,45 @@ export default async function RemindersPage({
             <h2 className="flex items-center gap-2 font-semibold text-[var(--brand-deep)]">
               <UserPlus className="size-4 text-[var(--brand)]" /> Nuevo cliente recurrente
             </h2>
-            <input name="name" required minLength={2} placeholder="Nombre" className={cn(field, "w-full")} />
-            <input name="phone" required minLength={8} placeholder="+56 9 1234 5678" className={cn(field, "w-full")} />
-            <input name="address" placeholder="Dirección" className={cn(field, "w-full")} />
-            <input name="commune" placeholder="Comuna" className={cn(field, "w-full")} />
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Nombre
+              <input name="name" required minLength={2} maxLength={120} autoComplete="off" placeholder="María Pérez" className={cn(field, "mt-1 w-full")} />
+            </label>
+            <label className="block text-xs font-medium text-[#5a6578]">
+              WhatsApp / teléfono
+              <input
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                required
+                minLength={8}
+                pattern="[+\d\s()-]{8,}"
+                title="Ingresa al menos 8 dígitos"
+                placeholder="+56 9 1234 5678"
+                className={cn(field, "mt-1 w-full")}
+              />
+            </label>
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Dirección <span className="font-normal text-[#8a96a6]">(opcional)</span>
+              <input name="address" placeholder="Av. Siempre Viva 123" className={cn(field, "mt-1 w-full")} />
+            </label>
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Comuna <span className="font-normal text-[#8a96a6]">(opcional)</span>
+              <input name="commune" placeholder="Providencia" className={cn(field, "mt-1 w-full")} />
+            </label>
             <div className="grid grid-cols-2 gap-2">
-              <select name="frequency" required defaultValue="quincenal" className={field}>
-                {FREQUENCIES.map((f) => (
-                  <option key={f} value={f}>{FREQUENCY_LABEL[f]}</option>
-                ))}
-              </select>
-              <input type="date" name="nextDeliveryDate" className={field} aria-label="Próxima entrega" />
+              <label className="block text-xs font-medium text-[#5a6578]">
+                Frecuencia
+                <select name="frequency" required defaultValue="quincenal" className={cn(field, "mt-1 w-full")}>
+                  {FREQUENCIES.map((f) => (
+                    <option key={f} value={f}>{FREQUENCY_LABEL[f]}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-xs font-medium text-[#5a6578]">
+                Próxima entrega
+                <input type="date" name="nextDeliveryDate" min={today} className={cn(field, "mt-1 w-full")} />
+              </label>
             </div>
             <button type="submit" className={cn(btn.primary, "w-full")}>Agregar</button>
           </form>

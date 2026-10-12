@@ -1,5 +1,7 @@
-import { ArrowDownLeft, ArrowUpRight, MessageCircle, Package, PackageOpen, UserX } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, MessageCircle, Package, PackageCheck, PackageOpen, UserX } from "lucide-react";
 import { addBottleMovementAction } from "./actions";
+import { ListQuickFilter } from "@/components/admin/dispatch-client";
+import { EmptyState } from "@/components/admin/ui";
 import { Flash, ModuleDisabled, PageHeader, Pill, StatCard, btn, field } from "@/components/admin/dispatch-ui";
 import { prisma } from "@/lib/db";
 import { customerWhatsappHref, formatDateTimeCl, shortRef, startOfDayCl, todayCl, addDaysStr } from "@/lib/dispatch";
@@ -75,19 +77,28 @@ export default async function BottlesPage({
             </h2>
             <span className="text-xs text-[#5a6578]">{owing.length} clientes</span>
           </header>
-          <table className="w-full text-sm">
+          {owing.length > 6 ? (
+            <div className="border-b border-[#eef3f7] bg-[#fafcfd] px-4 py-2.5">
+              <ListQuickFilter scope="owing-table" placeholder="Filtrar por cliente o comuna…" />
+            </div>
+          ) : null}
+          <div className="overflow-x-auto">
+          <table id="owing-table" className="w-full min-w-[520px] text-sm">
+            <caption className="sr-only">Clientes con saldo de envases por devolver</caption>
             <thead>
               <tr className="border-b border-[#e8f0f5] text-left text-[11px] uppercase tracking-wide text-[#5a6578]">
-                <th className="px-4 py-2">Cliente</th>
-                <th className="px-2 py-2 text-right">Entregados</th>
-                <th className="px-2 py-2 text-right">Devueltos</th>
-                <th className="px-2 py-2 text-right">Saldo</th>
-                <th className="px-4 py-2 text-right" />
+                <th scope="col" className="px-4 py-2">Cliente</th>
+                <th scope="col" className="px-2 py-2 text-right">Entregados</th>
+                <th scope="col" className="px-2 py-2 text-right">Devueltos</th>
+                <th scope="col" className="px-2 py-2 text-right">Saldo</th>
+                <th scope="col" className="px-4 py-2 text-right">
+                  <span className="sr-only">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eef3f7]">
               {owing.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} data-filter-text={`${r.name} ${r.phone} ${r.address ?? ""} ${r.commune ?? ""}`}>
                   <td className="px-4 py-2.5">
                     <p className="font-medium text-[var(--brand-deep)]">{r.name}</p>
                     <p className="text-xs text-[#5a6578]">
@@ -116,41 +127,62 @@ export default async function BottlesPage({
               ))}
               {owing.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-[#5a6578]">
-                    Ningún cliente debe envases.
+                  <td colSpan={5}>
+                    <EmptyState
+                      compact
+                      icon={<PackageCheck />}
+                      title="Ningún cliente debe envases"
+                      description="Todos los bidones entregados ya volvieron. ¡Buen trabajo!"
+                    />
                   </td>
                 </tr>
               ) : null}
             </tbody>
           </table>
+          </div>
         </section>
 
         <aside className="space-y-4">
           <form action={addBottleMovementAction} className="space-y-2 rounded-xl border border-[#d5e3ec] bg-white p-4">
             <h2 className="font-semibold text-[var(--brand-deep)]">Registrar movimiento</h2>
-            <select name="customerId" required defaultValue="" className={cn(field, "w-full")}>
-              <option value="" disabled>
-                Cliente…
-              </option>
-              {rows.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name} (saldo {r.balance})
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Cliente
+              <select name="customerId" required defaultValue="" className={cn(field, "mt-1 w-full")}>
+                <option value="" disabled>
+                  Elige un cliente…
                 </option>
-              ))}
-            </select>
-            <div className="grid grid-cols-2 gap-2">
-              <select name="direction" defaultValue="in" className={field}>
-                <option value="in">Devuelve (entra)</option>
-                <option value="out">Se lleva (sale)</option>
+                {rows.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name} (saldo {r.balance})
+                  </option>
+                ))}
               </select>
-              <input type="number" name="quantity" min={1} max={500} defaultValue={1} required className={field} />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-xs font-medium text-[#5a6578]">
+                Movimiento
+                <select name="direction" defaultValue="in" className={cn(field, "mt-1 w-full")}>
+                  <option value="in">Devuelve (entra)</option>
+                  <option value="out">Se lleva (sale)</option>
+                </select>
+              </label>
+              <label className="block text-xs font-medium text-[#5a6578]">
+                Cantidad
+                <input type="number" inputMode="numeric" name="quantity" min={1} max={500} defaultValue={1} required className={cn(field, "mt-1 w-full")} />
+              </label>
             </div>
-            <select name="reason" defaultValue="devolucion" className={cn(field, "w-full")}>
-              <option value="devolucion">Devolución</option>
-              <option value="entrega">Entrega</option>
-              <option value="ajuste">Ajuste de inventario</option>
-            </select>
-            <input name="note" maxLength={300} placeholder="Nota (opcional)" className={cn(field, "w-full")} />
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Motivo
+              <select name="reason" defaultValue="devolucion" className={cn(field, "mt-1 w-full")}>
+                <option value="devolucion">Devolución</option>
+                <option value="entrega">Entrega</option>
+                <option value="ajuste">Ajuste de inventario</option>
+              </select>
+            </label>
+            <label className="block text-xs font-medium text-[#5a6578]">
+              Nota <span className="font-normal text-[#8a96a6]">(opcional)</span>
+              <input name="note" maxLength={300} placeholder="Ej: devolvió en planta" className={cn(field, "mt-1 w-full")} />
+            </label>
             <button type="submit" className={cn(btn.primary, "w-full")}>Registrar</button>
           </form>
           <p className="rounded-xl border border-dashed border-[#d5e3ec] bg-[#fbfdfe] p-4 text-xs leading-relaxed text-[#5a6578]">
@@ -182,7 +214,16 @@ export default async function BottlesPage({
               <span className="text-xs text-[#8a95a6]">{formatDateTimeCl(m.createdAt)}</span>
             </li>
           ))}
-          {recent.length === 0 ? <li className="px-4 py-6 text-center text-[#5a6578]">Sin movimientos aún.</li> : null}
+          {recent.length === 0 ? (
+            <li>
+              <EmptyState
+                compact
+                icon={<Package />}
+                title="Sin movimientos aún"
+                description="Se registran solos al confirmar entregas en Despacho, o manualmente con el formulario."
+              />
+            </li>
+          ) : null}
         </ul>
       </section>
     </div>
