@@ -172,6 +172,7 @@ export default async function AdminHomePage() {
     getInventorySnapshot(tenantId, { envases: flags.envases, demandToday: 0 }),
   ]);
 
+  const liveDrivers = mapData.routes.filter((r) => r.driverLive).length;
   let bottlesToday = 0;
   let bottlesYesterday = 0;
   let litersToday = 0;
@@ -268,14 +269,15 @@ export default async function AdminHomePage() {
 
   return (
     <div>
-      <AutoRefresh seconds={60} />
+      <AutoRefresh seconds={liveDrivers ? 20 : 60} />
       <PageHeader
         title="Centro de despacho"
         subtitle={
           <>
             {admin.tenant.name} · {formatDateCl(today, "long")}
             <span className="ml-2 inline-flex items-center gap-1.5 align-middle text-xs font-medium text-emerald-700">
-              <span aria-hidden className="mb-live-dot size-1.5 rounded-full bg-emerald-500" /> Se actualiza cada minuto
+              <span aria-hidden className="mb-live-dot size-1.5 rounded-full bg-emerald-500" />{" "}
+              {liveDrivers ? `${liveDrivers} chofer(es) en vivo · se actualiza cada 20 s` : "Se actualiza cada minuto"}
             </span>
           </>
         }

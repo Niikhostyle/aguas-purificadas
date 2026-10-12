@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { Flash, FulfillmentBadge, ModuleDisabled } from "@/components/admin/dispatch-ui";
+import { DriverLocationSharer } from "@/components/admin/driver-location-sharer";
 import { OrderDispatchActions } from "@/components/admin/order-dispatch-actions";
 import { prisma } from "@/lib/db";
 import {
@@ -14,6 +15,7 @@ import {
   shortRef,
   todayCl,
 } from "@/lib/dispatch";
+import { platformUrl } from "@/lib/platform-url";
 import { requireTenantModule } from "@/lib/tenant-admin";
 import { cn, formatClp } from "@/lib/utils";
 
@@ -22,7 +24,7 @@ export default async function DriverViewPage({
 }: {
   searchParams: Promise<{ ruta?: string; fecha?: string; ok?: string; error?: string }>;
 }) {
-  const { tenantId, enabled } = await requireTenantModule("despacho");
+  const { admin, tenantId, enabled } = await requireTenantModule("despacho");
   if (!enabled) return <ModuleDisabled name="Ruta de despacho" />;
   const sp = await searchParams;
 
@@ -77,6 +79,13 @@ export default async function DriverViewPage({
         {formatDateCl(fecha, "long")} · {done.length}/{orders.length} entregados
       </p>
       <Flash ok={sp.ok} error={sp.error} />
+      {selected && selected.status !== "completada" ? (
+        <DriverLocationSharer routeId={selected.id} routeName={selected.name} />
+      ) : routes.length ? (
+        <p className="mt-4 rounded-xl border border-[#d5e3ec] bg-white px-4 py-3 text-sm text-[#5a6578]">
+          Elige tu ruta abajo para compartir tu ubicación en vivo con los clientes y el panel.
+        </p>
+      ) : null}
 
       <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
         <Link
@@ -151,7 +160,7 @@ export default async function DriverViewPage({
                   <Phone className="size-5" /> Llamar
                 </a>
                 <a
-                  href={customerWhatsappHref(o.customerPhone, `Hola ${o.customerName.split(" ")[0]}, vamos en camino con tu pedido de agua. ¡Llegamos pronto!`)}
+                  href={customerWhatsappHref(o.customerPhone, `Hola ${o.customerName.split(" ")[0]}, vamos en camino con tu pedido de agua. Sigue el camión en vivo aquí: ${platformUrl(`/pedido/${o.id}`, admin.tenant.slug)}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex flex-col items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 py-2 text-xs font-medium text-emerald-800"

@@ -82,6 +82,30 @@
   box-shadow: 0 3px 10px rgba(15, 35, 70, 0.35);
 }
 
+.mb-driver-estimated {
+  opacity: 0.75;
+  border-style: dashed;
+}
+
+.mb-driver-live {
+  animation: mb-driver-pulse 2s ease-out infinite;
+}
+
+@keyframes mb-driver-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--drv, #12326e) 55%, transparent), 0 3px 10px rgba(15, 35, 70, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent, 0 3px 10px rgba(15, 35, 70, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-driver-live {
+    animation: none;
+  }
+}
+
 .mb-map .leaflet-popup-content-wrapper {
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(15, 35, 70, 0.18);

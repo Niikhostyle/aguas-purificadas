@@ -2,6 +2,7 @@ import Link from "next/link";
 import { List, LocateFixed, MapPin, Route as RouteIcon } from "lucide-react";
 import { locateOrdersAction } from "../map-actions";
 import { Flash, ModuleDisabled, PageHeader, btn, field } from "@/components/admin/dispatch-ui";
+import { AutoRefresh } from "@/components/admin/dashboard/auto-refresh";
 import { FocusOnMapButton, LazyDispatchMap } from "@/components/admin/map/dispatch-map-lazy";
 import { ConfirmSubmitButton } from "@/components/admin/ui";
 import { prisma } from "@/lib/db";
@@ -53,8 +54,11 @@ export default async function DespachoMapaPage({ searchParams }: { searchParams:
     else loose.push(o);
   }
 
+  const liveDrivers = data.routes.filter((r) => r.driverLive).length;
+
   return (
     <div>
+      {fecha === today ? <AutoRefresh seconds={liveDrivers ? 20 : 60} /> : null}
       <PageHeader
         title="Mapa de entregas"
         subtitle={`${admin.tenant.name} · ${formatDateCl(fecha, "long")} · pedidos, rutas y choferes`}
@@ -167,7 +171,7 @@ export default async function DespachoMapaPage({ searchParams }: { searchParams:
                     <RouteIcon className="size-4 text-[var(--brand)]" /> {r.name}
                   </p>
                   <p className="text-xs text-[#5a6578]">
-                    {r.driverName ?? "Sin chofer"} · {r.delivered}/{r.total} entregados
+                    {r.driverName ?? "Sin chofer"} · {r.delivered}/{r.total} entregados{r.driverLive ? " · GPS en vivo" : ""}
                   </p>
                 </header>
                 <OrderList orders={list} />

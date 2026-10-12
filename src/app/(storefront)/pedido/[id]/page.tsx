@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { retryPaymentAction } from "@/app/(storefront)/pedido/actions";
+import { OrderLiveTracking } from "@/components/storefront/order-live-tracking";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
+import { getOrderTracking } from "@/lib/live-tracking-server";
 import { requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
 import { tenantWhatsappHref } from "@/lib/whatsapp";
@@ -19,7 +21,7 @@ const statusCopy: Record<
   pending: {
     eyebrow: "Pago pendiente",
     title: "Tu pedido está listo para pagar",
-    body: "Si cerraste WebPay sin terminar, podés reintentar el pago.",
+    body: "Si cerraste WebPay sin terminar, puedes reintentar el pago.",
   },
   paid: {
     eyebrow: "Pago confirmado",
@@ -29,12 +31,12 @@ const statusCopy: Record<
   failed: {
     eyebrow: "Pago rechazado",
     title: "No se pudo completar el pago",
-    body: "Podés reintentar con otra tarjeta o contactar a la empresa.",
+    body: "Puedes reintentar con otra tarjeta o contactar a la empresa.",
   },
   cancelled: {
     eyebrow: "Pago anulado",
     title: "Cancelaste el pago en WebPay",
-    body: "El pedido quedó anulado. Si fue un error, generá un pedido nuevo desde el carrito.",
+    body: "El pedido quedó anulado. Si fue un error, genera un pedido nuevo desde el carrito.",
   },
 };
 
@@ -46,6 +48,10 @@ export default async function OrderConfirmationPage({ params }: Props) {
     include: { items: true },
   });
   if (!order) notFound();
+  const tracking =
+    order.status === "paid" || (order.status === "pending" && order.fulfillmentStatus !== "por_asignar")
+      ? await getOrderTracking(tenant.id, order.id)
+      : null;
 
   const copy = statusCopy[order.status] ?? statusCopy.pending;
   const canRetry = order.status === "pending" || order.status === "failed";
@@ -64,6 +70,8 @@ export default async function OrderConfirmationPage({ params }: Props) {
           {copy.title}
         </h1>
         <p className="mt-3 text-[#5a6578]">{copy.body}</p>
+
+        {tracking ? <OrderLiveTracking orderId={order.id} initial={tracking} /> : null}
 
         <div className="sf-enter sf-card mt-10 p-6">
           <dl className="space-y-4 text-sm">

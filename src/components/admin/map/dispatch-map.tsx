@@ -19,6 +19,7 @@ import {
   type LatLng,
   type MapOrder,
 } from "@/lib/geo";
+import { agoLabel } from "@/lib/live-tracking";
 import { cn, formatClp } from "@/lib/utils";
 
 export const MAP_FOCUS_EVENT = "dispatch-map:focus";
@@ -49,10 +50,10 @@ function pinIcon(o: MapOrder, draggable: boolean, focused: boolean) {
   });
 }
 
-function driverIcon(color: string) {
+function driverIcon(color: string, live: boolean) {
   return L.divIcon({
     className: "",
-    html: `<div class="mb-driver" style="--drv:${color}">${TRUCK_SVG}</div>`,
+    html: `<div class="mb-driver${live ? " mb-driver-live" : " mb-driver-estimated"}" style="--drv:${color}">${TRUCK_SVG}</div>`,
     iconSize: [34, 34],
     iconAnchor: [17, 17],
     popupAnchor: [0, -18],
@@ -309,6 +310,18 @@ export default function DispatchMap({ data, className, scrollZoom = false }: Dis
           ) : null;
         })}
 
+        {data.routes.map((r) =>
+          r.trail.length > 1 ? (
+            <Polyline
+              key={`trail-${r.id}`}
+              positions={r.trail}
+              pathOptions={{ color: routeColor(r.colorIndex), weight: 3, opacity: 0.55, dashArray: "2 6", lineCap: "round" }}
+            >
+              <Tooltip sticky>Recorrido real de {r.driverName ?? r.name}</Tooltip>
+            </Polyline>
+          ) : null,
+        )}
+
         {visible.map((o) => (
           <OrderMarker key={o.id} o={o} draggable={editing} focused={focusId === o.id} register={register} />
         ))}
@@ -318,7 +331,7 @@ export default function DispatchMap({ data, className, scrollZoom = false }: Dis
             <Marker
               key={`drv-${r.id}`}
               position={r.driverPos}
-              icon={driverIcon(routeColor(r.colorIndex))}
+              icon={driverIcon(routeColor(r.colorIndex), r.driverLive)}
               zIndexOffset={500}
               title={`Chofer ${r.driverName}`}
             >
@@ -328,7 +341,13 @@ export default function DispatchMap({ data, className, scrollZoom = false }: Dis
                 <p className="mt-1 text-xs">
                   {r.delivered}/{r.total} entregas · {r.status === "en_ruta" ? "En ruta" : "Planificada"}
                 </p>
-                <p className="mt-1 text-[11px] text-[#7b8aa0]">Posición estimada según la última entrega.</p>
+                <p className="mt-1 text-[11px] text-[#7b8aa0]">
+                  {r.driverLive && r.driverSeenAt
+                    ? `GPS en vivo · ${agoLabel(r.driverSeenAt)}`
+                    : r.driverSeenAt
+                      ? `Sin señal GPS desde ${agoLabel(r.driverSeenAt)}. Posición estimada según la última entrega.`
+                      : "Posición estimada según la última entrega. El chofer puede compartir su ubicación desde la vista Chofer."}
+                </p>
               </Popup>
             </Marker>
           ) : null,

@@ -93,6 +93,12 @@ export type MapRoute = {
   colorIndex: number;
   stops: LatLng[];
   driverPos: LatLng | null;
+  /** True when driverPos comes from the driver's phone in the last few minutes (else estimated). */
+  driverLive: boolean;
+  /** ISO time of the last GPS fix, if the driver ever shared one today. */
+  driverSeenAt: string | null;
+  /** GPS path driven in the last hours. */
+  trail: LatLng[];
   total: number;
   delivered: number;
 };

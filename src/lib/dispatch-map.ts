@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { DISPATCHABLE_PAYMENT, bottlesForItems, dateFromStr, shortRef } from "@/lib/dispatch";
 import { cityCenter, type DispatchMapData, type LatLng, type MapOrder, type MapRoute } from "@/lib/geo";
+import { TRAIL_WINDOW_MS, isLive } from "@/lib/live-tracking";
 
 export type MapFilters = {
   /** YYYY-MM-DD */
@@ -26,7 +27,17 @@ const MAP_ORDER_SELECT = {
   routeStop: true,
   deliverySlot: true,
   items: { select: { productName: true, quantity: true } },
-  route: { select: { id: true, name: true, driverName: true, status: true } },
+  route: {
+    select: {
+      id: true,
+      name: true,
+      driverName: true,
+      status: true,
+      driverLat: true,
+      driverLng: true,
+      driverSeenAt: true,
+    },
+  },
 } satisfies Prisma.OrderSelect;
 
 type MapRow = Prisma.OrderGetPayload<{ select: typeof MAP_ORDER_SELECT }>;
@@ -131,12 +142,29 @@ export async function getDispatchMapData(
     if (o.routeId && !o.approx) byRoute.get(o.routeId)?.list.push(o);
   }
 
+  const trails = new Map<string, LatLng[]>();
+  if (byRoute.size) {
+    const pings = await prisma.routePing.findMany({
+      where: {
+        tenantId,
+        routeId: { in: Array.from(byRoute.keys()) },
+        createdAt: { gte: new Date(Date.now() - TRAIL_WINDOW_MS) },
+      },
+      select: { routeId: true, lat: true, lng: true },
+      orderBy: { createdAt: "asc" },
+      take: 5000,
+    });
+    for (const p of pings) trails.set(p.routeId, [...(trails.get(p.routeId) ?? []), [p.lat, p.lng]]);
+  }
+
   const routes: MapRoute[] = Array.from(byRoute.values())
     .sort((a, b) => a.meta.name.localeCompare(b.meta.name, "es"))
     .map(({ meta, list, total, deliveredCount }, i) => {
       const stops = [...list].sort((a, b) => (a.routeStop ?? 999) - (b.routeStop ?? 999));
       const delivered = stops.filter((s) => s.status === "entregado");
       const anchor = delivered.at(-1) ?? stops[0];
+      const live = isLive(meta.driverSeenAt) && meta.driverLat != null && meta.driverLng != null;
+      const estimated = anchor && meta.status !== "completada" ? ([anchor.lat, anchor.lng] as LatLng) : null;
       return {
         id: meta.id,
         name: meta.name,
@@ -144,7 +172,10 @@ export async function getDispatchMapData(
         status: meta.status,
         colorIndex: i,
         stops: stops.map((s) => [s.lat, s.lng] as LatLng),
-        driverPos: anchor && meta.status !== "completada" ? ([anchor.lat, anchor.lng] as LatLng) : null,
+        driverPos: live ? ([meta.driverLat!, meta.driverLng!] as LatLng) : estimated,
+        driverLive: live,
+        driverSeenAt: meta.driverSeenAt?.toISOString() ?? null,
+        trail: trails.get(meta.id) ?? [],
         total,
         delivered: deliveredCount,
       };

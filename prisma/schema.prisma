@@ -352,14 +352,37 @@ model DeliveryRoute {
   driverName String?
   /// planificada | en_ruta | completada
   status     String   @default("planificada")
+  /// Última posición GPS enviada por el celular del chofer
+  driverLat      Float?
+  driverLng      Float?
+  driverAccuracy Float?
+  driverHeading  Float?
+  driverSeenAt   DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orders Order[]
+  pings  RoutePing[]
 
   @@index([tenantId, date])
   @@map("delivery_routes")
+}
+
+/// Recorrido GPS del chofer (para dibujar el trayecto en el mapa del dueño)
+model RoutePing {
+  id        String   @id @default(cuid())
+  tenantId  String
+  routeId   String
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+
+  route DeliveryRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([routeId, createdAt])
+  @@index([createdAt])
+  @@map("route_pings")
 }
 
 /// Cliente de reparto (por teléfono), independiente del login de la tienda
