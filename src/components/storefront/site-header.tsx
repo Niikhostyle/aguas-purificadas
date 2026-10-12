@@ -108,7 +108,7 @@ export function SiteHeader({
             <BrandMark name={brandName} logoUrl={logoUrl} subtitle={brandSubtitle} />
           </Link>
 
-          <nav className="hidden min-w-0 items-center lg:flex">
+          <nav className="hidden shrink-0 items-center lg:flex">
             {nav.map((item) => (
               <Link
                 key={item.label}
@@ -124,7 +124,7 @@ export function SiteHeader({
           <div className="flex items-center gap-2 sm:gap-2.5">
             {showRegions ? (
               <div className="hidden sm:block">
-                <RegionSelector regions={regions} autoOpen />
+                <RegionSelector regions={regions} autoOpen className="max-xl:[&>span]:sr-only" />
               </div>
             ) : null}
             {audienceToggle ? (
@@ -138,7 +138,9 @@ export function SiteHeader({
                 className="hidden items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-1.5 text-xs font-bold uppercase text-[var(--nav-text)] transition-colors hover:bg-[var(--mist)] hover:text-[var(--header-hover)] sm:inline-flex"
               >
                 <UserRound className="size-4" aria-hidden />
-                {customerName ? customerName.split(" ")[0] : "Mi cuenta"}
+                <span className="max-2xl:sr-only">
+                  {customerName ? customerName.split(" ")[0] : "Mi cuenta"}
+                </span>
               </Link>
             ) : null}
             <Link
@@ -150,7 +152,7 @@ export function SiteHeader({
                 className="size-5 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
                 aria-hidden
               />
-              <span className="hidden sm:inline">Carrito</span>
+              <span className="hidden xl:inline">Carrito</span>
               {cartCount > 0 ? (
                 <span
                   key={cartCount}
