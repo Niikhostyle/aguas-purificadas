@@ -227,3 +227,31 @@
 .rc-body {
   font-family: var(--font-body), "Roboto Condensed", sans-serif;
 }
+
+/* Tenant appearance: unlayered so it wins over utility colors. */
+.rc-btn-primary,
+[data-storefront] [data-slot="button"].bg-primary {
+  background: var(--btn-fill, var(--brand));
+  color: var(--btn-text, #fff);
+  transition: filter 150ms ease;
+}
+.rc-btn-primary:hover,
+[data-storefront] [data-slot="button"].bg-primary:hover {
+  filter: brightness(0.9);
+}
+
+[data-kpi-style="filled"] .kpi-card {
+  background: var(--kpi-fill);
+  border-color: transparent;
+  color: var(--kpi-text);
+}
+[data-kpi-style="filled"] .kpi-card .kpi-icon {
+  background: color-mix(in srgb, var(--kpi-text) 18%, transparent);
+  color: var(--kpi-text);
+}
+[data-kpi-style="filled"] .kpi-card :is(.kpi-label, .kpi-value, .kpi-hint) {
+  color: inherit;
+}
+[data-kpi-style="filled"] .kpi-card :is(.kpi-label, .kpi-hint) {
+  opacity: 0.85;
+}

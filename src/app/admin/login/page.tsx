@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -6,6 +7,8 @@ import {
   isDemoTenantSlug,
   isSuperAdmin,
 } from "@/lib/auth";
+import { tenantAppearance } from "@/lib/appearance";
+import { prisma } from "@/lib/db";
 import {
   getInactiveHostTenant,
   getTenantSlugFromHeaders,
@@ -15,6 +18,18 @@ import { loginAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+async function hostTenantAppearance() {
+  const slug = await getTenantSlugFromHeaders();
+  if (!slug || slug === "plataforma") return null;
+  const tenant = await prisma.tenant.findFirst({ where: { slug, active: true } });
+  return tenant ? tenantAppearance(tenant) : null;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const favicon = (await hostTenantAppearance())?.images.faviconUrl;
+  return favicon ? { icons: { icon: favicon, apple: favicon } } : {};
+}
 
 export default async function AdminLoginPage({
   searchParams,
@@ -61,11 +76,28 @@ export default async function AdminLoginPage({
     );
   }
 
+  const look = isPlatform ? null : await hostTenantAppearance();
+  const bgUrl = look?.images.loginBgUrl;
+  const logoUrl = look?.images.loginLogoUrl;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] px-5">
+    <div
+      className="flex min-h-screen items-center justify-center bg-[linear-gradient(160deg,#e8f7fc_0%,#f7fbfd_50%,#d5e3ec_100%)] bg-cover bg-center px-5"
+      style={
+        bgUrl
+          ? {
+              backgroundImage: `linear-gradient(160deg,rgba(255,255,255,0.86),rgba(255,255,255,0.7)),url("${bgUrl}")`,
+            }
+          : undefined
+      }
+    >
       <div className="w-full max-w-md">
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="" className="mb-4 h-14 w-auto object-contain" />
+        ) : null}
         <p className="font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
-          {isPlatform ? "Panel MiBidón" : "Panel empresa"}
+          {isPlatform ? "Panel MiBidón" : look?.loginTitle ?? "Panel empresa"}
         </p>
         <p className="mt-2 text-sm text-[#5a6578]">
           {isPlatform

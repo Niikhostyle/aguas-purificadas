@@ -25,6 +25,7 @@ import {
   LogOut,
   Menu,
   Package,
+  Paintbrush,
   Palette,
   PanelLeftClose,
   PanelLeftOpen,
@@ -54,6 +55,7 @@ const ICONS: Record<AdminNavIcon, LucideIcon> = {
   containers: Recycle,
   products: Package,
   brand: Palette,
+  appearance: Paintbrush,
   modules: Blocks,
   tenants: Building2,
   newTenant: Plus,
@@ -72,6 +74,8 @@ export type AdminNotification = {
 type Props = {
   variant: "tenant" | "platform";
   orgName: string;
+  orgSubtitle?: string;
+  orgLogoUrl?: string;
   email: string;
   roleLabel: string;
   siteHref: string;
@@ -147,7 +151,7 @@ function SidebarNav({
                 onClick={() =>
                   setClosedGroups((s) => ({ ...s, [group.label]: !s[group.label] }))
                 }
-                className="flex w-full items-center justify-between rounded-md px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8fb3d1] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+                className="flex w-full items-center justify-between rounded-md px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--admin-sidebar-text)] opacity-75 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
               >
                 {group.label}
                 <ChevronDown
@@ -197,8 +201,8 @@ function SidebarLink({
         collapsed ? "justify-center" : ""
       } ${
         active
-          ? "bg-[var(--brand)] text-white shadow-[0_6px_18px_-8px_rgba(0,177,226,0.9)]"
-          : "text-[#c9dcec] hover:bg-white/8 hover:text-white"
+          ? "bg-[var(--admin-active-bg)] text-[var(--admin-active-text)] shadow-[0_6px_18px_-8px_rgba(0,0,0,0.45)]"
+          : "text-[var(--admin-sidebar-text)] hover:bg-[var(--admin-hover-bg)] hover:text-[var(--admin-active-text)]"
       }`}
     >
       <Icon aria-hidden className="size-[18px] shrink-0" />
@@ -430,10 +434,10 @@ function UserMenu({
           {initials(email)}
         </span>
         <span className="hidden text-left leading-tight md:block">
-          <span className="block max-w-[180px] truncate text-sm font-semibold text-[#12233d]">
+          <span className="block max-w-[180px] truncate text-sm font-semibold text-[var(--admin-topbar-text)]">
             {email}
           </span>
-          <span className="block text-[11px] text-[#5a6578]">{roleLabel}</span>
+          <span className="block text-[11px] text-[var(--admin-topbar-text)] opacity-70">{roleLabel}</span>
         </span>
         <ChevronDown aria-hidden className="hidden size-4 text-[#7b8aa0] md:block" />
         <span className="sr-only">Menú de usuario</span>
@@ -472,24 +476,45 @@ function UserMenu({
   );
 }
 
-function Brand({ orgName, variant, collapsed }: { orgName: string; variant: Props["variant"]; collapsed: boolean }) {
+function Brand({
+  orgName,
+  orgSubtitle,
+  orgLogoUrl,
+  variant,
+  collapsed,
+}: {
+  orgName: string;
+  orgSubtitle?: string;
+  orgLogoUrl?: string;
+  variant: Props["variant"];
+  collapsed: boolean;
+}) {
   return (
     <Link
       href={variant === "platform" ? "/admin/plataforma" : "/admin"}
       className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}
     >
-      <span
-        aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,#00b1e2,#0a6fb0)] text-sm font-black text-white shadow-[0_6px_16px_-6px_rgba(0,177,226,0.8)]"
-      >
-        {variant === "platform" ? "Mi" : initials(orgName)}
-      </span>
-      <span className={collapsed ? "sr-only" : "min-w-0 leading-tight"}>
-        <span className="block truncate text-[15px] font-bold text-white">
+      {orgLogoUrl && variant === "tenant" ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={orgLogoUrl}
+          alt=""
+          className="size-9 shrink-0 rounded-xl bg-white object-contain p-0.5"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="grid size-9 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,#00b1e2,#0a6fb0)] text-sm font-black text-white shadow-[0_6px_16px_-6px_rgba(0,177,226,0.8)]"
+        >
+          {variant === "platform" ? "Mi" : initials(orgName)}
+        </span>
+      )}
+      <span className={collapsed ? "sr-only" : "min-w-0 leading-tight text-[var(--admin-sidebar-text)]"}>
+        <span className="block truncate text-[15px] font-bold brightness-125">
           {variant === "platform" ? "MiBidón" : orgName}
         </span>
-        <span className="block text-[11px] text-[#8fb3d1]">
-          {variant === "platform" ? "Plataforma" : "Panel de empresa"}
+        <span className="block truncate text-[11px] opacity-70">
+          {variant === "platform" ? "Plataforma" : orgSubtitle || "Panel de empresa"}
         </span>
       </span>
     </Link>
@@ -499,6 +524,8 @@ function Brand({ orgName, variant, collapsed }: { orgName: string; variant: Prop
 export function AdminShell({
   variant,
   orgName,
+  orgSubtitle,
+  orgLogoUrl,
   email,
   roleLabel,
   siteHref,
@@ -587,12 +614,12 @@ export function AdminShell({
 
       <aside
         aria-label="Barra lateral"
-        className={`fixed inset-y-0 left-0 z-30 hidden flex-col bg-[#0b1f3a] transition-[width] duration-200 lg:flex print:!hidden ${
+        className={`fixed inset-y-0 left-0 z-30 hidden flex-col [background:var(--admin-sidebar-fill)] transition-[width] duration-200 lg:flex print:!hidden ${
           collapsed ? "w-[72px]" : "w-64"
         }`}
       >
         <div className={`flex h-16 items-center border-b border-white/8 ${collapsed ? "px-3" : "px-5"}`}>
-          <Brand orgName={orgName} variant={variant} collapsed={collapsed} />
+          <Brand orgName={orgName} orgSubtitle={orgSubtitle} orgLogoUrl={orgLogoUrl} variant={variant} collapsed={collapsed} />
         </div>
         <SidebarNav groups={groups} pathname={pathname} collapsed={collapsed} />
         <div className="border-t border-white/8 p-3">
@@ -600,7 +627,7 @@ export function AdminShell({
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
-            className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-[#8fb3d1] hover:bg-white/8 hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--brand)] ${
+            className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-[var(--admin-sidebar-text)] opacity-80 hover:bg-[var(--admin-hover-bg)] hover:opacity-100 focus-visible:outline-2 focus-visible:outline-[var(--brand)] ${
               collapsed ? "justify-center" : ""
             }`}
           >
@@ -628,15 +655,15 @@ export function AdminShell({
             role="dialog"
             aria-modal="true"
             aria-label="Menú de navegación"
-            className="absolute inset-y-0 left-0 flex w-[min(84vw,300px)] flex-col bg-[#0b1f3a] shadow-2xl"
+            className="absolute inset-y-0 left-0 flex w-[min(84vw,300px)] flex-col [background:var(--admin-sidebar-fill)] shadow-2xl"
           >
             <div className="flex h-16 items-center justify-between border-b border-white/8 px-5">
-              <Brand orgName={orgName} variant={variant} collapsed={false} />
+              <Brand orgName={orgName} orgSubtitle={orgSubtitle} orgLogoUrl={orgLogoUrl} variant={variant} collapsed={false} />
               <button
                 type="button"
                 onClick={closeDrawer}
                 aria-label="Cerrar menú"
-                className="grid size-9 place-items-center rounded-lg text-[#c9dcec] hover:bg-white/10"
+                className="grid size-9 place-items-center rounded-lg text-[var(--admin-sidebar-text)] hover:bg-[var(--admin-hover-bg)]"
               >
                 <X aria-hidden className="size-5" />
               </button>
@@ -652,7 +679,7 @@ export function AdminShell({
       ) : null}
 
       <div className={`transition-[padding] duration-200 print:!pl-0 ${collapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}>
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[#dde7ee] bg-white/95 px-4 backdrop-blur sm:px-6 print:hidden">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[#dde7ee] bg-[var(--admin-topbar-bg)]/95 text-[var(--admin-topbar-text)] px-4 backdrop-blur sm:px-6 print:hidden">
           <button
             ref={triggerRef}
             type="button"

@@ -1,11 +1,19 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AdminShell, type AdminNotification } from "@/components/admin/shell/admin-shell";
+import { PLATFORM_APPEARANCE, adminThemeVars, tenantAppearance } from "@/lib/appearance";
 import { isDemoTenantSlug, isSuperAdmin, requireAdmin } from "@/lib/auth";
-import { adminThemeStyle } from "@/lib/branding";
 import { prisma } from "@/lib/db";
 import { DISPATCHABLE_PAYMENT, addDaysStr, dateFromStr, todayCl } from "@/lib/dispatch";
 import { parseModuleFlags } from "@/lib/modules";
 import { getTenantSlugFromHeaders } from "@/lib/tenant";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const admin = await requireAdmin();
+  if (!admin || isSuperAdmin(admin)) return {};
+  const favicon = tenantAppearance(admin.tenant).images.faviconUrl;
+  return favicon ? { icons: { icon: favicon, apple: favicon } } : {};
+}
 
 export default async function AdminPanelLayout({
   children,
@@ -20,7 +28,8 @@ export default async function AdminPanelLayout({
   }
 
   const superAdmin = isSuperAdmin(admin);
-  const theme = adminThemeStyle();
+  const appearance = superAdmin ? PLATFORM_APPEARANCE : tenantAppearance(admin.tenant);
+  const theme = adminThemeVars(appearance);
 
   const flags = parseModuleFlags(admin.tenant.modulesEnabled);
   const hiddenHrefs = superAdmin
@@ -98,10 +107,12 @@ export default async function AdminPanelLayout({
   }
 
   return (
-    <div style={theme}>
+    <div style={theme} data-kpi-style={appearance.kpiStyle}>
       <AdminShell
         variant={superAdmin ? "platform" : "tenant"}
         orgName={admin.tenant.name}
+        orgSubtitle={appearance.panelSubtitle}
+        orgLogoUrl={appearance.images.panelLogoUrl}
         email={admin.email}
         roleLabel={superAdmin ? "Super-admin" : "Administrador"}
         siteHref="/"

@@ -123,7 +123,7 @@ export default async function CuentaPage({
                 minLength={8}
               />
             </div>
-            <Button type="submit" className="w-full bg-[var(--brand)]">
+            <Button type="submit" className="w-full">
               Entrar
             </Button>
           </form>

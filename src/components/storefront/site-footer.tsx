@@ -1,7 +1,13 @@
 import type { Tenant } from "@prisma/client";
 import { formatChileWhatsapp, tenantWhatsappHref } from "@/lib/whatsapp";
 
-export function SiteFooter({ tenant }: { tenant: Tenant }) {
+export function SiteFooter({
+  tenant,
+  logoDarkUrl,
+}: {
+  tenant: Tenant;
+  logoDarkUrl?: string;
+}) {
   const phones = [tenant.phone, tenant.phoneSecondary].filter(Boolean);
   const whatsapp = tenantWhatsappHref(tenant.whatsapp);
   const coverage =
@@ -9,7 +15,7 @@ export function SiteFooter({ tenant }: { tenant: Tenant }) {
     "Nos esmeramos día a día por nuestros clientes, sabemos que para ellos el agua debe llegar a tiempo. Despacho a Talca, Curicó, Linares y comunas de la región.";
 
   return (
-    <footer id="contacto" className="mt-auto bg-[var(--brand-deep)] text-white">
+    <footer id="contacto" className="mt-auto bg-[var(--footer-bg)] text-[var(--footer-text)]">
       <div
         className="bg-cover bg-center"
         style={{
@@ -20,7 +26,14 @@ export function SiteFooter({ tenant }: { tenant: Tenant }) {
       >
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-3 md:px-6">
           <div>
-            {tenant.logoUrl ? (
+            {logoDarkUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoDarkUrl}
+                alt={tenant.name}
+                className="mb-4 h-14 w-auto object-contain"
+              />
+            ) : tenant.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={tenant.logoUrl}
@@ -30,7 +43,7 @@ export function SiteFooter({ tenant }: { tenant: Tenant }) {
             ) : (
               <p className="rc-display text-3xl uppercase">{tenant.name}</p>
             )}
-            <p className="mt-2 text-sm text-white/80">{tenant.tagline}</p>
+            <p className="mt-2 text-sm opacity-80">{tenant.tagline}</p>
           </div>
           <div>
             <p className="rc-display text-xl uppercase tracking-wide">
@@ -60,20 +73,20 @@ export function SiteFooter({ tenant }: { tenant: Tenant }) {
               </a>
             ) : null}
             {tenant.email ? (
-              <p className="mt-3 text-sm text-white/80">{tenant.email}</p>
+              <p className="mt-3 text-sm opacity-80">{tenant.email}</p>
             ) : null}
           </div>
           <div>
             <p className="rc-display text-xl uppercase tracking-wide">
               Cobertura
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">
+            <p className="mt-3 text-sm leading-relaxed opacity-80">
               {coverage}
             </p>
           </div>
         </div>
       </div>
-      <div className="border-t border-white/15 px-4 py-3 text-center text-xs text-white/60">
+      <div className="border-t border-[var(--footer-text)]/15 px-4 py-3 text-center text-xs opacity-60">
         {tenant.name} · plataforma Aguas Purificadas
       </div>
     </footer>

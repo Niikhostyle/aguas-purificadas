@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { updateBrandingAction } from "@/app/admin/(panel)/marca/actions";
 import { BannerSlidesEditor } from "@/components/admin/banner-slides-editor";
@@ -30,7 +31,7 @@ export default async function BrandingAdminPage({
     <div className="max-w-4xl">
       <PageHeader
         title="Marca y contenido"
-        description="Personaliza toda tu tienda: logo, colores, barras, banners del inicio y textos de contacto."
+        description="Contenido de tu tienda: quiénes somos, barras, banners del inicio y datos de contacto."
         breadcrumbs={[{ label: "Configuración" }, { label: "Marca" }]}
       />
 
@@ -52,20 +53,20 @@ export default async function BrandingAdminPage({
       >
         <section className="space-y-5 rounded-xl border border-[#dde7ee] bg-white p-5 shadow-[0_1px_2px_rgba(16,40,70,0.04)]">
           <h2 className="-mx-5 -mt-5 mb-5 border-b border-[#e8f0f5] px-5 py-3.5 text-[15px] font-semibold text-[#12233d]">
-            Identidad
+            Quiénes somos
           </h2>
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre de la tienda</Label>
-            <Input id="name" name="name" required defaultValue={tenant.name} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tagline">Tagline</Label>
-            <Input
-              id="tagline"
-              name="tagline"
-              defaultValue={tenant.tagline ?? ""}
-            />
-          </div>
+          <p className="rounded-md bg-[#f4f8fb] px-3 py-2 text-sm text-[#5a6578]">
+            El nombre, tagline, logo, ícono y colores ahora se editan en{" "}
+            <Link href="/admin/apariencia" className="font-medium text-[var(--brand)] hover:underline">
+              Apariencia
+            </Link>
+            .
+          </p>
+          <input type="hidden" name="name" value={tenant.name} />
+          <input type="hidden" name="tagline" value={tenant.tagline ?? ""} />
+          <input type="hidden" name="primaryColor" value={tenant.primaryColor} />
+          <input type="hidden" name="secondaryColor" value={tenant.secondaryColor} />
+          <input type="hidden" name="logoUrl" value={tenant.logoUrl ?? ""} />
           <div className="space-y-2">
             <Label htmlFor="about">Quiénes somos</Label>
             <Textarea
@@ -74,53 +75,6 @@ export default async function BrandingAdminPage({
               rows={4}
               defaultValue={tenant.about ?? ""}
             />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="primaryColor">Color principal</Label>
-              <Input
-                id="primaryColor"
-                name="primaryColor"
-                required
-                defaultValue={tenant.primaryColor}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="secondaryColor">Color secundario</Label>
-              <Input
-                id="secondaryColor"
-                name="secondaryColor"
-                required
-                defaultValue={tenant.secondaryColor}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="logoFile">Logo (subir archivo)</Label>
-            <Input
-              id="logoFile"
-              name="logoFile"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-            />
-            <p className="text-xs text-[#5a6578]">
-              Se guarda en <code>public/uploads/{tenant.slug}/logo/</code>. Máx.
-              5 MB.
-            </p>
-            {tenant.logoUrl ? (
-              <div className="flex items-center gap-3 pt-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={tenant.logoUrl}
-                  alt=""
-                  className="h-12 w-auto object-contain"
-                />
-                <span className="truncate text-xs text-[#5a6578]">
-                  {tenant.logoUrl}
-                </span>
-              </div>
-            ) : null}
-            <input type="hidden" name="logoUrl" value={tenant.logoUrl ?? ""} />
           </div>
         </section>
 
