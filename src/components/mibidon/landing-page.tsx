@@ -4,15 +4,15 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
-  Calculator,
   ChevronDown,
   CircleCheck,
   CirclePlay,
   House,
+  LayoutDashboard,
   MessageCircle,
   MessageSquareMore,
-  Rocket,
   Star,
+  Store,
   Tag,
   TrendingUp,
   Truck,
@@ -25,12 +25,12 @@ import {
   SpotlightCard,
 } from "@/components/mibidon/landing-motion";
 import { RevenueSimulator } from "@/components/mibidon/revenue-simulator";
+import { DEMO_STORE_URL } from "@/lib/landing/defaults";
 import { fillTrialTokens, formatClp, isExternalHref, richText } from "@/lib/landing/format";
 import { LANDING_ICONS } from "@/lib/landing/icons";
 import type { LandingContent, LandingSectionContent } from "@/lib/landing/schema";
 import { whatsappHref } from "@/lib/whatsapp";
 
-const DEMO_HREF = "https://demo.mibidon.cl";
 const CLIENT_LOGIN_HREF = "/admin/login?tenant=plataforma";
 const NO_TRIAL_WHATSAPP = "Hola MiBidón, quiero crear la tienda online de mi purificadora.";
 
@@ -135,7 +135,9 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
     trial,
     announcement,
     hero,
+    demo,
     trust,
+    steps,
     stats,
     comparison,
     features,
@@ -157,8 +159,13 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
   const testimonialsOn = testimonials.enabled && testimonials.content.items.length > 0;
   const faqOn = faq.enabled && faq.content.items.length > 0;
   const simulatorOn = hero.enabled && hero.content.showSimulator;
+  const stepsOn = steps.enabled && steps.content.items.length > 0;
+  const demoOn = demo.enabled && Boolean(demo.content.storeHref);
+  const demoInHero = demoOn && hero.enabled && !simulatorOn;
+  const demoNavOn = demoOn && Boolean(demo.content.navLabel);
 
   const anchors: Record<string, boolean> = {
+    "como-funciona": stepsOn,
     beneficios: featuresOn,
     comparativa: comparison.enabled,
     simulador: simulatorOn,
@@ -172,9 +179,12 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
   const waTrial = whatsappHref(trialOn ? fill(t.whatsappMessage) : NO_TRIAL_WHATSAPP);
   const waAdvisor = whatsappHref(advisor.content.whatsappMessage);
   const primaryCtaLabel = trialOn ? fill(t.ctaLabel) : t.noTrialCtaLabel;
-  const headerCtaHref = pricingOn ? "#precios" : waTrial;
+  const plansHref = pricingOn ? "#precios" : activePlans[0]?.ctaUrl || waTrial;
+  const headerCtaHref = plansHref;
+  const primaryCtaHref = trialOn ? waTrial : plansHref;
 
   const navLinks = [
+    { href: "#como-funciona", label: steps.content.navLabel },
     { href: "#beneficios", label: features.content.navLabel },
     { href: "#comparativa", label: comparison.content.navLabel },
     { href: "#simulador", label: hero.content.simulatorNavLabel },
@@ -192,7 +202,7 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
   const showcaseLinkHref = pricingOn ? "#precios" : waTrial;
 
   return (
-    <div className="pb-32 sm:pb-20 md:pb-0">
+    <div className="pb-20 md:pb-0">
       {announcement.enabled ? (
         <div className="flex flex-wrap items-center justify-center gap-2 border-b border-sv-surface-tint/30 sv-label bg-sv-primary-container px-4 py-2.5 text-center text-xs font-medium text-sv-surface">
           {announcement.content.badge ? (
@@ -235,15 +245,29 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-sv-primary transition-colors hover:bg-sv-surface-container sm:inline-block"
+              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-sv-primary transition-colors hover:bg-sv-surface-container md:inline-block"
               href={CLIENT_LOGIN_HREF}
             >
               Ingresar
             </Link>
+            {demoNavOn ? (
+              <a
+                className="group inline-flex items-center gap-2 rounded-full border-2 border-sv-secondary bg-sv-secondary-fixed/50 px-3.5 py-2 text-xs font-bold text-sv-on-secondary-fixed-variant transition-all hover:-translate-y-0.5 hover:bg-sv-secondary hover:text-white sm:text-sm"
+                href={demo.content.storeHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="mb-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-70" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <span>{demo.content.navLabel}</span>
+              </a>
+            ) : null}
             <a
-              className="sv-shine flex items-center gap-1.5 rounded-lg bg-sv-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-sv-primary-container sm:text-sm"
+              className="sv-shine hidden items-center gap-1.5 rounded-lg bg-sv-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sv-primary-container sm:flex"
               href={headerCtaHref}
               {...externalProps(headerCtaHref)}
             >
@@ -258,34 +282,78 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
         <HeroSection
           hero={hero.content}
           primaryCtaLabel={primaryCtaLabel}
-          waTrial={waTrial}
+          primaryCtaHref={primaryCtaHref}
+          whatsappHref={waAdvisor}
+          demo={demoInHero ? demo.content : null}
         />
       ) : null}
 
-      {trust.enabled ? (
-        <section className="border-y border-sv-surface-high bg-sv-surface py-10">
+      {demoOn && !demoInHero ? (
+        <section className="bg-sv-surface py-12">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <Reveal variant="scale">
+              <DemoCard demo={demo.content} />
+            </Reveal>
+          </div>
+        </section>
+      ) : null}
+
+      {trust.enabled && trust.content.badges.length ? (
+        <section className="border-y border-sv-surface-high bg-sv-surface py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-              <Reveal className="text-center md:text-left">
+            {trust.content.eyebrow || trust.content.text ? (
+              <Reveal className="mb-6 text-center">
                 {trust.content.eyebrow ? (
                   <p className="text-xs font-bold uppercase tracking-widest text-sv-secondary">{trust.content.eyebrow}</p>
                 ) : null}
-                <p className="text-base font-bold text-sv-primary">{trust.content.text}</p>
+                {trust.content.text ? (
+                  <p className="text-base font-bold text-sv-primary">{trust.content.text}</p>
+                ) : null}
               </Reveal>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
-                {trust.content.badges.map((b, i) => {
-                  const Icon = LANDING_ICONS[b.icon];
-                  return (
-                    <Reveal key={b.id} delayMs={i * 90} variant="scale">
-                      <div className="flex items-center gap-2 rounded-lg border border-sv-surface-container bg-sv-surface-low px-3 py-2 text-xs font-bold text-sv-on-surface transition-transform duration-300 hover:-translate-y-0.5">
-                        <Icon className={`size-[18px] ${i % 2 ? "text-emerald-600" : "text-sv-secondary"}`} aria-hidden />
-                        <span>{b.label}</span>
-                      </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
-            </div>
+            ) : null}
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-4">
+              {trust.content.badges.map((b, i) => {
+                const Icon = LANDING_ICONS[b.icon];
+                return (
+                  <Reveal as="li" key={b.id} delayMs={i * 90} className="flex items-center justify-center gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sv-surface-container text-sv-secondary">
+                      <Icon className="size-5" aria-hidden />
+                    </span>
+                    <span className="text-sm font-bold text-sv-primary">{b.label}</span>
+                  </Reveal>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      {stepsOn ? (
+        <section className="scroll-mt-20 bg-sv-surface py-20" id="como-funciona">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <SectionIntro
+              className="mb-14 max-w-2xl"
+              eyebrow={steps.content.eyebrow}
+              title={steps.content.title}
+              body={steps.content.body}
+            />
+            <ol className={`relative grid grid-cols-1 gap-10 md:gap-8 ${steps.content.items.length >= 4 ? "md:grid-cols-4" : steps.content.items.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+              <span
+                className="absolute left-[16%] right-[16%] top-6 hidden h-px bg-gradient-to-r from-transparent via-sv-secondary/40 to-transparent md:block"
+                aria-hidden
+              />
+              {steps.content.items.map((s, i) => (
+                <Reveal as="li" key={s.id} delayMs={i * 120} className="relative flex flex-col items-center text-center">
+                  <span className="sv-display relative flex size-12 items-center justify-center rounded-full bg-sv-primary text-lg font-black text-white shadow-lg ring-8 ring-sv-surface">
+                    {i + 1}
+                  </span>
+                  <h3 className="sv-display mt-5 text-lg font-bold text-sv-primary">{s.title}</h3>
+                  {s.body ? (
+                    <p className="mt-2 max-w-xs text-sm leading-relaxed text-sv-on-surface-variant">{s.body}</p>
+                  ) : null}
+                </Reveal>
+              ))}
+            </ol>
           </div>
         </section>
       ) : null}
@@ -409,8 +477,8 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
       ) : null}
 
       {featuresOn || showcase.enabled ? (
-        <section className="scroll-mt-20 bg-sv-surface-low py-16" id={featuresOn ? "beneficios" : undefined}>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="scroll-mt-20 bg-sv-surface-low py-20" id={featuresOn ? "beneficios" : undefined}>
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             {featuresOn ? (
               <>
                 <SectionIntro
@@ -419,7 +487,9 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
                   title={features.content.title}
                   body={features.content.body}
                 />
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div
+                  className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${features.content.items.length % 4 === 0 && features.content.items.length % 3 !== 0 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
+                >
                   {features.content.items.map((f, i) => {
                     const Icon = f.icon ? LANDING_ICONS[f.icon] : null;
                     return (
@@ -430,7 +500,7 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
                               <Icon className="size-6" aria-hidden />
                             </div>
                           ) : null}
-                          <h3 className="sv-display mb-2 text-lg font-bold text-sv-primary">{f.title}</h3>
+                          <h3 className="sv-display mb-1.5 text-lg font-bold text-sv-primary">{f.title}</h3>
                           <p className="text-sm leading-relaxed text-sv-on-surface-variant">{f.body}</p>
                         </SpotlightCard>
                       </Reveal>
@@ -634,13 +704,16 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
         </section>
       ) : null}
 
-      {faqOn || advisor.enabled ? (
-        <section className="bg-sv-surface py-16" id={faqOn ? "faq" : undefined}>
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            {faqOn ? (
-              <>
-                <SectionIntro eyebrow={faq.content.eyebrow} title={faq.content.title} body={faq.content.body} />
-                <div className="space-y-4">
+      {faqOn ? (
+        <section className="scroll-mt-20 bg-sv-surface py-20" id="faq">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <SectionIntro
+              className="mb-10 max-w-2xl"
+              eyebrow={faq.content.eyebrow}
+              title={faq.content.title}
+              body={faq.content.body}
+            />
+            <div className="space-y-3">
                   {faq.content.items.map((f, i) => (
                     <Reveal key={f.id} delayMs={i * 80}>
                       <details className="sv-faq group cursor-pointer rounded-xl border border-sv-surface-high bg-sv-surface-low p-5">
@@ -652,32 +725,50 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
                       </details>
                     </Reveal>
                   ))}
-                </div>
-              </>
-            ) : null}
-
-            {advisor.enabled ? (
-              <Reveal variant="scale" className={faqOn ? "mt-12" : undefined}>
-                <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-sv-surface-highest bg-sv-surface-container p-6 text-center sm:flex-row sm:p-8">
-                  <div className="text-left">
-                    <h4 className="text-lg font-bold text-sv-primary">{advisor.content.title}</h4>
-                    {advisor.content.body ? (
-                      <p className="mt-1 text-sm text-sv-on-surface-variant">{advisor.content.body}</p>
-                    ) : null}
-                  </div>
-                  <a
-                    className="sv-shine flex items-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white shadow-md hover:bg-emerald-700"
-                    href={waAdvisor}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="size-5" aria-hidden />
-                    <span>{advisor.content.ctaLabel}</span>
-                  </a>
-                </div>
-              </Reveal>
-            ) : null}
+            </div>
           </div>
+        </section>
+      ) : null}
+
+      {advisor.enabled ? (
+        <section className="relative overflow-hidden bg-sv-primary-container py-20 text-white">
+          <div className="sv-blob -right-24 -top-24 h-80 w-80 bg-sv-secondary/30" />
+          <Reveal variant="scale" className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+            <h2 className="sv-display text-3xl font-black tracking-tight sm:text-4xl">{advisor.content.title}</h2>
+            {advisor.content.body ? (
+              <p className="mt-3 text-base text-white/75 sm:text-lg">{advisor.content.body}</p>
+            ) : null}
+            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <a
+                className="sv-shine inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 font-bold text-sv-primary shadow-lg hover:bg-sv-surface-low"
+                href={primaryCtaHref}
+                {...externalProps(primaryCtaHref)}
+              >
+                <span>{primaryCtaLabel}</span>
+                <ArrowRight className="sv-arrow size-5" aria-hidden />
+              </a>
+              {demoOn ? (
+                <a
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-sv-secondary-fixed/70 px-6 py-3 font-bold text-white transition-colors hover:bg-white/10"
+                  href={demo.content.storeHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CirclePlay className="size-5" aria-hidden />
+                  <span>{hero.content.secondaryCtaLabel || demo.content.navLabel || demo.content.storeLabel}</span>
+                </a>
+              ) : null}
+              <a
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                href={waAdvisor}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-5" aria-hidden />
+                <span>{advisor.content.ctaLabel}</span>
+              </a>
+            </div>
+          </Reveal>
         </section>
       ) : null}
 
@@ -692,7 +783,9 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-medium">
               {footer.content.demoLabel ? (
-                <a href={DEMO_HREF} className="hover:text-sv-primary">{footer.content.demoLabel}</a>
+                <a href={demo.content.storeHref || DEMO_STORE_URL} className="hover:text-sv-primary" target="_blank" rel="noopener noreferrer">
+                  {footer.content.demoLabel}
+                </a>
               ) : null}
               {footer.content.loginLabel ? (
                 <Link href={CLIENT_LOGIN_HREF} className="hover:text-sv-primary">{footer.content.loginLabel}</Link>
@@ -707,35 +800,30 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
         </footer>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-14 z-30 border-t border-sv-surface-high bg-sv-surface/95 p-3 backdrop-blur-md sm:hidden">
-        <a
-          className="sv-shine flex w-full items-center justify-center gap-2 rounded-lg bg-sv-primary py-3 text-xs font-bold text-white shadow-md"
-          href={waTrial}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span>{primaryCtaLabel}</span>
-          <Rocket className="size-4" aria-hidden />
-        </a>
-      </div>
-
       <nav className="fixed inset-x-0 bottom-0 z-50 md:hidden" aria-label="Navegación rápida">
         <div className="flex gap-2 border-t border-[#e8ecf2] bg-[#f8fafb] px-4 pb-3 pt-2">
           {[
-            { href: "#", label: "Inicio", icon: House, active: true },
-            { href: "#simulador", label: "Simulador", icon: Calculator },
-            { href: "#precios", label: "Planes", icon: Tag },
-            { href: waAdvisor, label: "WhatsApp", icon: MessageSquareMore },
+            { href: "#", label: "Inicio", icon: House, active: true, show: true },
+            {
+              href: demo.content.storeHref,
+              label: demo.content.navLabel || "Demo",
+              icon: CirclePlay,
+              accent: true,
+              show: demoOn,
+            },
+            { href: plansHref, label: "Planes", icon: Tag, show: true },
+            { href: waAdvisor, label: "WhatsApp", icon: MessageSquareMore, show: true },
           ]
-            .filter((item) => anchorVisible(item.href))
+            .filter((item) => item.show && anchorVisible(item.href))
             .map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`flex flex-1 flex-col items-center justify-end gap-1 transition-transform active:scale-95 ${item.active ? "text-[#0e131a]" : "text-[#516a94]"}`}
+                {...externalProps(item.href)}
+                className={`flex flex-1 flex-col items-center justify-end gap-1 transition-transform active:scale-95 ${item.active ? "text-[#0e131a]" : item.accent ? "font-bold text-sv-secondary" : "text-[#516a94]"}`}
               >
                 <span className="flex h-8 items-center justify-center">
-                  <item.icon className="size-6" strokeWidth={item.active ? 2.5 : 2} aria-hidden />
+                  <item.icon className="size-6" strokeWidth={item.active || item.accent ? 2.5 : 2} aria-hidden />
                 </span>
                 <span className="text-xs font-medium leading-normal tracking-[0.015em]">{item.label}</span>
               </a>
@@ -746,25 +834,101 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
   );
 }
 
+function DemoCard({ demo }: { demo: LandingSectionContent<"demo"> }) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-sv-surface-high bg-sv-surface-lowest p-3 shadow-2xl">
+      {demo.imageUrl ? (
+        <a
+          href={demo.storeHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group relative block overflow-hidden rounded-2xl"
+          aria-label={demo.storeLabel || demo.title}
+        >
+          <CmsImage
+            src={demo.imageUrl}
+            alt={demo.imageAlt}
+            width={512}
+            height={279}
+            sizes="(min-width: 1024px) 520px, 100vw"
+            className={`w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] h-48 sm:h-64`}
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-sv-primary/60 via-sv-primary/10 to-transparent" />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex size-16 items-center justify-center rounded-full bg-white/95 text-sv-secondary shadow-xl transition-transform duration-300 group-hover:scale-110">
+              <CirclePlay className="size-8" aria-hidden />
+            </span>
+          </span>
+          {demo.badge ? (
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-sv-primary shadow">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="mb-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              {demo.badge}
+            </span>
+          ) : null}
+        </a>
+      ) : null}
+      <div className="px-3 pb-3 pt-5 sm:px-4">
+        {!demo.imageUrl && demo.badge ? (
+          <span className="text-xs font-bold uppercase tracking-widest text-sv-secondary">{demo.badge}</span>
+        ) : null}
+        <p className="sv-display text-lg font-bold leading-snug text-sv-primary">{demo.title}</p>
+        {demo.body ? <p className="mt-1 text-sm text-sv-on-surface-variant">{demo.body}</p> : null}
+        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-1">
+          {demo.storeLabel ? (
+            <a
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-sv-secondary px-4 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              href={demo.storeHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Store className="size-4" aria-hidden />
+              <span>{demo.storeLabel}</span>
+            </a>
+          ) : null}
+          {demo.adminLabel && demo.adminHref ? (
+            <a
+              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-sv-secondary/40 bg-sv-surface-lowest px-4 py-2.5 text-sm font-bold text-sv-primary transition-all hover:-translate-y-0.5 hover:border-sv-secondary"
+              href={demo.adminHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <LayoutDashboard className="size-4 text-sv-secondary" aria-hidden />
+              <span>{demo.adminLabel}</span>
+            </a>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HeroSection({
   hero,
   primaryCtaLabel,
-  waTrial,
+  primaryCtaHref,
+  whatsappHref,
+  demo,
 }: {
   hero: LandingSectionContent<"hero">;
   primaryCtaLabel: string;
-  waTrial: string;
+  primaryCtaHref: string;
+  whatsappHref: string;
+  demo: LandingSectionContent<"demo"> | null;
 }) {
   const words = hero.headline.split(/\s+/).filter(Boolean);
-  const chipIcons = [LANDING_ICONS.Zap, LANDING_ICONS.BadgeCheck, LANDING_ICONS.Ban, LANDING_ICONS.CircleCheck];
+  const chipIcons = [CirclePlay, LANDING_ICONS.BadgeCheck, LANDING_ICONS.Palette, LANDING_ICONS.CircleCheck];
+  const twoCol = hero.showSimulator || demo !== null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-sv-surface-low via-sv-surface to-sv-surface pb-16 pt-8 lg:pb-24 lg:pt-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-sv-surface-low via-sv-surface to-sv-surface pb-20 pt-10 lg:pb-28 lg:pt-20">
       <div className="sv-blob -left-24 top-10 h-72 w-72 bg-sv-secondary-container/20" />
       <div className="sv-blob -right-20 bottom-0 h-80 w-80 bg-sv-surface-highest/70" style={{ animationDelay: "-6s" }} />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className={`grid grid-cols-1 items-center gap-12 ${hero.showSimulator ? "lg:grid-cols-12" : ""}`}>
-          <div className={`flex flex-col gap-6 text-left ${hero.showSimulator ? "lg:col-span-7" : "mx-auto max-w-3xl"}`}>
+        <div className={`grid grid-cols-1 items-center gap-12 lg:gap-16 ${twoCol ? "lg:grid-cols-12" : ""}`}>
+          <div className={`flex flex-col gap-6 text-left ${twoCol ? "lg:col-span-7" : "mx-auto max-w-3xl"}`}>
             {hero.badge ? (
               <div
                 className="mb-fade-up inline-flex items-center gap-2 self-start rounded-full border border-sv-secondary/20 bg-sv-secondary-fixed/50 px-3.5 py-1.5"
@@ -804,24 +968,36 @@ function HeroSection({
             </p>
             <div className="mb-fade-up flex flex-col gap-3 pt-2 sm:flex-row" style={d(800)}>
               <a
-                className="sv-shine inline-flex items-center justify-center gap-2 rounded-xl bg-sv-primary-container px-6 py-4 text-base font-semibold text-white shadow-lg hover:bg-sv-primary hover:shadow-xl"
-                href={waTrial}
-                target="_blank"
-                rel="noopener noreferrer"
+                className="sv-shine inline-flex items-center justify-center gap-2 rounded-xl bg-sv-primary-container px-7 py-4 text-base font-bold text-white shadow-lg hover:bg-sv-primary hover:shadow-xl"
+                href={primaryCtaHref}
+                {...externalProps(primaryCtaHref)}
               >
                 <span>{primaryCtaLabel}</span>
-                <Rocket className="sv-arrow size-5" aria-hidden />
+                <ArrowRight className="sv-arrow size-5" aria-hidden />
               </a>
               {hero.secondaryCtaLabel && hero.secondaryCtaHref ? (
                 <a
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-sv-outline-variant bg-sv-surface-lowest px-6 py-4 text-base font-semibold text-sv-on-surface transition-all hover:-translate-y-0.5 hover:bg-sv-surface-container"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-sv-secondary px-7 py-4 text-base font-bold text-white shadow-lg ring-4 ring-sv-secondary-container/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   href={hero.secondaryCtaHref}
+                  {...externalProps(hero.secondaryCtaHref)}
                 >
-                  <CirclePlay className="size-5 text-sv-secondary" aria-hidden />
+                  <CirclePlay className="size-5" aria-hidden />
                   <span>{hero.secondaryCtaLabel}</span>
                 </a>
               ) : null}
             </div>
+            {hero.whatsappLabel ? (
+              <a
+                className="mb-fade-up -mt-2 inline-flex items-center gap-1.5 self-start text-sm font-semibold text-sv-on-surface-variant transition-colors hover:text-emerald-700"
+                style={d(880)}
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-4 text-emerald-600" aria-hidden />
+                <span>{hero.whatsappLabel}</span>
+              </a>
+            ) : null}
             {hero.chips.length ? (
               <div
                 className="mb-fade-up sv-label flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs text-sv-on-surface-variant"
@@ -861,12 +1037,12 @@ function HeroSection({
             ) : null}
           </div>
 
-          {hero.showSimulator ? (
+          {twoCol ? (
             <Parallax className="relative lg:col-span-5">
               <div className="mb-pop" style={d(450)}>
                 <div className="mb-layer" style={{ "--depth": 10 } as CSSProperties}>
-                  <div className="mb-float">
-                    <RevenueSimulator />
+                  <div className={hero.showSimulator ? "mb-float" : undefined}>
+                    {hero.showSimulator ? <RevenueSimulator /> : demo ? <DemoCard demo={demo} /> : null}
                   </div>
                 </div>
               </div>

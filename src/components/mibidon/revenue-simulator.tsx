@@ -16,7 +16,7 @@ export function RevenueSimulator() {
   const hoursSaved = Math.max(4, Math.round(bottles * HOURS_SAVED_PER_BOTTLE));
   const fill = ((bottles - MIN) / (MAX - MIN)) * 100;
   const ctaHref = whatsappHref(
-    `Hola MiBidón, entrego ~${bottles.toLocaleString("es-CL")} bidones al mes y quiero comenzar mi prueba gratis de 14 días.`,
+    `Hola MiBidón, entrego ~${bottles.toLocaleString("es-CL")} bidones al mes y quiero conocer la plataforma.`,
   );
 
   return (

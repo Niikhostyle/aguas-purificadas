@@ -74,14 +74,58 @@ const column = (label: string): Field[] => [
   { type: "text", key: "result", label: "Texto de resultado", max: 160 },
 ];
 
-export const SECTION_META: SectionMeta[] = [
+const SECTIONS: SectionMeta[] = [
+  {
+    key: "demo",
+    slug: "demo",
+    title: "Demo en vivo",
+    description:
+      "Botón “Ver demo” del menú y tarjeta con enlaces a la tienda y al panel admin de demostración.",
+    primary: true,
+    fields: [
+      { type: "text", key: "navLabel", label: "Botón en el menú", max: 40, hint: "Vacío = no aparece en el menú." },
+      { type: "text", key: "badge", label: "Etiqueta", max: 40 },
+      { type: "text", key: "title", label: "Título", max: 160 },
+      { type: "textarea", key: "body", label: "Texto", max: 300 },
+      { type: "text", key: "storeLabel", label: "Botón tienda demo", max: 60 },
+      { type: "url", key: "storeHref", label: "URL tienda demo", max: 500 },
+      { type: "text", key: "adminLabel", label: "Botón panel admin demo", max: 60, hint: "Vacío = oculto." },
+      { type: "url", key: "adminHref", label: "URL panel admin demo", max: 500 },
+      { type: "url", key: "imageUrl", label: "URL de la imagen", max: 500, hint: "Vacío = sin imagen." },
+      { type: "text", key: "imageAlt", label: "Texto alternativo", max: 200 },
+    ],
+  },
+  {
+    key: "steps",
+    slug: "como-funciona",
+    title: "Cómo funciona",
+    description: "Pasos numerados (máximo 4).",
+    primary: true,
+    fields: [
+      navLabel,
+      ...intro,
+      {
+        type: "list",
+        key: "items",
+        label: "Pasos",
+        itemLabel: "Paso",
+        titleKey: "title",
+        max: 4,
+        fields: [
+          { type: "text", key: "title", label: "Título", max: 80 },
+          { type: "textarea", key: "body", label: "Descripción", max: 200 },
+        ],
+        newItem: { title: "Nuevo paso", body: "" },
+      },
+    ],
+  },
   {
     key: "trial",
     slug: "dias-gratis",
     title: "Días gratis",
     description:
       "Prueba gratuita que aparece en la barra de anuncio, botones de inicio, CTA móvil y nota de precios.",
-    primary: true,
+    primary: false,
     fields: [
       { type: "number", key: "days", label: "Días de prueba", min: 1, max: 365 },
       { type: "text", key: "label", label: "Etiqueta", max: 40, hint: "Se usa en {prueba}: “14 días gratis”." },
@@ -102,7 +146,7 @@ export const SECTION_META: SectionMeta[] = [
     slug: "comparativa",
     title: "Sistema MiBidón (comparativa)",
     description: "WhatsApp manual vs MiBidón: columnas, viñetas y barras de resultado.",
-    primary: true,
+    primary: false,
     fields: [
       navLabel,
       ...intro,
@@ -141,7 +185,7 @@ export const SECTION_META: SectionMeta[] = [
     slug: "testimonios",
     title: "Testimonios",
     description: "Casos de éxito con nombre, cargo/planta, cita y foto opcional.",
-    primary: true,
+    primary: false,
     fields: [
       navLabel,
       ...intro,
@@ -270,15 +314,22 @@ export const SECTION_META: SectionMeta[] = [
     key: "hero",
     slug: "hero",
     title: "Hero",
-    description: "Titular principal, botones y simulador de ingresos.",
-    primary: false,
+    description: "Titular principal, botones (planes y demo) y simulador opcional.",
+    primary: true,
     fields: [
       { type: "text", key: "badge", label: "Etiqueta superior", max: 80 },
       { type: "text", key: "headline", label: "Titular", max: 120 },
       { type: "text", key: "headlineAccent", label: "Titular destacado (cian)", max: 60 },
       { type: "textarea", key: "body", label: "Bajada", max: 500, hint: FORMAT_HINT },
-      { type: "text", key: "secondaryCtaLabel", label: "Botón secundario", max: 60 },
-      { type: "url", key: "secondaryCtaHref", label: "URL botón secundario", max: 500 },
+      { type: "text", key: "secondaryCtaLabel", label: "Botón demo", max: 60 },
+      { type: "url", key: "secondaryCtaHref", label: "URL botón demo", max: 500 },
+      {
+        type: "text",
+        key: "whatsappLabel",
+        label: "Enlace a WhatsApp bajo los botones",
+        max: 60,
+        hint: "Vacío = oculto.",
+      },
       {
         type: "list",
         key: "chips",
@@ -290,16 +341,21 @@ export const SECTION_META: SectionMeta[] = [
         newItem: { label: "Nuevo sello" },
       },
       { type: "text", key: "liveText", label: "Texto “En vivo”", max: 160, hint: FORMAT_HINT },
-      { type: "bool", key: "showSimulator", label: "Mostrar simulador de ingresos" },
+      {
+        type: "bool",
+        key: "showSimulator",
+        label: "Mostrar simulador de ingresos",
+        hint: "Si está activo, la tarjeta de demo pasa a una franja bajo el hero.",
+      },
       { type: "text", key: "simulatorNavLabel", label: "Texto del simulador en el menú", max: 40 },
     ],
   },
   {
     key: "trust",
     slug: "confianza",
-    title: "Sellos de confianza",
-    description: "Franja de prueba social bajo el hero.",
-    primary: false,
+    title: "Beneficios",
+    description: "Franja de 3–4 beneficios cortos bajo el hero.",
+    primary: true,
     fields: [
       { type: "text", key: "eyebrow", label: "Antetítulo", max: 60 },
       { type: "text", key: "text", label: "Texto", max: 200 },
@@ -364,9 +420,9 @@ export const SECTION_META: SectionMeta[] = [
   {
     key: "advisor",
     slug: "asesor",
-    title: "Caja de asesor",
-    description: "Llamado a hablar con un asesor por WhatsApp.",
-    primary: false,
+    title: "Llamado final",
+    description: "Franja de cierre con botones a planes, demo y WhatsApp.",
+    primary: true,
     fields: [
       { type: "text", key: "title", label: "Título", max: 160 },
       { type: "textarea", key: "body", label: "Texto", max: 300 },
@@ -379,7 +435,7 @@ export const SECTION_META: SectionMeta[] = [
     slug: "footer",
     title: "Footer",
     description: "Pie de página.",
-    primary: false,
+    primary: true,
     fields: [
       { type: "text", key: "brandText", label: "Texto de marca", max: 80 },
       { type: "text", key: "demoLabel", label: "Enlace tienda demo", max: 40, hint: "Vacío = oculto." },
@@ -388,6 +444,26 @@ export const SECTION_META: SectionMeta[] = [
     ],
   },
 ];
+
+const ORDER: LandingSectionKey[] = [
+  "hero",
+  "demo",
+  "trust",
+  "steps",
+  "features",
+  "pricing",
+  "faq",
+  "advisor",
+  "footer",
+  "trial",
+  "announcement",
+  "stats",
+  "comparison",
+  "showcase",
+  "testimonials",
+];
+
+export const SECTION_META: SectionMeta[] = ORDER.map((k) => SECTIONS.find((s) => s.key === k)!);
 
 export function sectionBySlug(slug: string): SectionMeta | undefined {
   return SECTION_META.find((s) => s.slug === slug);

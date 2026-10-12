@@ -85,6 +85,7 @@ export const landingSchemas = {
     body: reqText(500),
     secondaryCtaLabel: text(60),
     secondaryCtaHref: url,
+    whatsappLabel: text(60).default(""),
     chips: z.array(z.object({ id, label: reqText(60) })).max(4),
     liveText: text(160),
     showSimulator: z.boolean(),
@@ -92,7 +93,7 @@ export const landingSchemas = {
   }),
   trust: z.object({
     eyebrow: text(60),
-    text: reqText(200),
+    text: text(200),
     badges: z.array(z.object({ id, icon, label: reqText(50) })).max(6),
   }),
   stats: z.object({
@@ -125,6 +126,23 @@ export const landingSchemas = {
     items: z
       .array(z.object({ id, icon: icon.nullable(), title: reqText(80), body: reqText(300) }))
       .max(12),
+  }),
+  demo: z.object({
+    navLabel: text(40),
+    badge: text(40),
+    title: reqText(160),
+    body: text(300),
+    storeLabel: text(60),
+    storeHref: url,
+    adminLabel: text(60),
+    adminHref: url,
+    imageUrl: url,
+    imageAlt: text(200),
+  }),
+  steps: z.object({
+    navLabel: text(40),
+    ...intro,
+    items: z.array(z.object({ id, title: reqText(80), body: text(200) })).max(4),
   }),
   showcase: z.object({
     eyebrow: text(60),

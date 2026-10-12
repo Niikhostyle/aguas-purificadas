@@ -54,3 +54,6 @@ AGENTS.md
 # uploaded product images (seed copies may be committed under brand/)
 public/uploads/**
 !public/uploads/.gitkeep
+
+# landing CMS backups (scripts/landing-apply-concise.ts)
+landing-backup-*.json
