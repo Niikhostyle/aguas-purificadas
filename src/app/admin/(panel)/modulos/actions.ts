@@ -52,7 +52,6 @@ export async function updateModulesAction(formData: FormData) {
       };
     });
 
-  const descuentosJson = String(formData.get("descuentosJson") || "").trim();
   const planesJson = String(formData.get("planesJson") || "").trim();
   const kitsJson = String(formData.get("kitsJson") || "").trim();
   const redesJson = String(formData.get("redesJson") || "").trim();
@@ -69,7 +68,6 @@ export async function updateModulesAction(formData: FormData) {
 
   const modulesContent: ModulesContent = {
     regions,
-    descuentos: safeParse(descuentosJson, prev.descuentos),
     planes: safeParse(planesJson, prev.planes),
     kits: safeParse(kitsJson, prev.kits),
     redes: safeParse(redesJson, prev.redes),

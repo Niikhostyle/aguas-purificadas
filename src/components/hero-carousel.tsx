@@ -73,7 +73,7 @@ export function HeroCarousel({
         return (
           <div
             key={`${slide.image}-${i}`}
-            className={`absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-out ${
+            className={`absolute inset-0 overflow-hidden bg-[linear-gradient(120deg,var(--brand-deep,#12326e)_0%,var(--brand,#00b1e2)_100%)] transition-opacity duration-1000 ease-out ${
               active
                 ? "z-[1] opacity-100"
                 : "z-0 pointer-events-none opacity-0"

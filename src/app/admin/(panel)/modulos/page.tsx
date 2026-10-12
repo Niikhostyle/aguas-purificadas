@@ -47,7 +47,7 @@ export default async function ModulesAdminPage() {
         <ConfirmSubmitButton
           tone="warning"
           confirmTitle="¿Cargar contenido demo?"
-          confirmText="Se reemplazan los textos de Hogar/Empresa, descuentos, planes, kits y certificaciones por el contenido de ejemplo."
+          confirmText="Se reemplazan los textos de Hogar/Empresa, planes, kits y certificaciones por el contenido de ejemplo. Los descuentos se configuran en «Descuentos»."
           confirmLabel="Cargar demo"
           className={adminButton({ variant: "secondary", size: "sm" })}
         >
@@ -199,7 +199,6 @@ export default async function ModulesAdminPage() {
 
         {(
           [
-            ["descuentosJson", "Descuentos (JSON)", content.descuentos],
             ["planesJson", "Planes (JSON)", content.planes],
             ["kitsJson", "Kits (JSON)", content.kits],
             ["redesJson", "Redes embeds (JSON)", content.redes],

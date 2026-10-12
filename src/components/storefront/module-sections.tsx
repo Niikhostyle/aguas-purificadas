@@ -10,7 +10,7 @@ import type {
   SocialEmbed,
 } from "@/lib/modules";
 import { forAudience } from "@/lib/modules";
-import { OffersCarousel } from "@/components/storefront/offers-carousel";
+import { OffersCarousel, type PromoCard } from "@/components/storefront/offers-carousel";
 import { Reveal } from "@/components/storefront/reveal";
 
 function youtubeEmbed(url: string): string | null {
@@ -66,18 +66,15 @@ export function AudienceHeroBand({
   );
 }
 
+/** Promo cards for active discounts where the admin added banner text or an image. */
 export function DescuentosSection({
   flags,
-  content,
-  audience,
+  offers,
 }: {
   flags: ModuleFlags;
-  content: ModulesContent;
-  audience: Audience;
+  offers: PromoCard[];
 }) {
-  if (!flags.descuentos) return null;
-  const offers = forAudience(content.descuentos, audience);
-  if (!offers.length) return null;
+  if (!flags.descuentos || !offers.length) return null;
   return (
     <Reveal>
       <section id="descuentos" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
@@ -85,7 +82,7 @@ export function DescuentosSection({
           Descuentos
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
-          Ofertas activas para {audience === "empresa" ? "empresas" : "hogares"}.
+          Ofertas vigentes en la tienda.
         </p>
         <div className="mt-8">
           <OffersCarousel offers={offers} />

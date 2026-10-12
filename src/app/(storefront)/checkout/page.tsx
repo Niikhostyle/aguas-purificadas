@@ -186,6 +186,8 @@ export default async function CheckoutPage({
             </ul>
             <CheckoutZoneTotal
               subtotalClp={cart.subtotalClp}
+              discountClp={cart.discountClp}
+              couponCode={cart.coupon?.code}
               zones={zones.map((z) => ({ id: z.id, costClp: z.costClp }))}
             />
           </aside>

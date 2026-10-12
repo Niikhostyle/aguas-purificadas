@@ -87,7 +87,7 @@ export function BannerSlidesEditor({
         </h2>
         <p className="mt-1 text-sm text-[#5a6578]">
           Una imagen por slide. Podés subir JPG/PNG/WEBP (máx. 5 MB). Si no hay
-          slides, la tienda usa banners por defecto.
+          slides, la tienda muestra una portada con el texto y los colores de tu marca.
         </p>
       </div>
 

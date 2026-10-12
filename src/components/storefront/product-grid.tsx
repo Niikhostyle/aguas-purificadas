@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, Droplets, MessageCircle, PackageOpen } from "lucide-react";
 import type { Product } from "@prisma/client";
-import { formatClp } from "@/lib/utils";
+import { DiscountRibbon, PriceTag } from "@/components/storefront/price-tag";
+import type { ProductPrice } from "@/lib/discounts";
 
 export function ProductGrid({
   products,
+  prices,
   whatsappHref,
 }: {
   products: Product[];
+  /** Prices after automatic discounts, by product id. */
+  prices?: Record<string, ProductPrice>;
   /** Shown as the call to action while the catalog is empty. */
   whatsappHref?: string | null;
 }) {
@@ -51,6 +55,7 @@ export function ProductGrid({
         >
           <Link href={`/productos/${product.slug}`} className="flex flex-1 flex-col focus-visible:outline-offset-[-2px]">
             <div className="relative m-2 mb-0 aspect-square overflow-hidden rounded-[calc(var(--radius)*1.4)] bg-[radial-gradient(120%_90%_at_50%_15%,#fff_0%,var(--mist)_100%)]">
+              <DiscountRibbon price={prices?.[product.id]} />
               {product.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -69,8 +74,8 @@ export function ProductGrid({
               <h3 className="rc-display text-xl uppercase leading-tight text-[var(--brand-deep)]">
                 {product.name}
               </h3>
-              <p className="mx-auto mt-2 inline-flex rounded-full bg-[color-mix(in_srgb,var(--brand)_10%,#fff)] px-3 py-0.5 text-lg font-bold text-[var(--brand)]">
-                {formatClp(product.priceClp)}
+              <p className="mt-2">
+                <PriceTag priceClp={product.priceClp} price={prices?.[product.id]} />
               </p>
               {product.description ? (
                 <p className="mt-3 line-clamp-3 text-left text-xs leading-relaxed text-[#5a6578]">

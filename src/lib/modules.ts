@@ -21,16 +21,6 @@ export type RegionOption = {
   zone?: string;
 };
 
-export type OfferItem = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  badge?: string;
-  imageUrl?: string;
-  href?: string;
-  audience?: Audience | "ambos";
-};
-
 export type PlanItem = {
   id: string;
   name: string;
@@ -77,7 +67,6 @@ export type AudienceCopy = {
 
 export type ModulesContent = {
   regions: RegionOption[];
-  descuentos: OfferItem[];
   planes: PlanItem[];
   kits: KitItem[];
   redes: SocialEmbed[];
@@ -138,7 +127,6 @@ function audienceOf(v: unknown): Audience | "ambos" | undefined {
 export function parseModulesContent(raw: unknown): ModulesContent {
   const empty: ModulesContent = {
     regions: [],
-    descuentos: [],
     planes: [],
     kits: [],
     redes: [],
@@ -158,25 +146,6 @@ export function parseModulesContent(raw: unknown): ModulesContent {
         id: str(r.id) || `r-${regions.length + 1}`,
         name,
         zone: str(r.zone),
-      });
-    }
-  }
-
-  const descuentos: OfferItem[] = [];
-  if (Array.isArray(o.descuentos)) {
-    for (const item of o.descuentos) {
-      if (!item || typeof item !== "object") continue;
-      const r = item as Record<string, unknown>;
-      const title = str(r.title);
-      if (!title) continue;
-      descuentos.push({
-        id: str(r.id) || `d-${descuentos.length + 1}`,
-        title,
-        subtitle: str(r.subtitle),
-        badge: str(r.badge),
-        imageUrl: str(r.imageUrl),
-        href: str(r.href),
-        audience: audienceOf(r.audience),
       });
     }
   }
@@ -272,7 +241,6 @@ export function parseModulesContent(raw: unknown): ModulesContent {
 
   return {
     regions,
-    descuentos,
     planes,
     kits,
     redes,
@@ -291,35 +259,6 @@ export function defaultDemoModulesContent(): ModulesContent {
       { id: "maule", name: "Talca / Curicó", zone: "Maule" },
       { id: "biobio", name: "Concepción", zone: "Biobío" },
       { id: "araucania", name: "Temuco", zone: "La Araucanía" },
-    ],
-    descuentos: [
-      {
-        id: "d1",
-        title: "Pack familiar 4 bidones",
-        subtitle: "Ahorrá en tu primera compra del mes",
-        badge: "-15%",
-        imageUrl: "/brand/rio-claro/destacado-02.jpg",
-        href: "/productos",
-        audience: "hogar",
-      },
-      {
-        id: "d2",
-        title: "Oficina 8 bidones",
-        subtitle: "Descuento por volumen semanal",
-        badge: "-20%",
-        imageUrl: "/brand/rio-claro/destacado-03.jpg",
-        href: "/productos",
-        audience: "empresa",
-      },
-      {
-        id: "d3",
-        title: "Dispensador + 2 bidones",
-        subtitle: "Kit de bienvenida con envío incluido en zonas seleccionadas",
-        badge: "Combo",
-        imageUrl: "/brand/rio-claro/destacado-01.jpg",
-        href: "/productos",
-        audience: "ambos",
-      },
     ],
     planes: [
       {
@@ -429,8 +368,8 @@ export function defaultDemoModulesContent(): ModulesContent {
     hogar: {
       headline: "Agua pura para tu hogar",
       body: "Bidones, dispensadores y planes pensados para familias. Pedí online y recibí en tu comuna.",
-      ctaLabel: "Ver ofertas hogar",
-      ctaHref: "/#descuentos",
+      ctaLabel: "Ver productos",
+      ctaHref: "/#productos",
     },
     empresa: {
       headline: "Soluciones de agua para tu empresa",

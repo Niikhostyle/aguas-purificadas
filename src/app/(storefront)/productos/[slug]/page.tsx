@@ -3,9 +3,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Droplets, Phone } from "lucide-react";
 import { AddToCartForm } from "@/components/storefront/add-to-cart-form";
+import { PriceTag } from "@/components/storefront/price-tag";
 import { prisma } from "@/lib/db";
+import { getLiveDiscounts, priceProduct } from "@/lib/discounts";
 import { requireTenant } from "@/lib/tenant";
-import { formatClp } from "@/lib/utils";
 import { tenantWhatsappHref } from "@/lib/whatsapp";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -66,8 +67,12 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </div>
         <div className="flex flex-col justify-center sf-rise-stagger">
-          <p className="w-fit rounded-full bg-[color-mix(in_srgb,var(--brand)_10%,#fff)] px-4 py-1 text-3xl font-bold text-[var(--brand)] ring-1 ring-[color-mix(in_srgb,var(--brand)_20%,transparent)]">
-            {formatClp(product.priceClp)}
+          <p>
+            <PriceTag
+              size="lg"
+              priceClp={product.priceClp}
+              price={priceProduct(product, await getLiveDiscounts(tenant.id))}
+            />
           </p>
           {product.description ? (
             <div className="mt-6 space-y-3 text-[15px] leading-relaxed text-[#5a6578] whitespace-pre-line">

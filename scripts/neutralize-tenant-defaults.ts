@@ -38,7 +38,6 @@ function templateText(v: string | null): boolean {
 function contentSummary(c: ModulesContent) {
   return {
     regions: c.regions.map((r) => r.name),
-    descuentos: c.descuentos.length,
     planes: c.planes.length,
     kits: c.kits.length,
     redes: c.redes.length,

@@ -19,11 +19,8 @@ import { Reveal } from "@/components/storefront/reveal";
 import { HeroCarousel, type HeroSlide } from "@/components/hero-carousel";
 import { getAdminSession } from "@/lib/auth";
 import { STOREFRONT_PRIMARY, STOREFRONT_SECONDARY } from "@/lib/branding";
-import {
-  defaultStorefrontSlides,
-  parseHeroSlides,
-  tenantSlidesToCarousel,
-} from "@/lib/hero-slides";
+import { getLiveDiscounts, priceProducts, promoCards } from "@/lib/discounts";
+import { parseHeroSlides, tenantSlidesToCarousel } from "@/lib/hero-slides";
 import { DEFAULT_MODULE_FLAGS, parseModuleFlags, type Audience } from "@/lib/modules";
 import { parseAppearance } from "@/lib/appearance";
 import {
@@ -96,79 +93,60 @@ export default async function HomePage({
   const setupSteps = showcase ? null : await setupStepsFor(tenant, products.length);
 
   const configured = parseHeroSlides(tenant.heroSlides).filter(
-    (s) => showcase || !isTemplateAsset(s.imageUrl),
+    (s) => !isTemplateAsset(s.imageUrl),
   );
+  const discounts = await getLiveDiscounts(tenant.id);
 
-  let hero: React.ReactNode;
-  if (showcase) {
-    const headline =
-      tenant.heroHeadline ||
-      (audience === "empresa"
+  const title =
+    tenant.heroHeadline ||
+    (showcase
+      ? audience === "empresa"
         ? "Agua purificada para tu empresa"
-        : "Agua purificada para tu hogar");
-    const body =
-      tenant.heroBody ||
-      tenant.about ||
-      "Purificación multietapas, libre de sodio. Pedí online, elegí tu ciudad y recibí en ruta.";
-    const slides =
-      configured.length > 0
-        ? tenantSlidesToCarousel(configured, brandName).map((s) => ({
-            ...s,
-            title: s.title || headline,
-            body: s.body || body,
-          }))
-        : defaultStorefrontSlides({
-            brandName,
-            headline,
-            body,
-            legacyHeroImage: tenant.heroImageUrl,
-          });
-    hero = <HeroCarousel slides={slides} />;
-  } else {
-    const title = tenant.heroHeadline || "Agua purificada a domicilio";
-    const body =
-      tenant.heroBody ||
-      tenant.tagline ||
-      `Pide en línea bidones de agua purificada y recíbelos en tu hogar u oficina${
-        tenant.city ? ` en ${tenant.city}` : ""
-      }.`;
-    const legacyImage =
-      tenant.heroImageUrl && !isTemplateAsset(tenant.heroImageUrl) ? tenant.heroImageUrl : null;
-    const slides: HeroSlide[] =
-      configured.length > 0
-        ? tenantSlidesToCarousel(configured, brandName).map((s) => ({
-            ...s,
-            title: s.title || title,
-            body: s.body || body,
-          }))
-        : legacyImage
-          ? [
-              {
-                image: legacyImage,
-                eyebrow: brandName,
-                title,
-                body,
-                primaryHref: "/productos",
-                primaryLabel: "Ver productos",
-              },
-            ]
-          : [];
-    hero = slides.length ? (
-      <HeroCarousel slides={slides} />
-    ) : (
-      <NeutralHero
-        brandName={brandName}
-        title={title}
-        body={body}
-        whatsappHref={whatsappContact}
-        highlights={[
-          tenant.city ? `Despacho en ${tenant.city}` : "Despacho a domicilio",
-          "Hogar y oficina",
-          ...(whatsappContact ? ["Pedidos por WhatsApp"] : []),
-        ]}
-      />
-    );
-  }
+        : "Agua purificada para tu hogar"
+      : "Agua purificada a domicilio");
+  const body =
+    tenant.heroBody ||
+    (showcase ? tenant.about : tenant.tagline) ||
+    `Pide en línea bidones de agua purificada y recíbelos en tu hogar u oficina${
+      tenant.city ? ` en ${tenant.city}` : ""
+    }.`;
+  const legacyImage =
+    tenant.heroImageUrl && !isTemplateAsset(tenant.heroImageUrl) ? tenant.heroImageUrl : null;
+  // Only banners the tenant uploaded itself; without them the hero is a text + brand-color cover.
+  const slides: HeroSlide[] =
+    configured.length > 0
+      ? tenantSlidesToCarousel(configured, brandName).map((s) => ({
+          ...s,
+          title: s.title || title,
+          body: s.body || body,
+        }))
+      : legacyImage
+        ? [
+            {
+              image: legacyImage,
+              eyebrow: brandName,
+              title,
+              body,
+              primaryHref: "/productos",
+              primaryLabel: "Ver productos",
+            },
+          ]
+        : [];
+  const hero = slides.length ? (
+    <HeroCarousel slides={slides} />
+  ) : (
+    <NeutralHero
+      brandName={brandName}
+      title={title}
+      body={body}
+      whatsappHref={whatsappContact}
+      highlights={[
+        tenant.city ? `Despacho en ${tenant.city}` : "Despacho a domicilio",
+        "Hogar y oficina",
+        ...(whatsappContact ? ["Pedidos por WhatsApp"] : []),
+      ]}
+    />
+  );
 
   const about =
     tenant.about ||
@@ -188,7 +166,7 @@ export default async function HomePage({
         <AudienceHeroBand audience={audience} content={content} />
       ) : null}
 
-      <DescuentosSection flags={flags} content={content} audience={audience} />
+      <DescuentosSection flags={flags} offers={promoCards(discounts)} />
 
       <Reveal>
         <section id="productos" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
@@ -203,7 +181,11 @@ export default async function HomePage({
             </p>
           ) : null}
           <div className="mt-10">
-            <ProductGrid products={products} whatsappHref={whatsappContact} />
+            <ProductGrid
+              products={products}
+              prices={priceProducts(products, discounts)}
+              whatsappHref={whatsappContact}
+            />
           </div>
         </section>
       </Reveal>

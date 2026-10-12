@@ -72,6 +72,7 @@ model Tenant {
   deliveryCustomers DeliveryCustomer[]
   orderEvents       OrderEvent[]
   bottleMovements   BottleMovement[]
+  discounts         Discount[]
 
   @@map("tenants")
 }
@@ -235,6 +236,12 @@ model Order {
   /// nominatim | cliente | manual | seed | no_encontrado
   geoSource         String?
   geocodedAt        DateTime?
+  /// Descuento por cupón; totalClp = subtotalClp - discountClp + shippingClp.
+  /// Los descuentos automáticos ya vienen rebajados en unitPriceClp de cada ítem.
+  discountClp      Int      @default(0)
+  /// Snapshot de los descuentos aplicados (automáticos y cupón), ej. "Verano -10% · Cupón BIENVENIDA -$1.000"
+  discountLabel    String?
+  couponCode       String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -285,6 +292,38 @@ model OrderItem {
 
   @@index([orderId])
   @@map("order_items")
+}
+
+/// Descuento de la tienda. Sin cupón = automático (rebaja el precio unitario de los productos);
+/// con cupón = el cliente lo ingresa en el carrito y rebaja el subtotal elegible del pedido.
+model Discount {
+  id          String    @id @default(cuid())
+  tenantId    String
+  name        String
+  /// percent | fixed
+  type        String    @default("percent")
+  /// percent: 1–100 · fixed: pesos (por unidad si es automático, por pedido si es cupón)
+  value       Int
+  /// all | products
+  scope       String    @default("all")
+  productIds  String[]  @default([])
+  /// Guardado en mayúsculas; null = descuento automático
+  couponCode  String?
+  active      Boolean   @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  /// Texto opcional del banner de ofertas en la tienda
+  bannerText  String?
+  /// Imagen opcional del banner de ofertas
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, couponCode])
+  @@index([tenantId, active])
+  @@map("discounts")
 }
 
 /// Apex SaaS landing CMS (mibidon.cl). One row per landing block; content validated by src/lib/landing/schema.ts

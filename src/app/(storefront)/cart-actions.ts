@@ -13,6 +13,7 @@ import {
   writeCartCookie,
 } from "@/lib/cart";
 import { prisma } from "@/lib/db";
+import { findLiveCoupon, normalizeCouponCode } from "@/lib/discounts";
 import { ensureDeliveryCustomer } from "@/lib/dispatch-server";
 import { locateOrder } from "@/lib/geocode";
 import { startPaymentForOrder } from "@/lib/payments";
@@ -76,6 +77,32 @@ export async function removeFromCartAction(formData: FormData) {
   redirect("/carrito");
 }
 
+export async function applyCouponAction(formData: FormData) {
+  const tenant = await requireTenant();
+  const code = normalizeCouponCode(formData.get("coupon"));
+  const existing = await readCartCookie();
+  if (!existing || existing.tenantId !== tenant.id || existing.items.length === 0) {
+    redirect("/carrito");
+  }
+  if (!code) redirect("/carrito?cupon=vacio");
+  const coupon = await findLiveCoupon(tenant.id, code);
+  if (!coupon) redirect(`/carrito?cupon=invalido&codigo=${encodeURIComponent(code)}`);
+
+  await writeCartCookie({ ...existing, coupon: coupon.couponCode! });
+  revalidateStorefront();
+  redirect("/carrito?cupon=ok");
+}
+
+export async function removeCouponAction() {
+  const tenant = await requireTenant();
+  const existing = await readCartCookie();
+  if (existing && existing.tenantId === tenant.id) {
+    await writeCartCookie({ ...existing, coupon: undefined });
+  }
+  revalidateStorefront();
+  redirect("/carrito");
+}
+
 const checkoutSchema = z.object({
   customerName: z.string().trim().min(2).max(120),
   customerPhone: z.string().trim().min(8).max(40),
@@ -119,7 +146,8 @@ export async function placeOrderAction(formData: FormData) {
 
   const shippingClp = zone.costClp;
   const subtotalClp = cart.subtotalClp;
-  const totalClp = subtotalClp + shippingClp;
+  const discountClp = cart.discountClp;
+  const totalClp = cart.totalClp + shippingClp;
 
   const deliveryCustomer = await ensureDeliveryCustomer(prisma, tenant.id, {
     name: parsed.data.customerName,
@@ -142,6 +170,9 @@ export async function placeOrderAction(formData: FormData) {
       deliveryZoneName: zone.name,
       subtotalClp,
       shippingClp,
+      discountClp,
+      discountLabel: cart.discountLabel,
+      couponCode: cart.coupon && discountClp > 0 ? cart.coupon.code : null,
       totalClp,
       items: {
         create: cart.items.map((item) => ({

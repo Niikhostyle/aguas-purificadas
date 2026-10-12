@@ -43,50 +43,6 @@ function strOpt(v: unknown): string | undefined {
   return t || undefined;
 }
 
-/** Defaults when tenant has no configured carousel slides. */
-export function defaultStorefrontSlides(opts: {
-  brandName: string;
-  headline: string;
-  body: string;
-  legacyHeroImage?: string | null;
-}): HeroSlide[] {
-  const img =
-    opts.legacyHeroImage &&
-    !opts.legacyHeroImage.includes("hero.jpg") &&
-    !opts.legacyHeroImage.includes("hero-2.jpg")
-      ? opts.legacyHeroImage
-      : "/brand/rio-claro/destacado-01.jpg";
-
-  return [
-    {
-      image: img,
-      eyebrow: opts.brandName,
-      title: opts.headline,
-      body: opts.body,
-      primaryHref: "/productos",
-      primaryLabel: "Nuestros productos",
-      secondaryHref: "/#contacto",
-      secondaryLabel: "Contacto",
-    },
-    {
-      image: "/brand/rio-claro/destacado-02.jpg",
-      eyebrow: opts.brandName,
-      title: "Agua purificada a tu puerta",
-      body: "Pedí online, elegí zona de despacho y pagá con WebPay en minutos.",
-      primaryHref: "/productos",
-      primaryLabel: "Ver catálogo",
-    },
-    {
-      image: "/brand/rio-claro/destacado-03.jpg",
-      eyebrow: opts.brandName,
-      title: "Bidones, dispensadores y más",
-      body: "Todo lo que necesitás para hogar u oficina, con tu misma calidad de siempre.",
-      primaryHref: "/productos",
-      primaryLabel: "Ver productos",
-    },
-  ];
-}
-
 export function tenantSlidesToCarousel(
   slides: TenantHeroSlide[],
   brandName: string,

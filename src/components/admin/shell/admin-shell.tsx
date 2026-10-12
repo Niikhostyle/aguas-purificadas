@@ -38,6 +38,7 @@ import {
   Search,
   Smartphone,
   Store,
+  TicketPercent,
   Truck,
   X,
   type LucideIcon,
@@ -64,6 +65,7 @@ const ICONS: Record<AdminNavIcon, LucideIcon> = {
   reminders: BellRing,
   containers: Recycle,
   products: Package,
+  discounts: TicketPercent,
   brand: Palette,
   appearance: Paintbrush,
   modules: Blocks,
@@ -260,6 +262,7 @@ function buildActions(variant: Props["variant"], hidden: Set<string>, siteHref: 
         ]
       : [
           { id: "new-product", label: "Nuevo producto", icon: Plus, href: "/admin/productos/nuevo", keywords: "crear agregar catalogo" },
+          { id: "new-discount", label: "Nuevo descuento o cupón", icon: TicketPercent, href: "/admin/descuentos/nuevo", keywords: "promocion oferta rebaja cupon porcentaje" },
           { id: "pending-pay", label: "Pedidos con pago pendiente", icon: ClipboardList, href: "/admin/pedidos?pago=pending", keywords: "webpay" },
           { id: "unassigned", label: "Pedidos sin ruta asignada", icon: Truck, href: "/admin/despacho?fecha=todas&estado=por_asignar", requires: "/admin/despacho", keywords: "asignar programar" },
           { id: "map", label: "Mapa de entregas", icon: MapIcon, href: "/admin/despacho/mapa", requires: "/admin/despacho", keywords: "ubicar pines rutas choferes" },

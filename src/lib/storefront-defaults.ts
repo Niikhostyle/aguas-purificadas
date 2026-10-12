@@ -27,12 +27,7 @@ export function storefrontModulesContent(
   isDemo: boolean,
 ): ModulesContent {
   const content = parseModulesContent(tenant.modulesContent);
-  if (
-    isDemo &&
-    !content.descuentos.length &&
-    !content.planes.length &&
-    !content.kits.length
-  ) {
+  if (isDemo && !content.planes.length && !content.kits.length) {
     return defaultDemoModulesContent();
   }
   return content;
@@ -41,7 +36,6 @@ export function storefrontModulesContent(
 export function emptyModulesContent(): ModulesContent {
   return {
     regions: [],
-    descuentos: [],
     planes: [],
     kits: [],
     redes: [],
@@ -53,7 +47,7 @@ export function emptyModulesContent(): ModulesContent {
 export function hasAudienceContent(content: ModulesContent): boolean {
   if (content.hogar?.headline || content.hogar?.body) return true;
   if (content.empresa?.headline || content.empresa?.body) return true;
-  return [...content.descuentos, ...content.planes, ...content.kits].some(
+  return [...content.planes, ...content.kits].some(
     (i) => i.audience === "hogar" || i.audience === "empresa",
   );
 }
@@ -155,7 +149,6 @@ export function stripTemplateModulesContent(content: ModulesContent): ModulesCon
     !!a && !!b && a.headline === b.headline && a.body === b.body;
   return {
     regions: stripMatching(content.regions, demo.regions, (r) => r.name),
-    descuentos: stripMatching(content.descuentos, demo.descuentos, (d) => d.title),
     planes: stripMatching(content.planes, demo.planes, (p) => p.name),
     kits: stripMatching(content.kits, demo.kits, (k) => k.title),
     redes: stripMatching(content.redes, demo.redes, (s) => s.url),

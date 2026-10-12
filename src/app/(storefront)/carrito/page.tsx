@@ -6,16 +6,23 @@ import {
   updateCartQuantityAction,
 } from "@/app/(storefront)/cart-actions";
 import { SubmitButton } from "@/components/storefront/submit-button";
+import { CouponForm } from "@/components/storefront/coupon-form";
 import { Input } from "@/components/ui/input";
 import { getResolvedCart } from "@/lib/cart";
+import { hasLiveCoupons } from "@/lib/discounts";
 import { requireTenant } from "@/lib/tenant";
 import { formatClp } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Carrito" };
 
-export default async function CartPage() {
+export default async function CartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cupon?: string; codigo?: string }>;
+}) {
   const tenant = await requireTenant();
   const cart = await getResolvedCart(tenant.id);
+  const sp = await searchParams;
 
   return (
     <div className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_420px)]">
@@ -76,7 +83,17 @@ export default async function CartPage() {
                         {item.name}
                       </Link>
                       <p className="mt-0.5 text-sm text-[#5a6578]">
-                        {formatClp(item.unitPriceClp)} c/u
+                        {item.discountBadge ? (
+                          <>
+                            <s className="mr-1.5 text-[#8a96a8]">{formatClp(item.listUnitPriceClp)}</s>
+                            {formatClp(item.unitPriceClp)} c/u
+                            <span className="ml-2 rounded-full bg-[var(--brand)] px-2 py-0.5 text-[11px] font-bold text-white">
+                              {item.discountBadge}
+                            </span>
+                          </>
+                        ) : (
+                          <>{formatClp(item.unitPriceClp)} c/u</>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -126,12 +143,33 @@ export default async function CartPage() {
               ))}
             </ul>
 
+            {cart.coupon || cart.invalidCoupon || sp.cupon || (await hasLiveCoupons(tenant.id)) ? (
+              <CouponForm
+                applied={cart.coupon}
+                invalidStored={cart.invalidCoupon}
+                status={sp.cupon}
+                attemptedCode={sp.codigo}
+              />
+            ) : null}
+
             <div className="sf-enter sf-card mt-6 flex flex-col gap-5 p-6 [animation-delay:200ms] sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm text-[#5a6578]">Subtotal productos</p>
-                <p className="rc-display text-4xl text-[var(--brand-deep)]">
-                  {formatClp(cart.subtotalClp)}
+                {cart.discountClp > 0 ? (
+                  <p className="text-sm text-[#5a6578]">
+                    Subtotal {formatClp(cart.subtotalClp)} · Cupón −{formatClp(cart.discountClp)}
+                  </p>
+                ) : null}
+                <p className="text-sm text-[#5a6578]">
+                  {cart.discountClp > 0 ? "Total productos" : "Subtotal productos"}
                 </p>
+                <p className="rc-display text-4xl text-[var(--brand-deep)]">
+                  {formatClp(cart.totalClp)}
+                </p>
+                {cart.savingsClp + cart.discountClp > 0 ? (
+                  <p className="mt-1 text-xs font-semibold text-emerald-700">
+                    Estás ahorrando {formatClp(cart.savingsClp + cart.discountClp)} con descuentos
+                  </p>
+                ) : null}
                 <p className="mt-1 text-xs text-[#5a6578]">
                   El costo de despacho se calcula al elegir la zona.
                 </p>

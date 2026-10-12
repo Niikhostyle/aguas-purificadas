@@ -124,7 +124,6 @@ async function main() {
         "Despacho a comunas seleccionadas. Elegí tu ciudad en el selector.",
       hoursBanner:
         "Horario: Lunes a Viernes 8:30–17:30 · Sábado 09:00–13:00",
-      heroImageUrl: "/brand/rio-claro/destacado-01.jpg",
       heroHeadline: "Agua purificada para tu hogar y tu empresa",
       heroBody:
         "Pedí online, personalizá módulos desde el admin y cobrá con WebPay.",

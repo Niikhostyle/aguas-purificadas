@@ -6,6 +6,7 @@ export type AdminNavIcon =
   | "reminders"
   | "containers"
   | "products"
+  | "discounts"
   | "brand"
   | "appearance"
   | "modules"
@@ -50,7 +51,10 @@ export const TENANT_NAV: AdminNavGroup[] = [
   },
   {
     label: "Catálogo",
-    items: [{ href: "/admin/productos", label: "Productos", icon: "products" }],
+    items: [
+      { href: "/admin/productos", label: "Productos", icon: "products" },
+      { href: "/admin/descuentos", label: "Descuentos", icon: "discounts" },
+    ],
   },
   {
     label: "Configuración",

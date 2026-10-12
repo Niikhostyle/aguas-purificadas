@@ -7,9 +7,14 @@ type ZoneOption = { id: string; costClp: number };
 
 export function CheckoutZoneTotal({
   subtotalClp,
+  discountClp = 0,
+  couponCode,
   zones,
 }: {
   subtotalClp: number;
+  /** Coupon amount; already validated server-side. */
+  discountClp?: number;
+  couponCode?: string | null;
   zones: ZoneOption[];
 }) {
   const [shippingClp, setShippingClp] = useState(zones[0]?.costClp ?? 0);
@@ -34,6 +39,12 @@ export function CheckoutZoneTotal({
         <span>Subtotal</span>
         <span>{formatClp(subtotalClp)}</span>
       </div>
+      {discountClp > 0 ? (
+        <div className="flex justify-between font-medium text-emerald-700">
+          <span>Descuento{couponCode ? ` (${couponCode})` : ""}</span>
+          <span>−{formatClp(discountClp)}</span>
+        </div>
+      ) : null}
       <div className="flex justify-between text-[#5a6578]">
         <span>Despacho</span>
         <span>
@@ -42,7 +53,7 @@ export function CheckoutZoneTotal({
       </div>
       <div className="mt-2 flex items-baseline justify-between border-t border-[var(--sf-line)] pt-3 text-base font-semibold text-[var(--brand-deep)]">
         <span>Total</span>
-        <span key={shippingClp} className="sf-pop rc-display inline-block text-3xl">{formatClp(subtotalClp + shippingClp)}</span>
+        <span key={shippingClp} className="sf-pop rc-display inline-block text-3xl">{formatClp(subtotalClp - discountClp + shippingClp)}</span>
       </div>
     </div>
   );

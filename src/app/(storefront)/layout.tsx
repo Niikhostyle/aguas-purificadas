@@ -7,6 +7,7 @@ import { WhatsappFloat } from "@/components/storefront/whatsapp-float";
 import { baseColors, storefrontThemeVars, tenantAppearance } from "@/lib/appearance";
 import { getResolvedCart } from "@/lib/cart";
 import { getCustomerSession } from "@/lib/customer-auth";
+import { getLiveDiscounts, promoCards } from "@/lib/discounts";
 import { parseModuleFlags } from "@/lib/modules";
 import {
   coverageCopy,
@@ -64,7 +65,7 @@ export default async function StorefrontLayout({
           cartCount={cart.itemCount}
           flags={flags}
           sections={{
-            descuentos: content.descuentos.length > 0,
+            descuentos: promoCards(await getLiveDiscounts(tenant.id)).length > 0,
             planes: content.planes.length > 0,
             kits: content.kits.length > 0,
           }}

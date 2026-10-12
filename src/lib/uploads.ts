@@ -95,6 +95,13 @@ export async function saveBannerImage(
   return saveImageFile(tenantSlug, file, "banners");
 }
 
+export async function saveDiscountImage(
+  tenantSlug: string,
+  file: File,
+): Promise<string> {
+  return saveImageFile(tenantSlug, file, "descuentos");
+}
+
 export async function saveLogoImage(
   tenantSlug: string,
   file: File,

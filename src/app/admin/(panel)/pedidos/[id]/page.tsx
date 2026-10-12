@@ -111,6 +111,15 @@ export default async function AdminOrderDetailPage({ params, searchParams }: Pro
                 <span>Subtotal</span>
                 <span>{formatClp(order.subtotalClp)}</span>
               </div>
+              {order.discountClp > 0 ? (
+                <div className="flex justify-between text-emerald-700">
+                  <span>Descuento{order.couponCode ? ` (cupón ${order.couponCode})` : ""}</span>
+                  <span>−{formatClp(order.discountClp)}</span>
+                </div>
+              ) : null}
+              {order.discountLabel ? (
+                <p className="text-xs text-[#5a6578]">Descuentos aplicados: {order.discountLabel}</p>
+              ) : null}
               <div className="flex justify-between text-[#5a6578]">
                 <span>Despacho</span>
                 <span>{order.shippingClp === 0 ? "Gratis" : formatClp(order.shippingClp)}</span>
