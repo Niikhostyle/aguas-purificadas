@@ -53,7 +53,8 @@ function verify(token: string): SessionPayload | null {
   }
 }
 
-async function setAdminSessionCookie(admin: {
+/** Call only from a Route Handler or Server Action (sets cookies). */
+export async function setAdminSessionCookie(admin: {
   id: string;
   tenantId: string;
   email: string;
