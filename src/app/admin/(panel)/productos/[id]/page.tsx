@@ -1,24 +1,20 @@
 import { notFound, redirect } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { updateProductAction } from "../../../actions";
-import { PageHeader, Panel } from "@/components/admin/ui";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { deleteProductAction, updateProductAction } from "../../../actions";
+import { ConfirmSubmitButton, PageHeader, Panel, adminButton } from "@/components/admin/ui";
+import { ProductForm } from "@/components/admin/product-form";
 
 type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
 };
 
-export default async function EditProductPage({ params, searchParams }: Props) {
+export default async function EditProductPage({ params }: Props) {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin/login");
 
   const { id } = await params;
-  const { error } = await searchParams;
   const product = await prisma.product.findFirst({
     where: { id, tenantId: admin.tenantId },
   });
@@ -28,77 +24,36 @@ export default async function EditProductPage({ params, searchParams }: Props) {
     <>
       <PageHeader
         title="Editar producto"
+        description={product.name}
         breadcrumbs={[{ label: "Catálogo" }, { label: "Productos", href: "/admin/productos" }, { label: "Editar" }]}
+        actions={
+          <form action={deleteProductAction}>
+            <input type="hidden" name="id" value={product.id} />
+            <ConfirmSubmitButton
+              confirmTitle={`¿Eliminar «${product.name}»?`}
+              confirmText="El producto desaparece de la tienda. Los pedidos anteriores conservan su detalle."
+              confirmLabel="Sí, eliminar"
+              className={adminButton({ variant: "danger" })}
+            >
+              <Trash2 aria-hidden />
+              Eliminar
+            </ConfirmSubmitButton>
+          </form>
+        }
       />
-      <Panel className="max-w-2xl">
-      <form
-        action={updateProductAction}
-        className="space-y-4"
-        encType="multipart/form-data"
-      >
-        <input type="hidden" name="id" value={product.id} />
-        {product.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.imageUrl}
-            alt=""
-            className="h-32 w-32 object-contain border border-[#d5e3ec] bg-[#f7fbfd]"
-          />
-        ) : null}
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre</Label>
-          <Input id="name" name="name" required defaultValue={product.name} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug</Label>
-          <Input id="slug" name="slug" defaultValue={product.slug} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="priceClp">Precio CLP</Label>
-          <Input
-            id="priceClp"
-            name="priceClp"
-            type="number"
-            min={0}
-            step={1}
-            required
-            defaultValue={product.priceClp}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="image">Nueva imagen (opcional)</Label>
-          <Input
-            id="image"
-            name="image"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Descripción</Label>
-          <Textarea
-            id="description"
-            name="description"
-            rows={4}
-            defaultValue={product.description ?? ""}
-          />
-        </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="active"
-            defaultChecked={product.active}
-            className="size-4 accent-[var(--brand)]"
-          />
-          Publicado en la tienda
-        </label>
-        {error ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        ) : null}
-        <Button type="submit">Guardar cambios</Button>
-      </form>
+      <Panel className="max-w-3xl">
+        <ProductForm
+          action={updateProductAction}
+          product={{
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            priceClp: product.priceClp,
+            description: product.description,
+            imageUrl: product.imageUrl,
+            active: product.active,
+          }}
+        />
       </Panel>
     </>
   );
