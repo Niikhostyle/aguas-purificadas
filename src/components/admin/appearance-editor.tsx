@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import { ImageIcon, RotateCcw, Save, Undo2 } from "lucide-react";
 import {
@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { confirmAction } from "@/lib/alerts";
+import { confirmAction, errorDialog } from "@/lib/alerts";
 import {
   DEFAULT_LOGIN_TITLE,
   DEFAULT_PANEL_SUBTITLE,
@@ -39,7 +39,18 @@ type Initial = {
 };
 
 type ImgKey = ImageKey | "logoUrl";
-type ImgState = { saved: string | null; preview: string | null; cleared: boolean };
+type ImgState = {
+  saved: string | null;
+  /** Local object URL shown while (and after) the file uploads. */
+  preview: string | null;
+  /** Server URL once the upload finished; this is what the save submits. */
+  uploaded: string | null;
+  cleared: boolean;
+  /** 0–100 while uploading, otherwise null. */
+  progress: number | null;
+};
+
+const UPLOAD_URL = "/api/admin/apariencia/upload";
 
 const CARD =
   "rounded-xl border border-[#dde7ee] bg-white shadow-[0_1px_2px_rgba(16,40,70,0.04)]";
@@ -71,8 +82,56 @@ const IMAGE_ACCEPT: Record<ImgKey, string> = {
   loginLogoUrl: "image/png,image/svg+xml,image/jpeg,image/webp",
 };
 
+/** Must match ASSET_RULES in src/lib/uploads.ts. */
+const IMAGE_MAX_MB: Record<ImgKey, number> = {
+  logoUrl: 2,
+  logoDarkUrl: 2,
+  faviconUrl: 1,
+  panelLogoUrl: 2,
+  loginBgUrl: 5,
+  loginLogoUrl: 2,
+};
+
 function isHex(v: string) {
   return HEX_RE.test(v.trim());
+}
+
+function checkFile(k: ImgKey, file: File): string | null {
+  const max = IMAGE_MAX_MB[k];
+  if (file.size > max * 1024 * 1024) {
+    const mb = (file.size / 1024 / 1024).toFixed(1).replace(".", ",");
+    return `"${file.name}" pesa ${mb} MB y el máximo para esta imagen es ${max} MB. Redúcela o comprímela e inténtalo de nuevo.`;
+  }
+  const accepted = IMAGE_ACCEPT[k].split(",");
+  const isIco = file.name.toLowerCase().endsWith(".ico") && accepted.includes(".ico");
+  if (!isIco && !accepted.includes(file.type)) {
+    return `"${file.name}" no tiene un formato permitido. ${IMAGE_HINTS[k]}`;
+  }
+  return null;
+}
+
+function uploadImage(field: ImgKey, file: File, onProgress: (pct: number) => void) {
+  const xhr = new XMLHttpRequest();
+  const promise = new Promise<string>((resolve, reject) => {
+    xhr.open("POST", UPLOAD_URL);
+    xhr.responseType = "json";
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.min(99, Math.round((e.loaded / e.total) * 100)));
+    };
+    xhr.onload = () => {
+      const body = xhr.response as { url?: string; error?: string } | null;
+      if (xhr.status >= 200 && xhr.status < 300 && body?.url) resolve(body.url);
+      else if (xhr.status === 413) reject(new Error("La imagen es demasiado grande para subirla. Usa una de menor tamaño."));
+      else reject(new Error(body?.error ?? "No pudimos subir la imagen. Inténtalo de nuevo."));
+    };
+    xhr.onerror = () => reject(new Error("Se perdió la conexión al subir la imagen. Revisa tu internet e inténtalo de nuevo."));
+    xhr.onabort = () => reject(new DOMException("aborted", "AbortError"));
+    const body = new FormData();
+    body.set("field", field);
+    body.set("file", file);
+    xhr.send(body);
+  });
+  return { promise, abort: () => xhr.abort() };
 }
 
 export function AppearanceEditor({
@@ -93,11 +152,70 @@ export function AppearanceEditor({
   });
   const [images, setImages] = useState<Record<ImgKey, ImgState>>(() => {
     const out = {} as Record<ImgKey, ImgState>;
-    out.logoUrl = { saved: initial.logoUrl, preview: null, cleared: false };
-    for (const k of IMAGE_KEYS) out[k] = { saved: initial.overrides[k] ?? null, preview: null, cleared: false };
+    const blank = { preview: null, uploaded: null, cleared: false, progress: null };
+    out.logoUrl = { ...blank, saved: initial.logoUrl };
+    for (const k of IMAGE_KEYS) out[k] = { ...blank, saved: initial.overrides[k] ?? null };
     return out;
   });
   const [dirty, setDirty] = useState(false);
+  const [saveState, formAction] = useActionState(saveAppearanceAction, { error: null, at: 0 });
+  const uploads = useRef<Partial<Record<ImgKey, () => void>>>({});
+  const blobs = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (saveState.error) {
+      void errorDialog({ title: "No se guardaron los cambios", text: `${saveState.error} Tus cambios siguen en pantalla.` });
+    }
+  }, [saveState]);
+
+  useEffect(() => {
+    const pending = uploads.current;
+    const urls = blobs.current;
+    return () => {
+      for (const abort of Object.values(pending)) abort?.();
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, []);
+
+  const uploading = Object.values(images).some((s) => s.progress !== null);
+
+  const patchImage = (k: ImgKey, preview: string, patch: Partial<ImgState>) =>
+    setImages((s) => (s[k].preview === preview ? { ...s, [k]: { ...s[k], ...patch } } : s));
+
+  const chooseFile = (k: ImgKey, file: File) => {
+    const problem = checkFile(k, file);
+    if (problem) {
+      void errorDialog({ title: "No pudimos usar esa imagen", text: problem });
+      return;
+    }
+    uploads.current[k]?.();
+    const preview = URL.createObjectURL(file);
+    blobs.current.add(preview);
+    touch();
+    setImages((s) => ({ ...s, [k]: { ...s[k], preview, uploaded: null, cleared: false, progress: 0 } }));
+
+    const { promise, abort } = uploadImage(k, file, (progress) => patchImage(k, preview, { progress }));
+    uploads.current[k] = abort;
+    promise.then(
+      (url) => patchImage(k, preview, { uploaded: url, progress: null }),
+      (e: unknown) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        patchImage(k, preview, { preview: null, uploaded: null, progress: null });
+        void errorDialog({
+          title: "No pudimos subir la imagen",
+          text: e instanceof Error ? e.message : "Inténtalo de nuevo.",
+        });
+      },
+    ).finally(() => {
+      if (uploads.current[k] === abort) delete uploads.current[k];
+    });
+  };
+
+  const clearImage = (k: ImgKey) => {
+    uploads.current[k]?.();
+    touch();
+    setImages((s) => ({ ...s, [k]: { ...s[k], preview: null, uploaded: null, cleared: true, progress: null } }));
+  };
 
   const base = useMemo(
     () => ({
@@ -156,16 +274,10 @@ export function AppearanceEditor({
       hint={IMAGE_HINTS[k]}
       accept={IMAGE_ACCEPT[k]}
       hasValue={Boolean(img(k))}
-      cleared={images[k].cleared}
+      state={images[k]}
       preview={preview}
-      onFile={(url) => {
-        touch();
-        setImages((s) => ({ ...s, [k]: { ...s[k], preview: url, cleared: false } }));
-      }}
-      onClear={() => {
-        touch();
-        setImages((s) => ({ ...s, [k]: { ...s[k], preview: null, cleared: true } }));
-      }}
+      onFile={(file) => chooseFile(k, file)}
+      onClear={() => clearImage(k)}
     />
   );
 
@@ -177,11 +289,13 @@ export function AppearanceEditor({
   const loginLogo = img("loginLogoUrl");
 
   return (
-    <form action={saveAppearanceAction} className="mt-4 space-y-8 pb-4">
+    <form action={formAction} className="mt-4 space-y-8 pb-4">
       <input type="hidden" name="appearanceJson" value={JSON.stringify(o)} />
-      {(Object.keys(images) as ImgKey[]).map((k) =>
-        images[k].cleared ? <input key={k} type="hidden" name={`clear_${k}`} value="1" /> : null,
-      )}
+      {(Object.keys(images) as ImgKey[]).map((k) => {
+        const s = images[k];
+        const value = s.uploaded ?? (s.cleared ? "" : (s.saved ?? ""));
+        return <input key={k} type="hidden" name={`img_${k}`} value={value} />;
+      })}
 
       <Section title="Identidad" description="Nombre, logos e ícono que ven tus clientes.">
         <Row
@@ -437,7 +551,7 @@ export function AppearanceEditor({
         </div>
       </Section>
 
-      <StickyBar dirty={dirty} />
+      <StickyBar dirty={dirty} uploading={uploading} />
     </form>
   );
 }
@@ -545,7 +659,7 @@ function ImageField({
   hint,
   accept,
   hasValue,
-  cleared,
+  state,
   preview,
   onFile,
   onClear,
@@ -555,16 +669,22 @@ function ImageField({
   hint: string;
   accept: string;
   hasValue: boolean;
-  cleared: boolean;
+  state: ImgState;
   preview: ReactNode;
-  onFile: (url: string) => void;
+  onFile: (file: File) => void;
   onClear: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const urlRef = useRef<string | null>(null);
-  useEffect(() => () => {
-    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-  }, []);
+  const status =
+    state.progress !== null
+      ? `Subiendo… ${state.progress}%`
+      : state.uploaded
+        ? "Imagen lista · se aplica al guardar"
+        : hasValue
+          ? "Imagen personalizada"
+          : state.cleared
+            ? ""
+            : "Usando valor de fábrica";
 
   return (
     <div className={`${CARD} space-y-3 p-4`}>
@@ -579,23 +699,33 @@ function ImageField({
         <Button type="button" size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
           <ImageIcon aria-hidden /> Seleccionar archivo
         </Button>
-        <span className="text-xs text-[#5a6578]">
-          {hasValue ? (cleared ? "" : "Imagen personalizada") : "Usando valor de fábrica"}
+        <span className="text-xs text-[#5a6578]" aria-live="polite">
+          {status}
         </span>
       </div>
+      {state.progress !== null ? (
+        <div
+          role="progressbar"
+          aria-label={`Subiendo ${label}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={state.progress}
+          className="h-1.5 overflow-hidden rounded-full bg-[#e8f0f5]"
+        >
+          <div className="h-full rounded-full bg-[var(--brand)] transition-[width]" style={{ width: `${Math.max(4, state.progress)}%` }} />
+        </div>
+      ) : null}
       <input
         ref={inputRef}
         type="file"
-        name={field === "logoUrl" ? "logoFile" : `file_${field}`}
+        data-field={field}
         accept={accept}
         className="sr-only"
         aria-label={label}
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (!file) return;
-          if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-          urlRef.current = URL.createObjectURL(file);
-          onFile(urlRef.current);
+          e.target.value = "";
+          if (file) onFile(file);
         }}
       />
       <p className="text-xs text-[#5a6578]">{hint}</p>
@@ -739,12 +869,12 @@ function KpiRow({ tone, resolved, children }: { tone: KpiToneKey; resolved: Retu
   );
 }
 
-function StickyBar({ dirty }: { dirty: boolean }) {
+function StickyBar({ dirty, uploading }: { dirty: boolean; uploading: boolean }) {
   const { pending } = useFormStatus();
   return (
     <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dde7ee] bg-white/95 px-5 py-3 shadow-[0_-6px_16px_-12px_rgba(16,40,70,0.25)] backdrop-blur">
       <div className="min-h-5 text-sm text-[#5a6578]" aria-live="polite">
-        {pending ? "Guardando…" : dirty ? "Cambios sin guardar" : ""}
+        {pending ? "Guardando…" : uploading ? "Subiendo imágenes… espera a que terminen para guardar" : dirty ? "Cambios sin guardar" : ""}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -766,7 +896,7 @@ function StickyBar({ dirty }: { dirty: boolean }) {
         >
           <RotateCcw aria-hidden /> Volver a los valores originales
         </Button>
-        <Button type="submit" disabled={pending} className="bg-[var(--brand)] text-white hover:bg-[var(--brand-deep)]">
+        <Button type="submit" disabled={pending || uploading} className="bg-[var(--brand)] text-white hover:bg-[var(--brand-deep)]">
           <Save aria-hidden /> {pending ? "Guardando…" : "Guardar cambios"}
         </Button>
       </div>

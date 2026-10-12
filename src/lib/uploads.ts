@@ -106,6 +106,30 @@ type AssetExt = "png" | "jpg" | "webp" | "gif" | "svg" | "ico";
 
 export type AppearanceAssetKind = "logo" | "favicon" | "background";
 
+/** Apariencia image fields and the asset rules each one is validated with. */
+export const APPEARANCE_FIELD_KIND = {
+  logoUrl: "logo",
+  logoDarkUrl: "logo",
+  faviconUrl: "favicon",
+  panelLogoUrl: "logo",
+  loginBgUrl: "background",
+  loginLogoUrl: "logo",
+} as const satisfies Record<string, AppearanceAssetKind>;
+
+export type AppearanceField = keyof typeof APPEARANCE_FIELD_KIND;
+
+export function isAppearanceField(v: unknown): v is AppearanceField {
+  return typeof v === "string" && Object.hasOwn(APPEARANCE_FIELD_KIND, v);
+}
+
+const ASSET_NAME_RE = /^(logo|favicon|background)-\d+-[0-9a-f]{8}\.(png|jpg|webp|gif|svg|ico)$/;
+
+/** True for files written by `saveAppearanceAsset` for this tenant. */
+export function isOwnAppearanceAsset(tenantSlug: string, url: string): boolean {
+  const prefix = `/uploads/${safeSlug(tenantSlug)}/appearance/`;
+  return url.startsWith(prefix) && ASSET_NAME_RE.test(url.slice(prefix.length));
+}
+
 const ASSET_RULES: Record<
   AppearanceAssetKind,
   { exts: AssetExt[]; maxBytes: number; square?: boolean; label: string }

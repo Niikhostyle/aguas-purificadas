@@ -16,7 +16,7 @@ import {
 } from "@/lib/appearance";
 import { prisma } from "@/lib/db";
 import { requireTenantAdmin } from "@/lib/tenant-admin";
-import { saveAppearanceAsset, type AppearanceAssetKind } from "@/lib/uploads";
+import { isOwnAppearanceAsset } from "@/lib/uploads";
 
 const PAGE = "/admin/apariencia";
 
@@ -27,16 +27,12 @@ const identitySchema = z.object({
   secondaryColor: z.string().trim().regex(HEX_RE),
 });
 
-const IMAGE_KIND: Record<ImageKey, AppearanceAssetKind> = {
-  faviconUrl: "favicon",
-  logoDarkUrl: "logo",
-  panelLogoUrl: "logo",
-  loginBgUrl: "background",
-  loginLogoUrl: "logo",
-};
+export type SaveAppearanceState = { error: string | null; at: number };
+
+class SaveError extends Error {}
 
 function fail(message: string): never {
-  redirect(`${PAGE}?error=${encodeURIComponent(message)}`);
+  throw new SaveError(message);
 }
 
 function revalidateAll() {
@@ -44,7 +40,22 @@ function revalidateAll() {
   revalidatePath(PAGE);
 }
 
-export async function saveAppearanceAction(formData: FormData) {
+/** Errors come back as state so the editor keeps every unsaved change on screen. */
+export async function saveAppearanceAction(
+  _prev: SaveAppearanceState,
+  formData: FormData,
+): Promise<SaveAppearanceState> {
+  try {
+    await saveAppearance(formData);
+  } catch (e) {
+    if (e instanceof SaveError) return { error: e.message, at: Date.now() };
+    throw e;
+  }
+  revalidateAll();
+  redirect(`${PAGE}?ok=1`);
+}
+
+async function saveAppearance(formData: FormData) {
   const { admin, tenantId } = await requireTenantAdmin();
   const slug = admin.tenant.slug;
   const str = (key: string) => String(formData.get(key) ?? "").trim();
@@ -85,44 +96,43 @@ export async function saveAppearanceAction(formData: FormData) {
 
   const current = parseAppearance(admin.tenant.appearance);
   const next: AppearanceOverrides = { ...parsed.data };
-  let logoUrl = admin.tenant.logoUrl;
 
-  try {
-    const logoFile = formData.get("logoFile");
-    if (logoFile instanceof File && logoFile.size > 0) {
-      logoUrl = await saveAppearanceAsset(slug, logoFile, "logo");
-    } else if (str("clear_logoUrl") === "1") {
-      logoUrl = null;
+  // Images are uploaded one by one beforehand; the save only carries their URLs.
+  const imageUrl = (key: ImageKey | "logoUrl", saved: string | null | undefined): string | null => {
+    const v = str(`img_${key}`);
+    if (!v) return null;
+    if (v === saved) return saved;
+    if (!isOwnAppearanceAsset(slug, v)) {
+      fail("Una de las imágenes no es válida. Vuelve a seleccionarla e inténtalo de nuevo.");
     }
-    for (const key of IMAGE_KEYS) {
-      const file = formData.get(`file_${key}`);
-      if (file instanceof File && file.size > 0) {
-        next[key] = await saveAppearanceAsset(slug, file, IMAGE_KIND[key]);
-      } else if (str(`clear_${key}`) !== "1" && current[key]) {
-        next[key] = current[key];
-      }
-    }
-  } catch (e) {
-    fail(e instanceof Error ? e.message : "No se pudo subir la imagen");
+    return v;
+  };
+
+  const logoUrl = imageUrl("logoUrl", admin.tenant.logoUrl);
+  for (const key of IMAGE_KEYS) {
+    const url = imageUrl(key, current[key]);
+    if (url) next[key] = url;
   }
 
   const base = baseColors(identity.data);
   const appearance = compactOverrides(base, next);
 
-  await prisma.tenant.update({
-    where: { id: tenantId },
-    data: {
-      name: identity.data.name,
-      tagline: identity.data.tagline || null,
-      primaryColor: base.primary.toUpperCase(),
-      secondaryColor: base.secondary.toUpperCase(),
-      logoUrl,
-      appearance: Object.keys(appearance).length ? appearance : Prisma.DbNull,
-    },
-  });
-
-  revalidateAll();
-  redirect(`${PAGE}?ok=1`);
+  try {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        name: identity.data.name,
+        tagline: identity.data.tagline || null,
+        primaryColor: base.primary.toUpperCase(),
+        secondaryColor: base.secondary.toUpperCase(),
+        logoUrl,
+        appearance: Object.keys(appearance).length ? appearance : Prisma.DbNull,
+      },
+    });
+  } catch (e) {
+    console.error("[apariencia] save failed", e);
+    fail("No pudimos guardar los cambios. Inténtalo de nuevo en unos segundos.");
+  }
 }
 
 export async function resetAppearanceAction() {
