@@ -65,13 +65,16 @@ const KPI_LABELS: Record<KpiToneKey, { label: string; sample: string; value: str
 };
 
 const IMAGE_HINTS: Record<ImgKey, string> = {
-  logoUrl: "PNG, SVG, JPG o WEBP · máx. 2 MB · fondo transparente ideal.",
-  logoDarkUrl: "Versión clara para fondos oscuros · PNG, SVG, JPG o WEBP · máx. 2 MB.",
-  faviconUrl: "Cuadrado (ej. 512×512) · PNG, SVG, ICO o WEBP · máx. 1 MB.",
-  panelLogoUrl: "Cuadrado ideal · PNG, SVG, JPG o WEBP · máx. 2 MB.",
-  loginBgUrl: "JPG, PNG o WEBP · máx. 5 MB · se ve con una capa clara encima.",
-  loginLogoUrl: "PNG, SVG, JPG o WEBP · máx. 2 MB.",
+  logoUrl: "600 × 200 px horizontal · SVG o PNG con fondo transparente · máx. 2 MB.",
+  logoDarkUrl: "600 × 200 px · versión clara/blanca · PNG, SVG, JPG o WEBP · máx. 2 MB.",
+  faviconUrl: "512 × 512 px cuadrado · PNG, SVG, ICO o WEBP · máx. 1 MB.",
+  panelLogoUrl: "512 × 512 px cuadrado · PNG o SVG transparente · máx. 2 MB.",
+  loginBgUrl: "1920 × 1080 px · JPG o WEBP · ideal < 500 KB · máx. 5 MB · se ve con una capa clara encima.",
+  loginLogoUrl: "600 × 200 px (o 512 × 512 si es cuadrado) · PNG o SVG · máx. 2 MB.",
 };
+
+const LOGO_TIP = "Consejo: recorta los márgenes vacíos y evita textos pequeños dentro del logo.";
+const LOGO_FIELDS = new Set<ImgKey>(["logoUrl", "logoDarkUrl", "panelLogoUrl", "loginLogoUrl"]);
 
 const IMAGE_ACCEPT: Record<ImgKey, string> = {
   logoUrl: "image/png,image/svg+xml,image/jpeg,image/webp",
@@ -729,6 +732,7 @@ function ImageField({
         }}
       />
       <p className="text-xs text-[#5a6578]">{hint}</p>
+      {LOGO_FIELDS.has(field) ? <p className="text-xs text-[#8a96a6]">{LOGO_TIP}</p> : null}
       {hasValue ? (
         <button
           type="button"
