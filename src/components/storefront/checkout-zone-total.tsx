@@ -29,20 +29,20 @@ export function CheckoutZoneTotal({
   }, [zones]);
 
   return (
-    <div className="mt-6 space-y-2 border-t border-[#c5d8d2] pt-4 text-sm">
-      <div className="flex justify-between text-[#4a655f]">
+    <div className="mt-6 space-y-2 border-t border-dashed border-[var(--sf-line-strong)] pt-4 text-sm">
+      <div className="flex justify-between text-[#5a6578]">
         <span>Subtotal</span>
         <span>{formatClp(subtotalClp)}</span>
       </div>
-      <div className="flex justify-between text-[#4a655f]">
+      <div className="flex justify-between text-[#5a6578]">
         <span>Despacho</span>
         <span>
           {shippingClp === 0 ? "Gratis" : formatClp(shippingClp)}
         </span>
       </div>
-      <div className="flex justify-between pt-2 text-base font-medium text-[var(--brand-deep)]">
+      <div className="mt-2 flex items-baseline justify-between border-t border-[var(--sf-line)] pt-3 text-base font-semibold text-[var(--brand-deep)]">
         <span>Total</span>
-        <span>{formatClp(subtotalClp + shippingClp)}</span>
+        <span key={shippingClp} className="sf-pop rc-display inline-block text-3xl">{formatClp(subtotalClp + shippingClp)}</span>
       </div>
     </div>
   );

@@ -53,7 +53,7 @@ export default async function StorefrontLayout({
     <div style={theme} data-storefront className="flex min-h-full flex-1 flex-col">
       <Suspense
         fallback={
-          <div className="h-24 border-b border-[#d5e3ec] bg-[var(--header-bg)]" aria-hidden />
+          <div className="h-24 border-b border-[var(--sf-line)] bg-[var(--header-bg)]" aria-hidden />
         }
       >
         <SiteHeader

@@ -131,7 +131,7 @@ export function RegionSelector({
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6">
       <div
         aria-hidden
-        className="absolute inset-0 bg-[#051b3f]/55 backdrop-blur-[2px] animate-in fade-in duration-200"
+        className="absolute inset-0 bg-[#051b3f]/50 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={() => close(true)}
       />
       <div
@@ -140,9 +140,9 @@ export function RegionSelector({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex outline-none max-h-[85dvh] w-full flex-col rounded-t-3xl bg-white shadow-2xl animate-in slide-in-from-bottom-8 fade-in duration-300 sm:max-h-[min(640px,85dvh)] sm:max-w-md sm:rounded-2xl sm:slide-in-from-bottom-0 sm:zoom-in-95"
+        className="relative flex outline-none max-h-[85dvh] w-full flex-col rounded-t-[1.75rem] bg-white shadow-[0_30px_80px_-20px_rgba(5,27,63,0.5)] ring-1 ring-black/5 animate-in slide-in-from-bottom-10 fade-in duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:max-h-[min(640px,85dvh)] sm:max-w-md sm:rounded-[1.75rem] sm:slide-in-from-bottom-4 sm:zoom-in-95"
       >
-        <div className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-[#d5e3ec] sm:hidden" aria-hidden />
+        <div className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-[var(--sf-line-strong)] sm:hidden" aria-hidden />
         <div className="flex items-start justify-between gap-4 px-6 pb-2 pt-4 sm:pt-6">
           <div>
             <h2 id={titleId} className="rc-display text-2xl uppercase text-[var(--brand-deep)]">
@@ -156,7 +156,7 @@ export function RegionSelector({
             type="button"
             onClick={() => close(true)}
             aria-label="Cerrar"
-            className="-mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#5a6578] transition hover:bg-[var(--mist)] hover:text-[var(--brand-deep)] focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+            className="-mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#5a6578] transition duration-300 hover:rotate-90 hover:bg-[var(--mist)] hover:text-[var(--brand-deep)] focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
           >
             <X className="size-5" />
           </button>
@@ -170,27 +170,31 @@ export function RegionSelector({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar ciudad o región"
               aria-label="Buscar ciudad o región"
-              className="w-full rounded-lg border border-[#d5e3ec] px-3 py-2 text-sm outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20"
+              className="h-11 w-full rounded-full border border-[var(--sf-line-strong)] px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/15"
             />
           </div>
         ) : null}
 
         <ul className="mt-3 flex-1 space-y-2 overflow-y-auto overscroll-contain px-6 pb-2">
-          {visible.map((r) => {
+          {visible.map((r, i) => {
             const active = selected?.id === r.id;
             return (
-              <li key={r.id}>
+              <li key={r.id} className="sf-enter" style={{ animationDelay: `${120 + Math.min(i, 8) * 40}ms` }}>
                 <button
                   type="button"
                   onClick={() => choose(r)}
                   data-autofocus={active || undefined}
                   aria-pressed={active}
-                  className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition hover:border-[var(--brand)] hover:bg-[var(--mist)] focus-visible:outline-2 focus-visible:outline-[var(--brand)] ${
-                    active ? "border-[var(--brand)] bg-[var(--mist)]" : "border-[#d5e3ec]"
+                  className={`group flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition duration-300 hover:border-[var(--brand)] hover:bg-[var(--mist)] hover:shadow-[var(--sf-shadow-md)] active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-[var(--brand)] ${
+                    active
+                      ? "border-[var(--brand)] bg-[var(--mist)] ring-1 ring-[var(--brand)]"
+                      : "border-[var(--sf-line-strong)]"
                   }`}
                 >
                   <span className="flex items-center gap-2 font-semibold text-[var(--brand-deep)]">
-                    <MapPin className="size-4 shrink-0 text-[var(--brand)]" aria-hidden />
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--brand)_12%,#fff)] text-[var(--brand)] transition-transform duration-300 group-hover:scale-110">
+                      <MapPin className="size-4" aria-hidden />
+                    </span>
                     {r.name}
                   </span>
                   {r.zone ? <span className="text-xs text-[#5a6578]">{r.zone}</span> : null}
@@ -203,11 +207,11 @@ export function RegionSelector({
           ) : null}
         </ul>
 
-        <div className="border-t border-[#e8f0f5] px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="border-t border-[var(--sf-line)] px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button
             type="button"
             onClick={() => close(true)}
-            className="w-full rounded-lg py-2 text-sm font-semibold text-[#5a6578] hover:text-[var(--brand)]"
+            className="w-full rounded-full py-2.5 text-sm font-semibold text-[#5a6578] transition hover:bg-[var(--mist)] hover:text-[var(--brand)]"
           >
             {selected ? "Cerrar" : "Ahora no"}
           </button>
@@ -223,7 +227,7 @@ export function RegionSelector({
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#d5e3ec] px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--brand-deep)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] ${className}`}
+        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--sf-line-strong)] bg-white/70 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--brand-deep)] shadow-[var(--sf-shadow-sm)] transition duration-300 hover:border-[var(--brand)] hover:text-[var(--brand)] active:scale-95 ${className}`}
       >
         <MapPin className="size-3.5 text-[var(--brand)]" aria-hidden />
         <span className="max-w-[10rem] truncate">{selected ? selected.name : "Elige tu ciudad"}</span>

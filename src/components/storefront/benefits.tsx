@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/storefront/reveal";
+
 const BENEFITS = [
   {
     title: "Libre de Sodio",
@@ -34,25 +36,31 @@ const BENEFITS = [
 
 export function BenefitsSection() {
   return (
-    <section id="beneficios" className="bg-[#f7fbfd] py-16">
-      <div className="mx-auto max-w-6xl px-4 md:px-6">
-        <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
+    <section
+      id="beneficios"
+      className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_100%)] py-16 md:py-20"
+    >
+      <Reveal className="mx-auto max-w-6xl px-4 md:px-6">
+        <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           Agua Purificada
         </h2>
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {BENEFITS.map((item) => (
             <li
               key={item.title}
               id={"id" in item ? item.id : undefined}
-              className="overflow-hidden border border-[#e4eef4] bg-white"
+              className="sf-card sf-card-hover group overflow-hidden"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.image}
-                alt=""
-                className="aspect-[16/10] w-full object-cover"
-              />
-              <div className="p-5">
+              <div className="overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[16/10] w-full object-cover transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                />
+              </div>
+              <div className="p-5 pt-4">
                 <h3 className="rc-display text-2xl uppercase text-[var(--brand)]">
                   {item.title}
                 </h3>
@@ -63,7 +71,7 @@ export function BenefitsSection() {
             </li>
           ))}
         </ul>
-      </div>
+      </Reveal>
     </section>
   );
 }

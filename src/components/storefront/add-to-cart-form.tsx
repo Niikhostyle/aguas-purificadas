@@ -1,5 +1,6 @@
+import { ShoppingBag } from "lucide-react";
 import { addToCartAction } from "@/app/(storefront)/cart-actions";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/storefront/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -8,7 +9,7 @@ export function AddToCartForm({ productId }: { productId: string }) {
     <form action={addToCartAction} className="flex flex-wrap items-end gap-3">
       <input type="hidden" name="productId" value={productId} />
       <div className="space-y-1.5">
-        <Label htmlFor="quantity" className="text-[#4a655f]">
+        <Label htmlFor="quantity" className="text-[#5a6578]">
           Cantidad
         </Label>
         <Input
@@ -18,12 +19,15 @@ export function AddToCartForm({ productId }: { productId: string }) {
           min={1}
           max={99}
           defaultValue={1}
-          className="w-24 bg-white"
+          className="h-11 w-24 rounded-full bg-white px-4 text-center text-base font-semibold"
         />
       </div>
-      <Button type="submit" className="h-9 px-5">
+      <SubmitButton
+        className="h-11 gap-2 px-6 text-sm font-bold uppercase tracking-wide"
+        icon={<ShoppingBag className="size-4" aria-hidden />}
+      >
         Agregar al carrito
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

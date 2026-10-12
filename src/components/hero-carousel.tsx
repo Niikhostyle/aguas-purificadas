@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type HeroSlide = {
   image: string;
@@ -33,6 +34,7 @@ export function HeroCarousel({
 }: Props) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [touchX, setTouchX] = useState<number | null>(null);
   const count = slides.length;
 
   useEffect(() => {
@@ -54,6 +56,14 @@ export function HeroCarousel({
       className={`relative overflow-hidden ${className}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onTouchStart={(e) => setTouchX(e.touches[0]?.clientX ?? null)}
+      onTouchEnd={(e) => {
+        const end = e.changedTouches[0]?.clientX;
+        if (touchX !== null && end !== undefined && Math.abs(end - touchX) > 40 && count > 1) {
+          go(end < touchX ? 1 : -1);
+        }
+        setTouchX(null);
+      }}
       aria-roledescription="carrusel"
       aria-label="Destacados"
     >
@@ -63,7 +73,7 @@ export function HeroCarousel({
         return (
           <div
             key={`${slide.image}-${i}`}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out ${
+            className={`absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-out ${
               active
                 ? "z-[1] opacity-100"
                 : "z-0 pointer-events-none opacity-0"
@@ -72,9 +82,12 @@ export function HeroCarousel({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              key={active ? `on-${index}` : "off"}
               src={slide.image}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${
+                active && variant === "storefront" ? "sf-kenburns" : ""
+              }`}
             />
             {showCopy ? (
               <>
@@ -86,7 +99,10 @@ export function HeroCarousel({
                   }
                 />
                 <div
+                  key={active ? `copy-${index}` : "copy-off"}
                   className={`relative mx-auto flex h-full min-h-[inherit] max-w-6xl flex-col px-4 py-16 md:px-6 ${
+                    variant === "storefront" && active ? "sf-rise-stagger" : ""
+                  } ${
                     variant === "marketing"
                       ? "justify-end pb-20 md:justify-center md:pb-28"
                       : "justify-center"
@@ -129,10 +145,16 @@ export function HeroCarousel({
                           className={
                             variant === "marketing"
                               ? "inline-flex rounded-md bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#12326e] hover:bg-[#e8f7fc]"
-                              : "rc-btn-primary px-6 py-3 text-sm font-bold uppercase tracking-wide"
+                              : "rc-btn-primary group/cta inline-flex items-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wide"
                           }
                         >
                           {slide.primaryLabel}
+                          {variant === "storefront" ? (
+                            <ArrowRight
+                              className="size-4 transition-transform duration-300 group-hover/cta:translate-x-0.5"
+                              aria-hidden
+                            />
+                          ) : null}
                         </Link>
                       ) : null}
                       {slide.secondaryHref && slide.secondaryLabel ? (
@@ -141,7 +163,7 @@ export function HeroCarousel({
                           className={
                             variant === "marketing"
                               ? "inline-flex rounded-md border border-white/70 bg-white/10 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm hover:bg-white/20"
-                              : "border border-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-white hover:bg-white hover:text-[var(--brand-deep)]"
+                              : "inline-flex items-center rounded-full border border-white/70 bg-white/10 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition-colors duration-300 hover:bg-white hover:text-[var(--brand-deep)]"
                           }
                         >
                           {slide.secondaryLabel}
@@ -167,20 +189,20 @@ export function HeroCarousel({
           <button
             type="button"
             onClick={() => go(-1)}
-            className="absolute left-3 top-1/2 z-[2] -translate-y-1/2 rounded-full border border-white/40 bg-[#12326e]/55 px-3 py-2 text-sm font-bold text-white backdrop-blur-sm hover:bg-[#12326e]/80 md:left-5"
+            className="absolute left-3 top-1/2 z-[2] hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-lg shadow-black/10 backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/25 active:scale-95 sm:inline-flex md:left-5"
             aria-label="Slide anterior"
           >
-            ‹
+            <ChevronLeft className="size-5" aria-hidden />
           </button>
           <button
             type="button"
             onClick={() => go(1)}
-            className="absolute right-3 top-1/2 z-[2] -translate-y-1/2 rounded-full border border-white/40 bg-[#12326e]/55 px-3 py-2 text-sm font-bold text-white backdrop-blur-sm hover:bg-[#12326e]/80 md:right-5"
+            className="absolute right-3 top-1/2 z-[2] hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-lg shadow-black/10 backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/25 active:scale-95 sm:inline-flex md:right-5"
             aria-label="Slide siguiente"
           >
-            ›
+            <ChevronRight className="size-5" aria-hidden />
           </button>
-          <div className="absolute bottom-5 left-0 right-0 z-[2] flex justify-center gap-2">
+          <div className="absolute bottom-5 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/15 px-2.5 py-2 backdrop-blur-sm">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -188,10 +210,10 @@ export function HeroCarousel({
                 aria-label={`Ir al slide ${i + 1}`}
                 aria-current={i === index}
                 onClick={() => setIndex(i)}
-                className={`h-2.5 w-2.5 rounded-full transition ${
+                className={`h-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                   i === index
-                    ? "bg-white scale-110"
-                    : "bg-white/45 hover:bg-white/70"
+                    ? "w-6 bg-white"
+                    : "w-2 bg-white/50 hover:bg-white/80"
                 }`}
               />
             ))}

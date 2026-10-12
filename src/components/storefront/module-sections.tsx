@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, BadgeCheck, Check } from "lucide-react";
 import type {
   Audience,
   CertificationItem,
@@ -38,9 +39,9 @@ export function AudienceHeroBand({
   if (!copy?.headline && !copy?.body) return null;
   return (
     <Reveal>
-      <section className="border-b border-[#e4eef4] bg-[linear-gradient(180deg,#e8f7fc_0%,#ffffff_100%)] py-10">
+      <section className="border-b border-[var(--sf-line)] bg-[linear-gradient(180deg,var(--mist)_0%,#ffffff_100%)] py-12">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
+          <p className="sf-eyebrow">
             {audience === "empresa" ? "Para empresas" : "Para el hogar"}
           </p>
           {copy.headline ? (
@@ -54,7 +55,7 @@ export function AudienceHeroBand({
           {copy.ctaHref && copy.ctaLabel ? (
             <Link
               href={copy.ctaHref}
-              className="mt-5 inline-flex bg-[var(--brand-deep)] px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white hover:bg-[var(--brand)]"
+              className="group mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--brand-deep)] px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow-[var(--sf-shadow-md)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--brand)] active:translate-y-0 active:scale-[0.98]"
             >
               {copy.ctaLabel}
             </Link>
@@ -80,10 +81,10 @@ export function DescuentosSection({
   return (
     <Reveal>
       <section id="descuentos" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)]">
+        <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           Descuentos
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#5a6578]">
+        <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
           Ofertas activas para {audience === "empresa" ? "empresas" : "hogares"}.
         </p>
         <div className="mt-8">
@@ -110,23 +111,23 @@ export function PlanesSection({
     <Reveal>
       <section
         id="planes"
-        className="border-y border-[#e4eef4] bg-[#f7fbfd] py-16"
+        className="border-y border-[var(--sf-line)] bg-[linear-gradient(180deg,var(--mist)_0%,#fff_100%)] py-16 md:py-20"
       >
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)]">
+          <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
             Planes
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#5a6578]">
+          <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
             Suscripciones y rutas fijas. Activá o editá desde el admin.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {planes.map((p: PlanItem) => (
               <article
                 key={p.id}
-                className={`flex flex-col rounded-2xl bg-white p-6 ring-1 ${
+                className={`sf-card sf-card-hover relative flex flex-col p-6 ${
                   p.highlighted
-                    ? "ring-[var(--brand)] shadow-lg shadow-[#00b1e2]/15"
-                    : "ring-[#d5e3ec]"
+                    ? "border-[var(--brand)] shadow-[var(--sf-shadow-lg)] ring-1 ring-[var(--brand)]"
+                    : ""
                 }`}
               >
                 <h3 className="rc-display text-2xl uppercase text-[var(--brand-deep)]">
@@ -141,7 +142,7 @@ export function PlanesSection({
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-[#3d4a5c]">
                   {p.features.map((f) => (
                     <li key={f} className="flex gap-2">
-                      <span className="text-[var(--brand)]">✓</span>
+                      <Check className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -149,7 +150,7 @@ export function PlanesSection({
                 {p.ctaHref && p.ctaLabel ? (
                   <Link
                     href={p.ctaHref}
-                    className="mt-6 inline-flex justify-center bg-[var(--brand-deep)] px-4 py-2.5 text-sm font-bold uppercase text-white hover:bg-[var(--brand)]"
+                    className="mt-6 inline-flex justify-center rounded-full bg-[var(--brand-deep)] px-4 py-2.5 text-sm font-bold uppercase text-white transition duration-300 hover:bg-[var(--brand)] active:scale-[0.98]"
                   >
                     {p.ctaLabel}
                   </Link>
@@ -178,18 +179,25 @@ export function KitsSection({
   return (
     <Reveal>
       <section id="kits" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)]">
+        <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           Kits
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#5a6578]">
+        <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
           Paquetes para quienes ya trabajan con nosotros y para quienes empiezan.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {kits.map((k: KitItem) => (
-            <article key={k.id} className="overflow-hidden rounded-2xl ring-1 ring-[#d5e3ec]">
+            <article key={k.id} className="sf-card sf-card-hover group overflow-hidden">
               {k.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={k.imageUrl} alt="" className="h-44 w-full object-cover" />
+                <div className="overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={k.imageUrl}
+                    alt=""
+                    loading="lazy"
+                    className="h-44 w-full object-cover transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                  />
+                </div>
               ) : null}
               <div className="p-5">
                 <h3 className="rc-display text-xl uppercase text-[var(--brand-deep)]">
@@ -207,9 +215,10 @@ export function KitsSection({
                   {k.href ? (
                     <Link
                       href={k.href}
-                      className="text-sm font-bold uppercase text-[var(--brand-deep)] hover:text-[var(--brand)]"
+                      className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold uppercase text-[var(--brand-deep)] transition hover:bg-[var(--mist)] hover:text-[var(--brand)]"
                     >
                       Ver
+                      <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
                     </Link>
                   ) : null}
                 </div>
@@ -234,10 +243,10 @@ export function RedesSection({
   if (!items.length) return null;
   return (
     <Reveal>
-      <section id="redes" className="border-t border-[#e4eef4] bg-[#051b3f] py-16 text-white">
+      <section id="redes" className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_50%_0%,color-mix(in_srgb,var(--brand-deep)_70%,#051b3f)_0%,#051b3f_70%)] py-16 text-white md:py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <h2 className="rc-display text-center text-4xl uppercase">Redes</h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-sm text-white/70">
+          <h2 className="sf-title rc-display text-center text-4xl uppercase md:text-5xl">Redes</h2>
+          <p className="mx-auto mt-4 max-w-xl text-center text-sm text-white/70">
             Historias y videos de la marca. Configurá URLs en el admin.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -246,7 +255,7 @@ export function RedesSection({
               return (
                 <article
                   key={s.id}
-                  className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/15"
+                  className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/15 transition duration-500 hover:bg-white/10 hover:ring-white/30"
                 >
                   {embed ? (
                     <div className="aspect-video w-full">
@@ -306,17 +315,17 @@ export function CertificacionesSection({
   return (
     <Reveal>
       <section id="certificaciones" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)]">
+        <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           Certificaciones
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#5a6578]">
+        <p className="mx-auto mt-4 max-w-xl text-center text-sm text-[#5a6578]">
           Confianza y estándares que podés comunicar a tus clientes.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {items.map((c: CertificationItem) => (
             <article
               key={c.id}
-              className="flex flex-col items-center rounded-2xl bg-[#f7fbfd] px-5 py-8 text-center ring-1 ring-[#d5e3ec]"
+              className="sf-card sf-card-hover flex flex-col items-center px-5 py-8 text-center"
             >
               {c.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -326,8 +335,8 @@ export function CertificacionesSection({
                   className="mb-4 h-14 w-auto object-contain"
                 />
               ) : (
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand)]/15 text-lg font-bold text-[var(--brand-deep)]">
-                  ✓
+                <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-[var(--mist)] text-[var(--brand)] ring-1 ring-[color-mix(in_srgb,var(--brand)_25%,transparent)]">
+                  <BadgeCheck className="size-7" aria-hidden />
                 </div>
               )}
               <h3 className="font-bold text-[var(--brand-deep)]">{c.name}</h3>

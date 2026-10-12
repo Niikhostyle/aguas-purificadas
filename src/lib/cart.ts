@@ -16,6 +16,7 @@ export type CartCookie = {
 export type ResolvedCartLine = CartLine & {
   name: string;
   slug: string;
+  imageUrl: string | null;
   unitPriceClp: number;
   lineTotalClp: number;
   active: boolean;
@@ -100,6 +101,7 @@ export async function getResolvedCart(tenantId: string): Promise<ResolvedCart> {
       quantity: line.quantity,
       name: product.name,
       slug: product.slug,
+      imageUrl: product.imageUrl,
       unitPriceClp: product.priceClp,
       lineTotalClp: product.priceClp * line.quantity,
       active: product.active,

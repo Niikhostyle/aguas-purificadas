@@ -1,42 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { MotionConfig, motion } from "motion/react";
+import type { ReactNode } from "react";
 
-/** Subtle section reveal on scroll — intentional motion, not noisy. */
+/** Subtle section reveal on scroll — intentional motion, not noisy. Reduced motion keeps only the fade. */
 export function Reveal({
   children,
   className = "",
+  delay = 0,
 }: {
   children: ReactNode;
   className?: string;
+  delay?: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-      } ${className}`}
-    >
-      {children}
-    </div>
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        className={className}
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px", amount: 0.08 }}
+        transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {children}
+      </motion.div>
+    </MotionConfig>
   );
 }

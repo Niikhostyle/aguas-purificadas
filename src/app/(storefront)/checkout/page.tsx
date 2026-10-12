@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { placeOrderAction } from "@/app/(storefront)/cart-actions";
+import { ArrowLeft, Lock, ShoppingBag } from "lucide-react";
 import { CheckoutZoneTotal } from "@/components/storefront/checkout-zone-total";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/storefront/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,18 +27,18 @@ export default async function CheckoutPage({
   const { error } = await searchParams;
 
   return (
-    <div className="bg-[linear-gradient(180deg,#e8f4f1_0%,#f3f7f6_40%)]">
-      <div className="mx-auto max-w-5xl px-5 pb-20 pt-12 md:px-8">
-        <h1 className="font-[family-name:var(--font-display)] text-4xl text-[var(--brand-deep)]">
+    <div className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_420px)]">
+      <div className="mx-auto max-w-5xl px-4 pb-20 pt-12 md:px-8">
+        <h1 className="sf-title sf-title-start rc-display text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           Checkout
         </h1>
-        <p className="mt-2 max-w-xl text-[#4a655f]">
+        <p className="mt-4 max-w-xl text-[#5a6578]">
           Completá tus datos y la zona de despacho. Al confirmar te llevamos a
           WebPay (sandbox o mock) para pagar.
         </p>
 
-        <div className="mt-10 grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
-          <form action={placeOrderAction} className="space-y-5">
+        <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
+          <form action={placeOrderAction} className="sf-enter sf-card space-y-5 p-5 sm:p-7">
             <div className="space-y-2">
               <Label htmlFor="customerName">Nombre completo</Label>
               <Input
@@ -46,7 +47,7 @@ export default async function CheckoutPage({
                 required
                 minLength={2}
                 placeholder="María González"
-                className="bg-white"
+                className="h-11 bg-white px-3.5"
               />
             </div>
             <div className="space-y-2">
@@ -57,7 +58,7 @@ export default async function CheckoutPage({
                 required
                 minLength={8}
                 placeholder="+56 9 1234 5678"
-                className="bg-white"
+                className="h-11 bg-white px-3.5"
               />
             </div>
             <div className="space-y-2">
@@ -68,7 +69,7 @@ export default async function CheckoutPage({
                 required
                 minLength={5}
                 placeholder="Calle, número, referencia"
-                className="bg-white"
+                className="h-11 bg-white px-3.5"
               />
             </div>
             <div className="space-y-2">
@@ -79,7 +80,7 @@ export default async function CheckoutPage({
                 list="checkout-communes"
                 maxLength={80}
                 placeholder="Ej: Providencia"
-                className="bg-white"
+                className="h-11 bg-white px-3.5"
               />
               <datalist id="checkout-communes">
                 {Array.from(
@@ -94,7 +95,7 @@ export default async function CheckoutPage({
               </datalist>
             </div>
             <fieldset className="space-y-3">
-              <legend className="text-sm font-medium text-[var(--brand-deep)]">
+              <legend className="mb-1 text-sm font-medium text-[var(--brand-deep)]">
                 Zona de despacho
               </legend>
               {zones.length === 0 ? (
@@ -105,23 +106,23 @@ export default async function CheckoutPage({
                 <ul className="space-y-3">
                   {zones.map((zone, index) => (
                     <li key={zone.id}>
-                      <label className="flex cursor-pointer gap-3 border border-[#c5d8d2] bg-white/80 px-4 py-3 transition hover:border-[var(--brand)]">
+                      <label className="flex cursor-pointer gap-3 rounded-xl border border-[var(--sf-line-strong)] bg-white px-4 py-3.5 transition duration-300 hover:border-[var(--brand)] hover:shadow-[var(--sf-shadow-md)] has-[:checked]:border-[var(--brand)] has-[:checked]:bg-[var(--mist)] has-[:checked]:ring-1 has-[:checked]:ring-[var(--brand)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--brand)]">
                         <input
                           type="radio"
                           name="deliveryZoneId"
                           value={zone.id}
                           required
                           defaultChecked={index === 0}
-                          className="mt-1 accent-[var(--brand)]"
+                          className="mt-1 size-4 accent-[var(--brand)]"
                         />
                         <span>
                           <span className="block font-medium text-[var(--brand-deep)]">
                             {zone.name}
                           </span>
-                          <span className="block text-sm text-[#4a655f]">
+                          <span className="block text-sm text-[#5a6578]">
                             {zone.communes}
                           </span>
-                          <span className="mt-1 block text-sm text-[var(--brand)]">
+                          <span className="mt-1.5 inline-flex rounded-full bg-[color-mix(in_srgb,var(--brand)_12%,#fff)] px-2.5 py-0.5 text-xs font-semibold text-[var(--brand)]">
                             {zone.costClp === 0
                               ? "Despacho gratis"
                               : `Despacho ${formatClp(zone.costClp)}`}
@@ -140,35 +141,41 @@ export default async function CheckoutPage({
                 name="customerNotes"
                 rows={3}
                 placeholder="Horario preferido, dejar en conserjería…"
-                className="bg-white"
+                className="rounded-xl bg-white px-3.5 py-2.5"
               />
             </div>
             {error ? (
-              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+              <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </p>
             ) : null}
-            <div className="flex flex-wrap gap-3">
-              <Button type="submit" disabled={zones.length === 0}>
+            <div className="flex flex-wrap items-center gap-3 border-t border-[var(--sf-line)] pt-5">
+              <SubmitButton
+                disabled={zones.length === 0}
+                className="h-11 gap-2 px-6 text-sm font-bold uppercase tracking-wide"
+                icon={<Lock className="size-4" aria-hidden />}
+              >
                 Pagar con WebPay
-              </Button>
+              </SubmitButton>
               <Link
                 href="/carrito"
-                className="inline-flex h-8 items-center px-3 text-sm text-[#4a655f] hover:underline"
+                className="group inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-sm text-[#5a6578] transition hover:bg-[var(--mist)] hover:text-[var(--brand-deep)]"
               >
+                <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden />
                 Volver al carrito
               </Link>
             </div>
           </form>
 
-          <aside className="h-fit border border-[#c5d8d2] bg-white/70 p-6">
-            <h2 className="font-[family-name:var(--font-display)] text-xl text-[var(--brand-deep)]">
+          <aside className="sf-enter sf-card h-fit p-6 [animation-delay:120ms] lg:sticky lg:top-32">
+            <h2 className="rc-display flex items-center gap-2 text-2xl uppercase text-[var(--brand-deep)]">
+              <ShoppingBag className="size-5 text-[var(--brand)]" aria-hidden />
               Resumen
             </h2>
             <ul className="mt-4 space-y-3 text-sm">
               {cart.items.map((item) => (
                 <li key={item.productId} className="flex justify-between gap-4">
-                  <span className="text-[#2f4a44]">
+                  <span className="text-[#3d4a5c]">
                     {item.name} × {item.quantity}
                   </span>
                   <span className="text-[var(--brand-deep)]">

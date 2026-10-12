@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { MessageCircle, Phone } from "lucide-react";
 import { BenefitsSection } from "@/components/storefront/benefits";
 import { BrandMark } from "@/components/storefront/brand-mark";
 import { NeutralBenefits } from "@/components/storefront/neutral-benefits";
@@ -191,11 +192,11 @@ export default async function HomePage({
 
       <Reveal>
         <section id="productos" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-          <h2 className="rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
+          <h2 className="sf-title rc-display text-center text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
             nuestros productos
           </h2>
           {products.length > 0 ? (
-            <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-[#5a6578]">
+            <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-[#5a6578]">
               {showcase
                 ? "Precios en pesos chilenos. Agregá al carrito y pagá con WebPay."
                 : "Precios en pesos chilenos. Agrega tus productos al carrito y coordina tu despacho."}
@@ -215,31 +216,40 @@ export default async function HomePage({
       <RedesSection flags={flags} content={content} />
       <CertificacionesSection flags={flags} content={content} />
 
-      <section id="nosotros" className="border-t border-[#e4eef4] bg-white py-16">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2 md:items-center md:px-6">
+      <section id="nosotros" className="border-t border-[var(--sf-line)] bg-white py-16 md:py-20">
+        <Reveal className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2 md:items-center md:gap-14 md:px-6">
           {showcase ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src="/brand/rio-claro/destacado-04.jpg"
-              alt=""
-              className="aspect-[4/3] w-full object-cover"
-            />
+            <div className="relative">
+              <div
+                aria-hidden
+                className="absolute -inset-3 -z-0 rotate-[-2deg] rounded-[calc(var(--radius)*3)] bg-[linear-gradient(135deg,var(--mist)_0%,color-mix(in_srgb,var(--brand)_18%,#fff)_100%)]"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/rio-claro/destacado-04.jpg"
+                alt=""
+                loading="lazy"
+                className="relative aspect-[4/3] w-full rounded-[calc(var(--radius)*2.4)] object-cover shadow-[var(--sf-shadow-lg)] ring-1 ring-black/5"
+              />
+            </div>
           ) : (
-            <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--brand)_0%,var(--brand-deep)_100%)] p-8">
+            <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-[calc(var(--radius)*2.4)] bg-[linear-gradient(135deg,var(--brand)_0%,var(--brand-deep)_100%)] p-8 shadow-[var(--sf-shadow-lg)]">
               <div aria-hidden className="absolute -right-16 -top-16 size-64 rounded-full bg-white/10" />
               <div aria-hidden className="absolute -bottom-20 -left-10 size-72 rounded-full bg-white/10" />
-              <div className="relative rounded-2xl bg-white/95 px-6 py-5 shadow-xl">
+              <div className="relative rounded-2xl bg-white/95 px-6 py-5 shadow-xl ring-1 ring-white/60">
                 <BrandMark name={tenant.name} logoUrl={tenant.logoUrl} subtitle="Agua purificada" />
               </div>
             </div>
           )}
           <div>
-            <h2 className="rc-display text-4xl uppercase text-[var(--brand-deep)]">
+            <span className="sf-eyebrow">Nosotros</span>
+            <h2 className="sf-title sf-title-start rc-display mt-3 text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
               Quiénes somos
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-[#5a6578]">{about}</p>
+            <p className="mt-5 text-base leading-relaxed text-[#5a6578]">{about}</p>
             {(tenant.phone || tenant.phoneSecondary) && (
-              <p id="contacto" className="mt-6 text-lg font-bold text-[var(--brand)]">
+              <p id="contacto" className="mt-6 flex flex-wrap items-center gap-2 text-lg font-bold text-[var(--brand)]">
+                <Phone className="size-5" aria-hidden />
                 Llámanos al{" "}
                 {[tenant.phone, tenant.phoneSecondary]
                   .filter(Boolean)
@@ -251,13 +261,14 @@ export default async function HomePage({
                 href={whatsappContact}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold uppercase text-white hover:bg-[#1ebe5b]"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold uppercase text-white shadow-[0_10px_24px_-10px_rgba(37,211,102,0.8)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe5b] active:translate-y-0 active:scale-[0.98]"
               >
+                <MessageCircle className="size-4" aria-hidden />
                 Escríbenos por WhatsApp
               </a>
             ) : null}
           </div>
-        </div>
+        </Reveal>
       </section>
     </>
   );

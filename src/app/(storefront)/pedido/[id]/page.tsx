@@ -55,98 +55,100 @@ export default async function OrderConfirmationPage({ params }: Props) {
   );
 
   return (
-    <div className="bg-[linear-gradient(180deg,#e8f4f1_0%,#f3f7f6_50%)]">
+    <div className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_420px)]">
       <div className="mx-auto max-w-2xl px-5 pb-20 pt-12 md:px-8">
-        <p className="text-sm font-medium uppercase tracking-wide text-[var(--brand)]">
+        <p className="sf-eyebrow">
           {copy.eyebrow}
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl text-[var(--brand-deep)]">
+        <h1 className="rc-display mt-3 text-4xl uppercase text-[var(--brand-deep)] md:text-5xl">
           {copy.title}
         </h1>
-        <p className="mt-3 text-[#4a655f]">{copy.body}</p>
+        <p className="mt-3 text-[#5a6578]">{copy.body}</p>
 
-        <dl className="mt-10 space-y-4 border-y border-[#c5d8d2] py-8 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-[#4a655f]">Referencia</dt>
-            <dd className="font-mono text-[var(--brand-deep)]">
-              {order.id.slice(-8).toUpperCase()}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-[#4a655f]">Estado de pago</dt>
-            <dd className="text-[var(--brand-deep)]">
-              {order.status}
-              {order.webpayStatus ? (
-                <span className="block text-xs text-[#4a655f]">
-                  WebPay: {order.webpayStatus}
-                  {order.webpayAuthorizationCode
-                    ? ` · auth ${order.webpayAuthorizationCode}`
-                    : ""}
-                  {order.paymentProvider
-                    ? ` · ${order.paymentProvider}`
-                    : ""}
+        <div className="sf-enter sf-card mt-10 p-6">
+          <dl className="space-y-4 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-[#5a6578]">Referencia</dt>
+              <dd className="font-mono text-[var(--brand-deep)]">
+                {order.id.slice(-8).toUpperCase()}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-[#5a6578]">Estado de pago</dt>
+              <dd className="text-[var(--brand-deep)]">
+                {order.status}
+                {order.webpayStatus ? (
+                  <span className="block text-xs text-[#5a6578]">
+                    WebPay: {order.webpayStatus}
+                    {order.webpayAuthorizationCode
+                      ? ` · auth ${order.webpayAuthorizationCode}`
+                      : ""}
+                    {order.paymentProvider
+                      ? ` · ${order.paymentProvider}`
+                      : ""}
+                  </span>
+                ) : null}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-[#5a6578]">Cliente</dt>
+              <dd className="text-right text-[var(--brand-deep)]">
+                {order.customerName}
+                <br />
+                {order.customerPhone}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-[#5a6578]">Entrega</dt>
+              <dd className="text-right text-[var(--brand-deep)]">
+                {order.customerAddress}
+                <br />
+                {order.deliveryZoneName}
+              </dd>
+            </div>
+          </dl>
+
+          <ul className="mt-6 space-y-2 border-t border-[var(--sf-line)] pt-6 text-sm">
+            {order.items.map((item) => (
+              <li key={item.id} className="flex justify-between gap-4">
+                <span>
+                  {item.productName} × {item.quantity}
                 </span>
-              ) : null}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-[#4a655f]">Cliente</dt>
-            <dd className="text-right text-[var(--brand-deep)]">
-              {order.customerName}
-              <br />
-              {order.customerPhone}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-[#4a655f]">Entrega</dt>
-            <dd className="text-right text-[var(--brand-deep)]">
-              {order.customerAddress}
-              <br />
-              {order.deliveryZoneName}
-            </dd>
-          </div>
-        </dl>
+                <span>{formatClp(item.lineTotalClp)}</span>
+              </li>
+            ))}
+          </ul>
 
-        <ul className="mt-6 space-y-2 text-sm">
-          {order.items.map((item) => (
-            <li key={item.id} className="flex justify-between gap-4">
+          <div className="mt-6 space-y-1 border-t border-dashed border-[var(--sf-line-strong)] pt-4 text-sm">
+            <div className="flex justify-between text-[#5a6578]">
+              <span>Subtotal</span>
+              <span>{formatClp(order.subtotalClp)}</span>
+            </div>
+            <div className="flex justify-between text-[#5a6578]">
+              <span>Despacho</span>
               <span>
-                {item.productName} × {item.quantity}
+                {order.shippingClp === 0
+                  ? "Gratis"
+                  : formatClp(order.shippingClp)}
               </span>
-              <span>{formatClp(item.lineTotalClp)}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-6 space-y-1 border-t border-[#c5d8d2] pt-4 text-sm">
-          <div className="flex justify-between text-[#4a655f]">
-            <span>Subtotal</span>
-            <span>{formatClp(order.subtotalClp)}</span>
-          </div>
-          <div className="flex justify-between text-[#4a655f]">
-            <span>Despacho</span>
-            <span>
-              {order.shippingClp === 0
-                ? "Gratis"
-                : formatClp(order.shippingClp)}
-            </span>
-          </div>
-          <div className="flex justify-between pt-2 text-base font-medium text-[var(--brand-deep)]">
-            <span>Total</span>
-            <span>{formatClp(order.totalClp)}</span>
+            </div>
+            <div className="flex justify-between pt-2 text-base font-medium text-[var(--brand-deep)]">
+              <span>Total</span>
+              <span>{formatClp(order.totalClp)}</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-3">
+        <div className="mt-8 flex flex-wrap gap-3">
           {canRetry ? (
             <form action={retryPaymentAction}>
               <input type="hidden" name="orderId" value={order.id} />
-              <Button type="submit">Reintentar pago</Button>
+              <Button type="submit" className="h-10 px-5 font-semibold">Reintentar pago</Button>
             </form>
           ) : null}
           <Link
             href="/productos"
-            className="inline-flex h-8 items-center rounded-md border border-[#c5d8d2] bg-white px-4 text-sm font-medium text-[var(--brand-deep)]"
+            className="inline-flex h-10 items-center rounded-full border border-[var(--sf-line-strong)] bg-white px-5 text-sm font-semibold text-[var(--brand-deep)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
           >
             Seguir comprando
           </Link>
@@ -155,7 +157,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 items-center rounded-md bg-[#25D366] px-4 text-sm font-medium text-white hover:bg-[#1ebe5b]"
+              className="inline-flex h-10 items-center rounded-full bg-[#25D366] px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#1ebe5b]"
             >
               Consultar por WhatsApp
             </a>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, MessageCircle } from "lucide-react";
+import { ArrowRight, Check, MessageCircle } from "lucide-react";
 
 function WaterDrop({ id, className }: { id: string; className?: string }) {
   return (
@@ -92,7 +92,7 @@ export function NeutralHero({
       />
 
       <div className="relative mx-auto grid min-h-[440px] max-w-6xl items-center gap-10 px-4 pb-24 pt-14 md:min-h-[500px] md:grid-cols-[1.2fr_0.8fr] md:px-6 md:pb-28 md:pt-16">
-        <div>
+        <div className="sf-rise-stagger">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/80 sm:text-sm">
             {brandName}
           </p>
@@ -116,16 +116,17 @@ export function NeutralHero({
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/productos"
-              className="inline-flex items-center bg-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)] shadow-lg shadow-black/10 transition hover:bg-[var(--mist)]"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-[var(--brand-deep)] shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--mist)] hover:shadow-xl active:translate-y-0 active:scale-[0.98]"
             >
               Ver productos
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
             </Link>
             {whatsappHref ? (
               <a
                 href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-white/80 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white hover:text-[var(--brand-deep)]"
+                className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/10 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition duration-300 hover:bg-white hover:text-[var(--brand-deep)] active:scale-[0.98]"
               >
                 <MessageCircle className="size-4" aria-hidden />
                 Pedir por WhatsApp

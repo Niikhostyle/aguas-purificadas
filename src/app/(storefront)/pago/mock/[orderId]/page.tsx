@@ -24,15 +24,15 @@ export default async function MockPaymentPage({ params }: Props) {
   const mode = getWebpayMode();
 
   return (
-    <div className="bg-[linear-gradient(180deg,#e8f4f1_0%,#f3f7f6_50%)]">
+    <div className="bg-[linear-gradient(180deg,var(--mist)_0%,#fff_420px)]">
       <div className="mx-auto max-w-lg px-5 pb-20 pt-12 md:px-8">
-        <p className="text-sm font-medium uppercase tracking-wide text-[var(--brand)]">
+        <p className="sf-eyebrow">
           Pago demo (mock)
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl text-[var(--brand-deep)]">
+        <h1 className="rc-display mt-3 text-4xl uppercase text-[var(--brand-deep)]">
           Simular WebPay
         </h1>
-        <p className="mt-3 text-sm text-[#4a655f]">
+        <p className="mt-3 text-sm text-[#5a6578]">
           Modo actual: <code className="rounded bg-white px-1">{mode}</code>.
           Esta pantalla aparece cuando{" "}
           <code className="rounded bg-white px-1">WEBPAY_MODE=mock</code> o si
@@ -41,13 +41,13 @@ export default async function MockPaymentPage({ params }: Props) {
           (credenciales de integración).
         </p>
 
-        <div className="mt-8 border border-[#c5d8d2] bg-white/80 p-5 text-sm">
-          <p className="text-[#4a655f]">Pedido</p>
+        <div className="sf-enter sf-card mt-8 p-5 text-sm">
+          <p className="text-[#5a6578]">Pedido</p>
           <p className="font-mono text-[var(--brand-deep)]">
             {order.id.slice(-8).toUpperCase()}
           </p>
-          <p className="mt-3 text-[#4a655f]">Total</p>
-          <p className="font-[family-name:var(--font-display)] text-2xl text-[var(--brand)]">
+          <p className="mt-3 text-[#5a6578]">Total</p>
+          <p className="rc-display text-3xl text-[var(--brand)]">
             {formatClp(order.totalClp)}
           </p>
         </div>
@@ -56,21 +56,21 @@ export default async function MockPaymentPage({ params }: Props) {
           <form action={mockPayAction}>
             <input type="hidden" name="orderId" value={order.id} />
             <input type="hidden" name="outcome" value="paid" />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="h-11 w-full font-semibold">
               Simular pago aprobado
             </Button>
           </form>
           <form action={mockPayAction}>
             <input type="hidden" name="orderId" value={order.id} />
             <input type="hidden" name="outcome" value="failed" />
-            <Button type="submit" variant="outline" className="w-full">
+            <Button type="submit" variant="outline" className="h-11 w-full">
               Simular pago rechazado
             </Button>
           </form>
           <form action={mockPayAction}>
             <input type="hidden" name="orderId" value={order.id} />
             <input type="hidden" name="outcome" value="cancelled" />
-            <Button type="submit" variant="ghost" className="w-full">
+            <Button type="submit" variant="ghost" className="h-11 w-full">
               Simular anulación
             </Button>
           </form>

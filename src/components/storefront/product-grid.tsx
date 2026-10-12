@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Droplets, MessageCircle, PackageOpen } from "lucide-react";
+import { ArrowRight, Droplets, MessageCircle, PackageOpen } from "lucide-react";
 import type { Product } from "@prisma/client";
 import { formatClp } from "@/lib/utils";
 
@@ -42,43 +42,50 @@ export function ProductGrid({
   }
 
   return (
-    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <ul className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product, index) => (
         <li
           key={product.id}
-          className="animate-fade-up group flex flex-col border border-[#e4eef4] bg-white"
-          style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
+          className="sf-enter sf-card sf-card-hover group flex flex-col overflow-hidden"
+          style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
         >
-          <Link href={`/productos/${product.slug}`} className="flex flex-1 flex-col">
-            <div className="relative aspect-square overflow-hidden bg-[#f7fbfd]">
+          <Link href={`/productos/${product.slug}`} className="flex flex-1 flex-col focus-visible:outline-offset-[-2px]">
+            <div className="relative m-2 mb-0 aspect-square overflow-hidden rounded-[calc(var(--radius)*1.4)] bg-[radial-gradient(120%_90%_at_50%_15%,#fff_0%,var(--mist)_100%)]">
               {product.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.03]"
+                  loading="lazy"
+                  className="h-full w-full object-contain p-5 mix-blend-multiply transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center bg-[var(--mist)] text-[var(--brand)]">
+                <div className="flex h-full items-center justify-center text-[var(--brand)]">
                   <Droplets className="size-16 opacity-40" aria-label="Sin imagen" />
                 </div>
               )}
             </div>
-            <div className="flex flex-1 flex-col px-4 pb-5 pt-3 text-center">
+            <div className="flex flex-1 flex-col px-5 pb-5 pt-4 text-center">
               <h3 className="rc-display text-xl uppercase leading-tight text-[var(--brand-deep)]">
                 {product.name}
               </h3>
-              <p className="mt-2 text-lg font-bold text-[var(--brand)]">
+              <p className="mx-auto mt-2 inline-flex rounded-full bg-[color-mix(in_srgb,var(--brand)_10%,#fff)] px-3 py-0.5 text-lg font-bold text-[var(--brand)]">
                 {formatClp(product.priceClp)}
               </p>
               {product.description ? (
-                <p className="mt-2 line-clamp-3 text-left text-xs leading-relaxed text-[#5a6578]">
+                <p className="mt-3 line-clamp-3 text-left text-xs leading-relaxed text-[#5a6578]">
                   {product.description}
                 </p>
               ) : null}
-              <span className="mt-4 rc-btn-primary inline-flex items-center justify-center px-3 py-2 text-xs font-bold uppercase tracking-wide">
-                Ver detalle
-              </span>
+              <div className="mt-auto pt-4">
+                <span className="rc-btn-primary flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wide">
+                  Ver detalle
+                  <ArrowRight
+                    className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                    aria-hidden
+                  />
+                </span>
+              </div>
             </div>
           </Link>
         </li>
