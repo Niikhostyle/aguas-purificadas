@@ -31,7 +31,7 @@ import { LANDING_ICONS } from "@/lib/landing/icons";
 import type { LandingContent, LandingSectionContent } from "@/lib/landing/schema";
 import { whatsappHref } from "@/lib/whatsapp";
 
-const CLIENT_LOGIN_HREF = "/admin/login?tenant=plataforma";
+const CLIENT_LOGIN_HREF = "/ingresar";
 const NO_TRIAL_WHATSAPP = "Hola MiBidón, quiero crear la tienda online de mi purificadora.";
 
 function d(ms: number) {

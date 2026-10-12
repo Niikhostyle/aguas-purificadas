@@ -1,4 +1,5 @@
 import { hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 import {
   IntegrationApiKeys,
   IntegrationCommerceCodes,
@@ -24,11 +25,14 @@ export type CreateTenantInput = {
   region?: string;
   adminName: string;
   adminEmail: string;
-  adminPassword: string;
+  /** Omit to create the admin with a random unusable password (owner sets it via invite link). */
+  adminPassword?: string;
   /** Seed a small default catalog + zones */
   withSampleCatalog?: boolean;
   /** Attach Transbank integration sandbox credentials */
   withSandboxWebpay?: boolean;
+  /** Link to the FOSSBilling order that pays for this tenant */
+  billing?: { clientId: string; orderId: string; plan?: string };
 };
 
 // Slugs double as subdomains of mibidon.cl; these hosts belong to the platform.
@@ -41,20 +45,61 @@ export const RESERVED_TENANT_SLUGS = new Set([
   "api",
   "mail",
   "billing",
+  "mibidon",
+  "smtp",
+  "imap",
+  "ftp",
+  "ns1",
+  "ns2",
+  "cdn",
+  "static",
+  "status",
+  "soporte",
+  "ayuda",
+  "blog",
+  "staging",
+  "dev",
+  "test",
 ]);
 
-function slugify(value: string) {
+export function normalizeTenantSlug(value: string) {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
-    .slice(0, 40);
+    .slice(0, 40)
+    .replace(/-$/, "");
+}
+
+export type SlugCheck =
+  | { ok: true; slug: string }
+  | { ok: false; slug: string; code: "invalid" | "reserved" | "taken"; message: string };
+
+/** Normalizes a desired subdomain and checks it can be used for a new tenant. */
+export async function checkTenantSlug(raw: string): Promise<SlugCheck> {
+  const slug = normalizeTenantSlug(raw);
+  if (slug.length < 3) {
+    return {
+      ok: false,
+      slug,
+      code: "invalid",
+      message: "El subdominio debe tener al menos 3 letras o números",
+    };
+  }
+  if (RESERVED_TENANT_SLUGS.has(slug)) {
+    return { ok: false, slug, code: "reserved", message: `El subdominio "${slug}" está reservado` };
+  }
+  const existing = await prisma.tenant.findUnique({ where: { slug }, select: { id: true } });
+  if (existing) {
+    return { ok: false, slug, code: "taken", message: `El subdominio "${slug}" ya está en uso` };
+  }
+  return { ok: true, slug };
 }
 
 export async function createTenantOnboarding(input: CreateTenantInput) {
-  const slug = slugify(input.slug);
+  const slug = normalizeTenantSlug(input.slug);
   if (slug.length < 2) {
     throw new Error("El slug debe tener al menos 2 caracteres");
   }
@@ -74,11 +119,13 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       ? input.secondaryColor.trim()
       : "#12326E";
 
-  if (input.adminPassword.length < 12) {
-    throw new Error("La contraseña del admin debe tener al menos 12 caracteres");
-  }
-  if (/admin123|password|changeme/i.test(input.adminPassword)) {
-    throw new Error("Elegí una contraseña más segura");
+  if (input.adminPassword !== undefined) {
+    if (input.adminPassword.length < 12) {
+      throw new Error("La contraseña del admin debe tener al menos 12 caracteres");
+    }
+    if (/admin123|password|changeme/i.test(input.adminPassword)) {
+      throw new Error("Elegí una contraseña más segura");
+    }
   }
 
   const whatsapp = input.whatsapp?.trim()
@@ -88,7 +135,10 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
     throw new Error("WhatsApp inválido: usa un número chileno, ej. +56 9 1234 5678");
   }
 
-  const passwordHash = hashSync(input.adminPassword, 12);
+  const passwordHash = hashSync(
+    input.adminPassword ?? randomBytes(32).toString("base64url"),
+    12,
+  );
   const { DEFAULT_MODULE_FLAGS, defaultDemoModulesContent } = await import(
     "@/lib/modules"
   );
@@ -111,6 +161,15 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
       modulesEnabled: DEFAULT_MODULE_FLAGS,
       modulesContent: defaultDemoModulesContent(),
       active: true,
+      ...(input.billing
+        ? {
+            billingClientId: input.billing.clientId,
+            billingOrderId: input.billing.orderId,
+            plan: input.billing.plan || null,
+            billingStatus: "active",
+            billingUpdatedAt: new Date(),
+          }
+        : {}),
       adminUsers: {
         create: {
           email: input.adminEmail.trim().toLowerCase(),
@@ -120,6 +179,7 @@ export async function createTenantOnboarding(input: CreateTenantInput) {
         },
       },
     },
+    include: { adminUsers: true },
   });
 
   if (input.withSampleCatalog !== false) {

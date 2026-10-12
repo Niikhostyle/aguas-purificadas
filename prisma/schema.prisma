@@ -48,6 +48,15 @@ model Tenant {
   twitterUrl     String?
   youtubeUrl     String?
   active         Boolean  @default(true)
+  /// FOSSBilling (billing.mibidon.cl) client id of the paying company
+  billingClientId  String?
+  /// FOSSBilling order id; idempotency key for automatic provisioning
+  billingOrderId   String?   @unique
+  /// Product/plan slug in FOSSBilling, e.g. plan-mibidon
+  plan             String?
+  /// active | suspended | canceled (null = managed manually, not via billing)
+  billingStatus    String?
+  billingUpdatedAt DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -111,11 +120,27 @@ model AdminUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant  Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invites AdminInvite[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
   @@map("admin_users")
+}
+
+/// One-time link for an admin to set their password (/admin/activar?token=). Only the SHA-256 of the token is stored.
+model AdminInvite {
+  id          String    @id @default(cuid())
+  adminUserId String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@map("admin_invites")
 }
 
 model Product {

@@ -1,0 +1,14 @@
+{% block subject %}Tu tienda MiBidón está lista: {{ store_url }}{% endblock %}
+{% block content %}
+<p>Hola {{ c.first_name }},</p>
+<p>¡Tu tienda online ya está creada!</p>
+<ul>
+    <li>Tienda: <a href="{{ store_url }}">{{ store_url }}</a></li>
+    <li>Panel de administración: <a href="{{ admin_url }}">{{ admin_url }}</a></li>
+    <li>Usuario: {{ c.email }}</li>
+</ul>
+<p>Para entrar por primera vez crea tu contraseña con este enlace (válido por 7 días y de un solo uso):</p>
+<p><a href="{{ invite_url }}">{{ invite_url }}</a></p>
+<p>Si el enlace expira, puedes generar uno nuevo desde tu cuenta en billing.mibidon.cl → Servicios → tu plan MiBidón.</p>
+<p>Equipo MiBidón</p>
+{% endblock %}

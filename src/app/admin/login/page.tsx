@@ -6,7 +6,11 @@ import {
   isDemoTenantSlug,
   isSuperAdmin,
 } from "@/lib/auth";
-import { getTenantSlugFromHeaders } from "@/lib/tenant";
+import {
+  getInactiveHostTenant,
+  getTenantSlugFromHeaders,
+  SUSPENDED_PATH,
+} from "@/lib/tenant";
 import { loginAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +25,8 @@ export default async function AdminLoginPage({
   if (session) {
     redirect(isSuperAdmin(session) ? "/admin/plataforma" : "/admin");
   }
+
+  if (await getInactiveHostTenant()) redirect(SUSPENDED_PATH);
 
   const { error, tenant: tenantQuery } = await searchParams;
   const headerSlug = await getTenantSlugFromHeaders();

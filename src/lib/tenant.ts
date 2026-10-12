@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import type { Tenant } from "@prisma/client";
 
@@ -21,12 +21,25 @@ export async function requireTenant(): Promise<Tenant> {
   const slug = await getTenantSlugFromHeaders();
   if (!slug) notFound();
 
-  const tenant = await prisma.tenant.findFirst({
-    where: { slug, active: true },
-  });
+  const tenant = await prisma.tenant.findUnique({ where: { slug } });
 
   if (!tenant) notFound();
+  if (!tenant.active) redirect(SUSPENDED_PATH);
   return tenant;
+}
+
+/** Friendly page shown on a tenant host whose account is suspended or canceled. */
+export const SUSPENDED_PATH = "/suspendida";
+
+/** Tenant of the current host when it exists but is inactive (suspended / canceled). */
+export async function getInactiveHostTenant() {
+  const slug = await getTenantSlugFromHeaders();
+  if (!slug) return null;
+  const tenant = await prisma.tenant.findUnique({
+    where: { slug },
+    select: { name: true, slug: true, active: true, billingStatus: true },
+  });
+  return tenant && !tenant.active ? tenant : null;
 }
 
 export async function getTenantProducts(tenantId: string) {
