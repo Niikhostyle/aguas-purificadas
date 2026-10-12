@@ -1,0 +1,7 @@
+{# MiBidón ships a single light look; drop any dark preference saved by huraga. #}
+<script>
+    (() => {
+        try { localStorage.removeItem('theme'); } catch (_) {}
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+    })();
+</script>

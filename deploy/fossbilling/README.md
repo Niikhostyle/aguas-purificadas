@@ -32,6 +32,7 @@ bash setup-nginx.sh    # backup de /etc/nginx, instala el vhost, nginx -t y reci
 bash run-installer.sh  # instalador web vía curl, borra install/, config.php 440, cron
 bash basic-setup.sh    # empresa, locale, formato CLP y producto del plan (token API temporal)
 bash install-mercadopago.sh  # pasarela Mercado Pago (pide el Access Token sin mostrarlo)
+bash install-theme.sh  # tema "mibidon" del área de clientes (backup + activa); --rollback vuelve a huraga
 ```
 
 Todos son idempotentes. Las contraseñas (BD y admin) se generan en el servidor y solo se escriben en `/root/fossbilling-credentials.txt`.
@@ -41,4 +42,5 @@ Todos son idempotentes. Las contraseñas (BD y admin) se generan en el servidor 
 - `config.php` queda en `440`. Los ajustes del admin que escriben el config (idioma, caché) necesitan `chmod u+w` temporal; `basic-setup.sh` lo hace y lo revierte.
 - Actualizar: Sistema → Actualizaciones en el admin, o https://docs.fossbilling.org/maintenance/updating/.
 - Pagos: adapter propio `gateways/MercadoPago.php` (Checkout Pro, pagos únicos en CLP; cada factura mensual se paga por separado). El pago se confirma consultando la API de Mercado Pago al volver el cliente (`ipn.php?...&redirect=1`) y por webhook (`notification_url` por preferencia, no hace falta configurarlo en el panel de Mercado Pago). Las actualizaciones de FOSSBilling pueden borrar `library/Payment/Adapter/MercadoPago.php`: volver a correr `install-mercadopago.sh` (Enter sin token conserva la configuración).
-- Pendiente: SMTP para correos y logo de MiBidón.
+- Tema de clientes `themes/mibidon`: assets compilados de Huraga + los overrides de `themes/mibidon/` (layouts, inicio/planes, panel del cliente, pedido, factura, login/registro y `assets/mibidon.css`). Tras actualizar FOSSBilling, volver a correr `install-theme.sh` para tomar los assets nuevos de Huraga y revisar que los templates sobrescritos sigan calzando con los del core.
+- Pendiente: SMTP para correos.

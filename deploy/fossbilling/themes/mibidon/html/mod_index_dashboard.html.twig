@@ -1,0 +1,213 @@
+{% extends request.ajax ? "layout_blank.html.twig" : "layout_default.html.twig" %}
+{% set active_menu = 'dashboard' %}
+
+{% block meta_title %}{% if client %}{{ 'Mi cuenta'|trans }}{% else %}{{ 'Planes MiBidón'|trans }}{% endif %}{% endblock %}
+{% block meta_description %}{{ 'Contrata tu tienda online MiBidón, paga con Mercado Pago y administra tu plan.'|trans }}{% endblock %}
+{% block page_header %}{{ 'Dashboard'|trans }}{% endblock %}
+
+{% block body_class %}dashboard{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
+{% import "macro_functions.html.twig" as mf %}
+
+{% block content %}
+    {{ render_widgets('client.index.dashboard.content.before') }}
+
+    {% if settings.showcase_enabled and settings.showcase_text|default('') and 'FOSSBilling' not in settings.showcase_text %}
+        <div class="alert alert-info mb-4" role="alert">
+            {{ (settings.showcase_text ?? '')|markdown_to_html }}
+            {% if (settings.showcase_button_url) and (settings.showcase_button_title) %}
+                <a class="btn btn-sm btn-primary" href="{{ settings.showcase_button_url }}">{{ settings.showcase_button_title }}</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if client %}
+        {% set dashboard = client.index_get_dashboard %}
+        {% set profile = dashboard.profile %}
+        {% set unpaid = client.invoice_get_list({"status": "unpaid", "per_page": 5}) %}
+        {% set orders = client.order_get_list({"per_page": 20, "hide_addons": 1}) %}
+
+        {% set mb_periods = {'1W': 'por semana', '1M': 'al mes', '3M': 'por trimestre', '6M': 'por semestre', '1Y': 'al año', '2Y': 'cada 2 años', '3Y': 'cada 3 años'} %}
+        {% set pay_map = {} %}
+        {% for inv in unpaid.list %}
+            {% for line in inv.lines|default([]) %}
+                {% if line.order_id %}
+                    {% set pay_map = pay_map|merge({ ('o' ~ line.order_id): inv.hash }) %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+
+        {{ render_widgets('client.index.dashboard.client.before', { 'dashboard': dashboard, 'profile': profile }) }}
+
+        <div class="mb-greeting mb-4">
+            <h1>{{ 'Hola'|trans }}{% if profile.first_name %}, {{ profile.first_name }}{% endif %}</h1>
+            <p class="mb-0">{{ 'Aquí tienes el estado de tu plan, tu tienda y tus pagos.'|trans }}</p>
+        </div>
+
+        {% if dashboard.tickets.on_hold > 0 %}
+            {% for ticket in dashboard.recent_tickets %}
+                {% if ticket.status == 'on_hold' %}
+                    <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
+                        <span>{{ 'Respondimos tu consulta'|trans }} <strong>#{{ ticket.id }}</strong>.</span>
+                        <a href='{{ "support/ticket/#{ticket.id}"|url }}' class="btn btn-sm btn-primary">{{ 'Ver respuesta'|trans }}</a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        {% if unpaid.total > 0 %}
+            <section class="mb-pay-alert" aria-labelledby="mb-pay-title">
+                <h2 id="mb-pay-title">
+                    <svg class="icon" aria-hidden="true"><use href="#credit-card" /></svg>
+                    {% if unpaid.total == 1 %}{{ 'Tienes 1 pago pendiente'|trans }}{% else %}{{ 'Tienes'|trans }} {{ unpaid.total }} {{ 'pagos pendientes'|trans }}{% endif %}
+                </h2>
+                {% for inv in unpaid.list %}
+                    <div class="mb-pay-row">
+                        <div>
+                            <span class="mb-amount">{{ inv.total|format_currency(inv.currency ?? default_currency) }}</span>
+                            <small>
+                                {{ 'Factura'|trans }} #{{ inv.serie ~ "%05s"|format(inv.nr) }}
+                                {% if inv.lines|default([])|length > 0 %} · {{ inv.lines[0].title }}{% endif %}
+                                {% if inv.due_at %} · {{ 'Vence el'|trans }} {{ inv.due_at|format_date }}{% endif %}
+                            </small>
+                        </div>
+                        <a class="btn btn-primary mb-btn-pay btn-lg" href='{{ "invoice/#{inv.hash}"|url }}'>{{ 'Pagar ahora'|trans }}</a>
+                    </div>
+                {% endfor %}
+                {% if unpaid.total > unpaid.list|length %}
+                    <a class="d-inline-block mt-2" href="{{ 'invoice'|url }}">{{ 'Ver todas las facturas pendientes'|trans }}</a>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <section class="mb-5" aria-labelledby="mb-services-title">
+            <div class="d-flex justify-content-between align-items-end gap-2 mb-3">
+                <h2 id="mb-services-title" class="mb-section-title mb-0">{{ 'Mis servicios'|trans }}</h2>
+                <a class="small fw-semibold" href="{{ 'order/service'|url }}">{{ 'Ver todos'|trans }}</a>
+            </div>
+            {% set shown = 0 %}
+            <div class="row g-3">
+                {% for order in orders.list %}
+                    {% if order.status != 'canceled' and shown < 6 %}
+                        {% set shown = shown + 1 %}
+                        {% set store = client.mibidon_store({ 'order_id': order.id }) %}
+                        {% set pay_hash = pay_map['o' ~ order.id]|default(null) %}
+                        <div class="col-md-6">
+                            <article class="mb-service">
+                                <div class="mb-service-head">
+                                    <div>
+                                        <h3>{{ order.title }}</h3>
+                                        <div class="mb-service-meta">
+                                            {% if order.config.empresa|default('') %}{{ order.config.empresa }} · {% endif %}
+                                            {{ order.total|format_currency(order.currency ?? default_currency) }}{% if order.period %} {{ mb_periods[order.period]|default(order.period|period_title) }}{% endif %}
+                                        </div>
+                                        {% if order.expires_at and order.status == 'active' %}
+                                            <div class="mb-service-meta">{{ 'Próxima renovación'|trans }}: {{ order.expires_at|format_date }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>{{ mf.status_badge(order.status, 'order') }}</div>
+                                </div>
+
+                                {% if store and store.url %}
+                                    <div class="mb-store-url">
+                                        <svg class="icon" aria-hidden="true"><use href="#shopping-cart" /></svg>
+                                        <a href="{{ store.url }}" target="_blank" rel="noopener">{{ store.url|replace({'https://': ''}) }}</a>
+                                    </div>
+                                {% elseif store and order.status == 'active' %}
+                                    <p class="mb-service-meta mb-0">{{ 'Tu tienda se está creando. Recarga en unos segundos.'|trans }}</p>
+                                {% elseif pay_hash %}
+                                    <p class="mb-service-meta mb-0">{{ 'Tu tienda se activará automáticamente cuando se confirme el pago.'|trans }}</p>
+                                {% endif %}
+
+                                <div class="mb-service-actions">
+                                    {% if pay_hash %}
+                                        <a class="btn btn-primary mb-btn-pay" href='{{ "invoice/#{pay_hash}"|url }}'>{{ 'Pagar'|trans }}</a>
+                                    {% endif %}
+                                    {% if store and store.url %}
+                                        <a class="btn btn-primary" href="{{ store.url }}" target="_blank" rel="noopener">{{ 'Abrir mi tienda'|trans }}</a>
+                                        {% if store.admin_url %}
+                                            <a class="btn btn-outline-primary" href="{{ store.admin_url }}" target="_blank" rel="noopener">{{ 'Panel de administración'|trans }}</a>
+                                        {% endif %}
+                                    {% endif %}
+                                    <a class="btn btn-dark" href='{{ "order/service/manage/#{order.id}"|url }}'>{{ 'Ver detalle'|trans }}</a>
+                                </div>
+                            </article>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% if shown == 0 %}
+                <div class="mb-empty">
+                    <h3 class="h5">{{ 'Aún no tienes un plan activo'|trans }}</h3>
+                    <p>{{ 'Elige tu plan y tendrás tu tienda online lista en minutos.'|trans }}</p>
+                    <a class="btn btn-primary btn-lg" href="{{ 'order'|url }}">{{ 'Ver planes'|trans }}</a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="mb-section-gap" aria-labelledby="mb-quick-title">
+            <h2 id="mb-quick-title" class="mb-section-title mb-3">{{ 'Accesos rápidos'|trans }}</h2>
+            <div class="mb-quick">
+                <a href="{{ 'invoice'|url }}">
+                    <span class="mb-qi"><svg class="icon"><use href="#receipt" /></svg></span>
+                    <span>{{ 'Mis facturas'|trans }}<small>{{ dashboard.invoices.paid }} {{ 'pagadas'|trans }} · {{ dashboard.invoices.unpaid }} {{ 'pendientes'|trans }}</small></span>
+                </a>
+                <a href="{{ 'order'|url }}">
+                    <span class="mb-qi"><svg class="icon"><use href="#shopping-cart" /></svg></span>
+                    <span>{{ 'Contratar otro plan'|trans }}<small>{{ 'Planes y precios'|trans }}</small></span>
+                </a>
+                <a href="{{ 'client/profile'|url }}">
+                    <span class="mb-qi"><svg class="icon"><use href="#user" /></svg></span>
+                    <span>{{ 'Mi perfil'|trans }}<small>{{ profile.email }}</small></span>
+                </a>
+                {% if settings.side_menu_support %}
+                    <a href="{{ 'support'|url }}">
+                        <span class="mb-qi"><svg class="icon"><use href="#lifebuoy" /></svg></span>
+                        <span>{{ 'Ayuda y soporte'|trans }}<small>{{ 'Escríbenos si necesitas ayuda'|trans }}</small></span>
+                    </a>
+                {% endif %}
+            </div>
+        </section>
+
+        {{ render_widgets('client.index.dashboard.client.after', { 'dashboard': dashboard, 'profile': profile }) }}
+    {% else %}
+        {{ render_widgets('client.index.dashboard.guest.before') }}
+
+        <section class="mb-hero">
+            <span class="mb-eyebrow">{{ 'Tienda online para agua purificada'|trans }}</span>
+            <h1>{{ 'Vende tus bidones online con tu propia tienda'|trans }}</h1>
+            <p class="lead">{{ 'Elige tu plan, paga con Mercado Pago y tu tienda queda lista en tuempresa.mibidon.cl. Sin instalaciones ni conocimientos técnicos.'|trans }}</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary btn-lg" href="#planes">{{ 'Ver planes'|trans }}</a>
+                <a class="btn btn-outline-primary btn-lg" href="{{ 'login'|url }}">{{ 'Ya soy cliente'|trans }}</a>
+            </div>
+        </section>
+
+        {% set products = guest.product_get_list.list|default([])|sort((a, b) => a.priority <=> b.priority) %}
+        <section id="planes" class="mb-5" aria-labelledby="mb-plans-title">
+            <h2 id="mb-plans-title" class="mb-section-title">{{ 'Planes'|trans }}</h2>
+            <p class="mb-section-sub">{{ 'Precios en pesos chilenos.'|trans }}</p>
+            <div class="mb-plans{% if products|length == 1 %} mb-plans-single{% endif %}">
+                {% for product in products %}
+                    {{ include('partial_mb_plan_card.html.twig', { product: product, featured: loop.first and products|length > 1 }) }}
+                {% else %}
+                    <div class="mb-empty"><p class="mb-0">{{ 'Pronto publicaremos nuestros planes.'|trans }}</p></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="mb-4 mb-section-gap" aria-labelledby="mb-how-title">
+            <h2 id="mb-how-title" class="mb-section-title mb-3">{{ '¿Cómo funciona?'|trans }}</h2>
+            <ol class="mb-steps">
+                <li><div><strong>{{ 'Elige tu plan'|trans }}</strong><span>{{ 'Indica el nombre de tu empresa y la dirección de tu tienda.'|trans }}</span></div></li>
+                <li><div><strong>{{ 'Crea tu cuenta y paga'|trans }}</strong><span>{{ 'Pago seguro a través de Mercado Pago.'|trans }}</span></div></li>
+                <li><div><strong>{{ 'Tu tienda queda lista'|trans }}</strong><span>{{ 'Se activa automáticamente y te enviamos el acceso por correo.'|trans }}</span></div></li>
+            </ol>
+        </section>
+
+        {{ render_widgets('client.index.dashboard.guest.after') }}
+    {% endif %}
+
+    {{ render_widgets('client.index.dashboard.content.after') }}
+{% endblock %}

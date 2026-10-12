@@ -1,0 +1,28 @@
+{% set products = guest.product_get_list %}
+{% set mb_choose_open = not request.product and not request.checkout and (product is not defined or not product) %}
+<div class="accordion-item">
+    <h3 class="accordion-header">
+        <button class="accordion-button{% if not mb_choose_open %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#products" aria-expanded="{{ mb_choose_open ? 'true' : 'false' }}" aria-controls="products">
+            <svg class="icon me-2"><use href="#apps" /></svg>
+            <span>{{ 'Elige tu plan'|trans }}</span>
+        </button>
+    </h3>
+    <div id="products" class="accordion-collapse collapse{% if mb_choose_open %} show{% endif %}" data-bs-parent="#orderManager">
+        <div class="accordion-body">
+            {% for i, category in guest.product_category_get_list.list %}
+                {% if category.products|length > 0 %}
+                    {% if category.title != 'Default category' and guest.product_category_get_list.list|length > 1 %}
+                        <h4 {% if i > 0 %} class="mt-4" {% endif %}>{{ category.title }}</h4>
+                        {% if category.description %}<div class="text-muted mb-3">{{ (category.description ?? '')|markdown_to_html }}</div>{% endif %}
+                    {% endif %}
+                    {% set sorted = category.products|sort((a, b) => a.priority <=> b.priority) %}
+                    <div class="mb-plans{% if sorted|length == 1 %} mb-plans-single{% endif %}">
+                        {% for product in sorted %}
+                            {{ include('partial_mb_plan_card.html.twig', { product: product, featured: loop.first and sorted|length > 1 }) }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

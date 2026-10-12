@@ -1,0 +1,12 @@
+{% set mb_step = request.checkout ? 3 : ((request.product or product|default(null)) ? 2 : 1) %}
+<div class="mb-page-head">
+    <h1>{% if mb_step == 1 %}{{ 'Elige tu plan'|trans }}{% elseif mb_step == 2 %}{{ 'Configura tu tienda'|trans }}{% else %}{{ 'Revisa y paga'|trans }}{% endif %}</h1>
+    <p>{% if mb_step == 1 %}{{ 'Todos los precios están en pesos chilenos.'|trans }}{% elseif mb_step == 2 %}{{ 'Cuéntanos el nombre de tu empresa y la dirección que quieres para tu tienda.'|trans }}{% else %}{{ 'Confirma tu pedido. El pago se realiza de forma segura en Mercado Pago.'|trans }}{% endif %}</p>
+</div>
+<ol class="mb-checkout-steps" aria-label="{{ 'Pasos de compra'|trans }}">
+    <li class="{{ mb_step == 1 ? 'is-active' : '' }}"{% if mb_step == 1 %} aria-current="step"{% endif %}><b>1</b>{{ 'Plan'|trans }}</li>
+    <li class="{{ mb_step == 2 ? 'is-active' : '' }}"{% if mb_step == 2 %} aria-current="step"{% endif %}><b>2</b>{{ 'Datos de tu tienda'|trans }}</li>
+    {% if not client %}<li><b>3</b>{{ 'Tu cuenta'|trans }}</li>{% endif %}
+    <li class="{{ mb_step == 3 ? 'is-active' : '' }}"{% if mb_step == 3 %} aria-current="step"{% endif %}><b>{{ client ? 3 : 4 }}</b>{{ 'Pago'|trans }}</li>
+</ol>
+{{ include('mod_orderbutton_currency.html.twig') }}

@@ -1,0 +1,33 @@
+{# Plan card. Expects: product (guest product API array), featured (bool), cta_label (string). #}
+{% set cart_currency = guest.cart_get_currency %}
+{% set periods = guest.system_periods %}
+{% set price_period = null %}
+{% set price_value = product.price_starting_from|default(0) %}
+{% if product.pricing.type|default('') == 'recurrent' %}
+    {% for code, prices in product.pricing.recurrent %}
+        {% if prices.enabled and price_period is null %}
+            {% set price_period = code %}
+            {% set price_value = prices.price %}
+        {% endif %}
+    {% endfor %}
+{% elseif product.pricing.type|default('') == 'once' %}
+    {% set price_value = product.pricing.once.price %}
+{% elseif product.pricing.type|default('') == 'free' %}
+    {% set price_value = 0 %}
+{% endif %}
+{% set period_short = {'1W': 'semana', '1M': 'mes', '3M': 'trimestre', '6M': 'semestre', '1Y': 'año', '2Y': '2 años', '3Y': '3 años'} %}
+<article class="mb-plan{% if featured|default(false) %} is-featured{% endif %}">
+    {% if featured|default(false) %}<span class="mb-plan-badge">{{ 'Recomendado'|trans }}</span>{% endif %}
+    <h3>{{ product.title }}</h3>
+    <div class="mb-plan-price">
+        <strong>{{ (price_value * cart_currency.conversion_rate)|format_currency(cart_currency.code) }}</strong>
+        {% if price_period %}<span>/ {{ period_short[price_period]|default(periods[price_period]|default(price_period)) }}</span>{% endif %}
+    </div>
+    <div class="mb-plan-note">
+        {% if price_period %}{{ 'Cobro recurrente · Paga con Mercado Pago'|trans }}{% else %}{{ 'Pago único con Mercado Pago'|trans }}{% endif %}
+    </div>
+    {% if product.description %}
+        <div class="mb-plan-desc">{{ (product.description ?? '')|markdown_to_html }}</div>
+    {% endif %}
+    <a class="btn btn-primary btn-lg w-100" href="{{ 'order'|url(query: { 'product': product.id }) }}">{{ cta_label|default('Elegir este plan'|trans) }}</a>
+</article>
