@@ -3,6 +3,7 @@ export type AdminNavIcon =
   | "dispatch"
   | "map"
   | "zones"
+  | "alerts"
   | "orders"
   | "reminders"
   | "containers"
@@ -48,6 +49,7 @@ export const TENANT_NAV: AdminNavGroup[] = [
       { href: "/admin/despacho/mapa", label: "Mapa de entregas", icon: "map" },
       { href: "/admin/zonas", label: "Zonas de despacho", icon: "zones" },
       { href: "/admin/pedidos", label: "Pedidos", icon: "orders" },
+      { href: "/admin/alertas", label: "Alertas", icon: "alerts" },
       { href: "/admin/recordatorios", label: "Recordatorios", icon: "reminders" },
       { href: "/admin/envases", label: "Envases", icon: "containers" },
     ],

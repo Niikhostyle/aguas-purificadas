@@ -58,7 +58,7 @@ export default async function AdminPanelLayout({
     }
   } else {
     const today = todayCl();
-    const [pending, unassigned, dueSoon, zones] = await Promise.all([
+    const [pending, unassigned, dueSoon, zones, debtors] = await Promise.all([
       prisma.order.count({ where: { tenantId: admin.tenantId, status: "pending" } }),
       flags.despacho
         ? prisma.order.count({
@@ -82,7 +82,19 @@ export default async function AdminPanelLayout({
         where: { tenantId: admin.tenantId },
         select: { active: true, createdAt: true, updatedAt: true },
       }),
+      prisma.order.count({
+        where: { tenantId: admin.tenantId, status: "pending", fulfillmentStatus: "entregado" },
+      }),
     ]);
+    if (debtors) {
+      notifications.push({
+        id: "debtors",
+        label: "Pedidos entregados sin pagar",
+        href: "/admin/alertas#morosos",
+        count: debtors,
+        tone: "danger",
+      });
+    }
     if (zonesNeedSetup(zones)) {
       notifications.push({
         id: "zones-setup",
