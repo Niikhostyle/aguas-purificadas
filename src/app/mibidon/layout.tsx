@@ -20,6 +20,14 @@ export const metadata: Metadata = {
   },
   description:
     "La plataforma eCommerce white-label para embotelladoras de agua: pedidos, rutas de despacho y cobro con WebPay Plus en 2 clics. Lista en menos de 24 horas y con tu propio logo.",
+  icons: {
+    icon: [
+      { url: "/brand/mibidon/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/mibidon/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/brand/mibidon/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: { url: "/brand/mibidon/apple-icon.png", sizes: "180x180" },
+  },
 };
 
 export default function MiBidonLayout({

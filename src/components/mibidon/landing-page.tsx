@@ -44,11 +44,16 @@ function externalProps(href: string) {
     : {};
 }
 
-function DropLogo({ className = "" }: { className?: string }) {
+function BrandLogo({ className, preload = false }: { className: string; preload?: boolean }) {
   return (
-    <svg fill="currentColor" viewBox="0 0 256 256" className={className} aria-hidden>
-      <path d="M174,47.75a254.19,254.19,0,0,0-41.45-38.3,8,8,0,0,0-9.18,0A254.19,254.19,0,0,0,82,47.75C54.51,79.32,40,112.6,40,144a88,88,0,0,0,176,0C216,112.6,201.49,79.32,174,47.75ZM128,216a72.08,72.08,0,0,1-72-72c0-57.23,55.47-105,72-118,16.53,13,72,60.75,72,118A72.08,72.08,0,0,1,128,216Zm55.89-62.66a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68Z" />
-    </svg>
+    <Image
+      src="/brand/mibidon/logo.png"
+      alt="MiBidón"
+      width={793}
+      height={296}
+      preload={preload}
+      className={className}
+    />
   );
 }
 
@@ -227,16 +232,8 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
 
       <ScrollHeader className="sticky top-0 z-40 border-b border-sv-surface-high bg-sv-surface/95 px-4 backdrop-blur-md sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="mb-nav-logo flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-sv-surface-high text-sv-secondary">
-              <DropLogo className="size-6" />
-            </div>
-            <div>
-              <p className="sv-display text-xl font-bold leading-none tracking-tight text-sv-primary">MiBidón</p>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-sv-secondary">
-                ECommerce Purificadoras
-              </span>
-            </div>
+          <Link href="/" className="mb-nav-logo flex items-center py-1.5" aria-label="MiBidón - Inicio">
+            <BrandLogo className="h-12 w-auto sm:h-16" preload />
           </Link>
           <nav className="sv-label hidden items-center gap-8 text-sm font-medium text-sv-on-surface-variant lg:flex">
             {navLinks.map((l) => (
@@ -775,8 +772,8 @@ export function MiBidonLanding({ content }: { content: LandingContent }) {
       {footer.enabled ? (
         <footer className="border-t border-sv-surface-high bg-sv-surface-low py-8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-sv-on-surface-variant sm:flex-row sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2">
-              <DropLogo className="size-4 text-sv-secondary" />
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+              <BrandLogo className="h-10 w-auto" />
               <span>
                 © {new Date().getFullYear()} {footer.content.brandText}
               </span>
