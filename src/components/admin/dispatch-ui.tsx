@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import { Blocks } from "lucide-react";
+import { AlertCircle, Blocks } from "lucide-react";
 import {
   FULFILLMENT_BADGE,
   FULFILLMENT_LABEL,
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { AutoBreadcrumbs } from "./ui/auto-breadcrumbs";
 import { adminButton } from "./ui/button-styles";
 import { EmptyState } from "./ui/empty-state";
-import { KpiCard, type KpiTone } from "./ui/kpi-card";
+import { KpiCard, type KpiTone, type KpiTrend } from "./ui/kpi-card";
 
 export function Pill({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
@@ -65,6 +65,7 @@ export function StatCard({
   icon: Icon,
   tone = "brand",
   href,
+  trend,
 }: {
   label: string;
   value: string | number;
@@ -72,6 +73,7 @@ export function StatCard({
   icon?: LucideIcon;
   tone?: "brand" | "amber" | "sky" | "emerald" | "rose" | "navy";
   href?: string;
+  trend?: KpiTrend;
 }) {
   return (
     <KpiCard
@@ -81,21 +83,21 @@ export function StatCard({
       icon={Icon ? <Icon /> : <Blocks />}
       tone={STAT_TONE[tone]}
       href={href}
+      trend={trend}
     />
   );
 }
 
-export function Flash({ ok, error }: { ok?: string; error?: string }) {
-  if (!ok && !error) return null;
+/** Success messages arrive as toasts (FlashToaster); errors also stay inline so they remain visible. */
+export function Flash({ error }: { ok?: string; error?: string }) {
+  if (!error) return null;
   return (
     <p
-      role={error ? "alert" : "status"}
-      className={cn(
-        "mt-4 rounded-lg border px-4 py-2.5 text-sm print:hidden",
-        ok ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800",
-      )}
+      role="alert"
+      className="mt-4 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-800 print:hidden"
     >
-      {ok ?? error}
+      <AlertCircle aria-hidden className="mt-0.5 size-4 shrink-0" />
+      {error}
     </p>
   );
 }

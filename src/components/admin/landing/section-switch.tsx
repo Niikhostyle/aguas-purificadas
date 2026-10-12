@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { setLandingSectionEnabledAction } from "@/app/admin/(panel)/plataforma/landing/actions";
+import { toast } from "@/lib/alerts";
 import type { LandingSectionKey } from "@/lib/landing/schema";
 
 export function Switch({
@@ -81,6 +82,9 @@ export function SectionToggle({
             if (!res.ok) {
               setEnabled(!next);
               setError(res.error);
+              void toast.error(res.error);
+            } else {
+              void toast.success(`${title}: ${next ? "visible" : "oculta"} en la landing`);
             }
             router.refresh();
           });

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 export type KpiTone = "brand" | "navy" | "info" | "success" | "warning" | "danger" | "neutral";
+
+/** Percent change vs a previous period; `null` when there's no baseline to compare. */
+export type KpiTrend = { current: number; previous: number; label: string; invert?: boolean };
 
 const TONE_VAR: Record<KpiTone, { bg: string; fill: string; text: string }> = {
   brand: { bg: "var(--kpi-brand-bg, var(--brand))", fill: "var(--kpi-brand-fill, var(--brand))", text: "var(--kpi-brand-text, #fff)" },
@@ -13,6 +17,43 @@ const TONE_VAR: Record<KpiTone, { bg: string; fill: string; text: string }> = {
   neutral: { bg: "#7b8aa0", fill: "#7b8aa0", text: "#fff" },
 };
 
+function TrendChip({ trend }: { trend: KpiTrend }) {
+  const { current, previous, label, invert } = trend;
+  const diff = current - previous;
+  const pct = previous > 0 ? Math.round((diff / previous) * 100) : null;
+  const direction = diff === 0 ? "flat" : diff > 0 ? "up" : "down";
+  const good = direction === "flat" ? null : (direction === "up") !== Boolean(invert);
+  const Icon = direction === "up" ? ArrowUpRight : direction === "down" ? ArrowDownRight : Minus;
+  const text =
+    direction === "flat"
+      ? "Sin cambio"
+      : pct === null
+        ? "Nuevo"
+        : pct >= 1000
+          ? `×${Math.round(current / previous)}`
+          : `${diff > 0 ? "+" : ""}${pct}%`;
+  const spoken =
+    direction === "flat"
+      ? `sin cambio ${label}`
+      : pct === null
+        ? `${diff > 0 ? "sube" : "baja"} ${label}, sin base de comparación`
+        : `${diff > 0 ? "sube" : "baja"} ${Math.abs(pct)}% ${label}`;
+  return (
+    <span className="kpi-hint mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-[#7b8aa0]">
+      <span
+        className={`kpi-trend inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums ${
+          good === null ? "bg-[#eef3f7] text-[#5a6578]" : good ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+        }`}
+      >
+        <Icon aria-hidden className="size-3" />
+        <span aria-hidden>{text}</span>
+        <span className="sr-only">{spoken}</span>
+      </span>
+      <span aria-hidden className="leading-snug">{label}</span>
+    </span>
+  );
+}
+
 export function KpiCard({
   label,
   value,
@@ -20,6 +61,7 @@ export function KpiCard({
   icon,
   tone = "brand",
   href,
+  trend,
 }: {
   label: string;
   value: ReactNode;
@@ -27,6 +69,7 @@ export function KpiCard({
   icon: ReactNode;
   tone?: KpiTone;
   href?: string;
+  trend?: KpiTrend;
 }) {
   const t = TONE_VAR[tone];
   const style = { "--kpi-bg": t.bg, "--kpi-fill": t.fill, "--kpi-text": t.text } as CSSProperties;
@@ -34,7 +77,7 @@ export function KpiCard({
     <>
       <span
         aria-hidden
-        className="kpi-icon grid size-11 shrink-0 place-items-center rounded-full bg-[var(--kpi-bg)] text-[var(--kpi-text)] [&>svg]:size-5"
+        className="kpi-icon grid size-11 shrink-0 place-items-center rounded-full bg-[var(--kpi-bg)] text-[var(--kpi-text)] transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none [&>svg]:size-5"
       >
         {icon}
       </span>
@@ -44,16 +87,17 @@ export function KpiCard({
           {value}
         </span>
         {hint ? <span className="kpi-hint block truncate text-xs text-[#7b8aa0]">{hint}</span> : null}
+        {trend ? <TrendChip trend={trend} /> : null}
       </span>
     </>
   );
   const cls =
-    "kpi-card flex items-center gap-4 rounded-xl border border-[#dde7ee] bg-white p-4 shadow-[0_1px_2px_rgba(16,40,70,0.04)]";
+    "kpi-card group flex items-center gap-4 rounded-xl border border-[#dde7ee] bg-white p-4 shadow-[0_1px_2px_rgba(16,40,70,0.04)]";
   return href ? (
     <Link
       href={href}
       style={style}
-      className={`${cls} transition hover:border-[var(--brand)]/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-[var(--brand)]`}
+      className={`${cls} transition hover:-translate-y-0.5 hover:border-[var(--brand)]/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
     >
       {body}
     </Link>

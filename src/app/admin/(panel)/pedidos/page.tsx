@@ -1,7 +1,10 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { ChevronRight, ClipboardList, SearchX, Store } from "lucide-react";
 import { FulfillmentBadge, PageHeader, PaymentBadge, btn, field } from "@/components/admin/dispatch-ui";
+import { DataTable, EmptyState, Pagination, paginate, parseSort } from "@/components/admin/ui";
+import { MobileCollapse } from "@/components/admin/ui/mobile-collapse";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -16,8 +19,9 @@ import {
 import { ORDER_STATUS_LABEL } from "@/lib/order-status";
 import { cn, formatClp } from "@/lib/utils";
 
-const PAGE_SIZE = 50;
-type SP = { q?: string; pago?: string; estado?: string; desde?: string; hasta?: string; p?: string };
+const PAGE_SIZE = 25;
+const SORTS = ["fecha", "total", "cliente", "entrega"] as const;
+type SP = { q?: string; pago?: string; estado?: string; desde?: string; hasta?: string; page?: string; orden?: string };
 
 export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<SP> }) {
   const admin = await requireAdmin();
@@ -30,7 +34,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   const estado = FULFILLMENT_STATUSES.includes(sp.estado as never) ? sp.estado : undefined;
   const desde = /^\d{4}-\d{2}-\d{2}$/.test(sp.desde ?? "") ? sp.desde : undefined;
   const hasta = /^\d{4}-\d{2}-\d{2}$/.test(sp.hasta ?? "") ? sp.hasta : undefined;
-  const page = Math.max(1, Number(sp.p) || 1);
+  const sort = parseSort(sp.orden, SORTS, "-fecha");
 
   const where: Prisma.OrderWhereInput = {
     tenantId,
@@ -58,25 +62,35 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       : {}),
   };
 
-  const [orders, total, counts] = await Promise.all([
-    prisma.order.findMany({
-      where,
-      include: { items: { select: { quantity: true } } },
-      orderBy: { createdAt: "desc" },
-      take: PAGE_SIZE,
-      skip: (page - 1) * PAGE_SIZE,
-    }),
+  const orderBy: Prisma.OrderOrderByWithRelationInput[] =
+    sort.by === "total"
+      ? [{ totalClp: sort.dir }, { createdAt: "desc" }]
+      : sort.by === "cliente"
+        ? [{ customerName: sort.dir }, { createdAt: "desc" }]
+        : sort.by === "entrega"
+          ? [{ deliveryDate: { sort: sort.dir, nulls: "last" } }, { createdAt: "desc" }]
+          : [{ createdAt: sort.dir }];
+
+  const [total, counts] = await Promise.all([
     prisma.order.count({ where }),
     prisma.order.groupBy({ by: ["status"], where: { tenantId }, _count: true }),
   ]);
+  const { page, pages, skip, take } = paginate(sp.page, total, PAGE_SIZE);
+  const orders = await prisma.order.findMany({
+    where,
+    include: { items: { select: { quantity: true } } },
+    orderBy,
+    take,
+    skip,
+  });
   const countOf = (s: string) => counts.find((c) => c.status === s)?._count ?? 0;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  const params = { q, pago, estado, desde, hasta, orden: sp.orden };
   const qsFor = (patch: Partial<SP>) => {
     const p = new URLSearchParams();
-    const merged = { ...sp, ...patch };
-    for (const [k, v] of Object.entries(merged)) if (v) p.set(k, String(v));
-    return `/admin/pedidos?${p}`;
+    for (const [k, v] of Object.entries({ ...params, ...patch })) if (v) p.set(k, String(v));
+    const s = p.toString();
+    return s ? `/admin/pedidos?${s}` : "/admin/pedidos";
   };
 
   const tabs = [
@@ -86,112 +100,236 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     { label: "Fallidos", value: "failed", n: countOf("failed") },
     { label: "Cancelados", value: "cancelled", n: countOf("cancelled") },
   ];
+  const filtered = Boolean(q || pago || estado || desde || hasta);
 
   return (
     <div>
       <PageHeader title="Pedidos" subtitle="Pedidos de la tienda con estado de pago WebPay y de despacho." />
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {tabs.map((t) => (
-          <Link
-            key={t.label}
-            href={qsFor({ pago: t.value, p: undefined })}
-            className={cn(
-              "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset",
-              pago === t.value ? "bg-[var(--brand)] text-white ring-[var(--brand)]" : "bg-white text-[var(--brand-deep)] ring-[#d5e3ec] hover:ring-[var(--brand)]",
-            )}
-          >
-            {t.label} <span className="opacity-70">{t.n}</span>
-          </Link>
-        ))}
-      </div>
+      <nav aria-label="Filtrar por estado de pago" className="mt-6 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {tabs.map((t) => {
+          const active = pago === t.value;
+          return (
+            <Link
+              key={t.label}
+              href={qsFor({ pago: t.value, page: undefined })}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]",
+                active
+                  ? "bg-[var(--brand)] text-white ring-[var(--brand)]"
+                  : "bg-white text-[var(--brand-deep)] ring-[#d5e3ec] hover:ring-[var(--brand)]",
+              )}
+            >
+              {t.label}
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-xs tabular-nums",
+                  active ? "bg-white/20" : "bg-[#eef3f7] text-[#5a6578]",
+                )}
+              >
+                {t.n}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
 
-      <form method="get" className="mt-3 grid gap-2 rounded-xl border border-[#d5e3ec] bg-white p-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+      <form
+        method="get"
+        role="search"
+        className="mt-3 grid gap-3 rounded-xl border border-[#d5e3ec] bg-white p-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-end"
+      >
         {pago ? <input type="hidden" name="pago" value={pago} /> : null}
-        <input name="q" defaultValue={q ?? ""} placeholder="Buscar cliente, teléfono, dirección, comuna o N° de pedido" className={field} />
-        <select name="estado" defaultValue={estado ?? ""} className={field} aria-label="Estado de despacho">
-          <option value="">Despacho: todos</option>
-          {FULFILLMENT_STATUSES.map((s) => (
-            <option key={s} value={s}>{FULFILLMENT_LABEL[s]}</option>
-          ))}
-        </select>
-        <input type="date" name="desde" defaultValue={desde ?? ""} className={field} aria-label="Desde" />
-        <input type="date" name="hasta" defaultValue={hasta ?? ""} className={field} aria-label="Hasta" />
+        {sp.orden ? <input type="hidden" name="orden" value={sp.orden} /> : null}
+        <label className="text-xs font-medium text-[#5a6578]">
+          Buscar
+          <input
+            name="q"
+            type="search"
+            defaultValue={q ?? ""}
+            placeholder="Cliente, teléfono, dirección, comuna o N° de pedido"
+            className={cn(field, "mt-1 w-full")}
+          />
+        </label>
+        <MobileCollapse activeCount={[estado, desde, hasta].filter(Boolean).length}>
+          <label className="text-xs font-medium text-[#5a6578]">
+            Despacho
+            <select name="estado" defaultValue={estado ?? ""} className={cn(field, "mt-1 w-full")}>
+              <option value="">Todos</option>
+              {FULFILLMENT_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {FULFILLMENT_LABEL[s]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-[#5a6578]">
+            Desde
+            <input type="date" name="desde" defaultValue={desde ?? ""} max={hasta} className={cn(field, "mt-1 w-full")} />
+          </label>
+          <label className="text-xs font-medium text-[#5a6578]">
+            Hasta
+            <input type="date" name="hasta" defaultValue={hasta ?? ""} min={desde} className={cn(field, "mt-1 w-full")} />
+          </label>
+        </MobileCollapse>
         <div className="flex gap-2">
-          <button type="submit" className={btn.primary}>Filtrar</button>
-          <Link href="/admin/pedidos" className={btn.outline}>Limpiar</Link>
+          <button type="submit" className={cn(btn.primary, "flex-1 lg:flex-none")}>
+            Filtrar
+          </button>
+          {filtered ? (
+            <Link href="/admin/pedidos" className={btn.outline}>
+              Limpiar
+            </Link>
+          ) : null}
         </div>
       </form>
 
-      {orders.length === 0 ? (
-        <p className="mt-6 rounded-xl border border-dashed border-[#d5e3ec] bg-white px-6 py-12 text-center text-[#5a6578]">
-          {total === 0 && !q && !pago && !estado ? "Aún no hay pedidos. Probá el flujo tienda → carrito → checkout → WebPay." : "Sin resultados para estos filtros."}
-        </p>
-      ) : (
-        <div className="mt-4 overflow-x-auto rounded-xl border border-[#d5e3ec] bg-white">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead>
-              <tr className="border-b border-[#e8f0f5] bg-[#fbfdfe] text-left text-[11px] uppercase tracking-wide text-[#5a6578]">
-                <th className="px-4 py-2.5">Pedido</th>
-                <th className="px-2 py-2.5">Cliente</th>
-                <th className="px-2 py-2.5">Entrega</th>
-                <th className="px-2 py-2.5 text-right">Total</th>
-                <th className="px-2 py-2.5">Pago</th>
-                <th className="px-2 py-2.5">Despacho</th>
-                <th className="px-4 py-2.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#eef3f7]">
-              {orders.map((o) => (
-                <tr key={o.id} className="hover:bg-[#fafdfe]">
-                  <td className="px-4 py-2.5">
-                    <p className="font-mono text-xs font-semibold text-[var(--brand-deep)]">#{shortRef(o.id)}</p>
-                    <p className="text-xs text-[#5a6578]">{formatDateTimeCl(o.createdAt)}</p>
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <p className="font-medium text-[var(--brand-deep)]">{o.customerName}</p>
-                    <p className="text-xs text-[#5a6578]">{o.customerPhone}</p>
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <p className="max-w-[220px] truncate">{o.customerAddress}</p>
-                    <p className="text-xs text-[#5a6578]">
-                      {o.deliveryCommune ?? o.deliveryZoneName ?? "—"} · {formatDateCl(toDateStr(o.deliveryDate))}
-                    </p>
-                  </td>
-                  <td className="px-2 py-2.5 text-right tabular-nums">
-                    {formatClp(o.totalClp)}
-                    <p className="text-xs text-[#5a6578]">{o.items.reduce((s, i) => s + i.quantity, 0)} uds.</p>
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <PaymentBadge status={o.status} provider={o.paymentProvider} />
-                    {o.webpayStatus ? <p className="mt-0.5 text-[11px] text-[#8a95a6]">{o.webpayStatus}</p> : null}
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <FulfillmentBadge status={o.fulfillmentStatus} />
-                  </td>
-                  <td className="px-4 py-2.5 text-right">
-                    <Link href={`/admin/pedidos/${o.id}`} className="text-sm font-medium text-[var(--brand)] hover:underline">
-                      Ver
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {pages > 1 ? (
-        <nav className="mt-4 flex items-center justify-between text-sm text-[#5a6578]">
-          <span>
-            {total} pedidos · página {page} de {pages}
-          </span>
-          <span className="flex gap-2">
-            {page > 1 ? <Link href={qsFor({ p: String(page - 1) })} className={btn.outline}>Anterior</Link> : null}
-            {page < pages ? <Link href={qsFor({ p: String(page + 1) })} className={btn.outline}>Siguiente</Link> : null}
-          </span>
-        </nav>
-      ) : null}
+      <div className="mt-4 overflow-hidden rounded-xl border border-[#d5e3ec] bg-white">
+        <DataTable
+          caption="Pedidos"
+          rows={orders}
+          rowKey={(o) => o.id}
+          minWidth={820}
+          mobileCards
+          sort={{ ...sort, basePath: "/admin/pedidos", params }}
+          empty={
+            filtered ? (
+              <EmptyState
+                icon={<SearchX />}
+                title="Sin resultados para estos filtros"
+                description="Prueba con otra búsqueda o amplía el rango de fechas."
+                action={
+                  <Link href="/admin/pedidos" className={btn.outline}>
+                    Limpiar filtros
+                  </Link>
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={<ClipboardList />}
+                title="Aún no hay pedidos"
+                description="Prueba el flujo tienda → carrito → checkout → WebPay; los pedidos aparecerán aquí al instante."
+                action={
+                  <Link href="/" target="_blank" className={btn.primary}>
+                    <Store className="size-4" /> Abrir la tienda
+                  </Link>
+                }
+              />
+            )
+          }
+          columns={[
+            {
+              key: "ref",
+              header: "Pedido",
+              sortKey: "fecha",
+              mobile: "hidden",
+              cell: (o) => (
+                <>
+                  <Link
+                    href={`/admin/pedidos/${o.id}`}
+                    className="font-mono text-xs font-semibold text-[var(--brand-deep)] hover:text-[var(--brand)]"
+                  >
+                    #{shortRef(o.id)}
+                  </Link>
+                  <p className="text-xs text-[#5a6578]">{formatDateTimeCl(o.createdAt)}</p>
+                </>
+              ),
+            },
+            {
+              key: "customer",
+              header: "Cliente",
+              sortKey: "cliente",
+              mobile: "title",
+              cell: (o) => (
+                <Link href={`/admin/pedidos/${o.id}`} className="group flex items-center justify-between gap-2">
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-[var(--brand-deep)] group-hover:text-[var(--brand)]">
+                      {o.customerName}
+                    </span>
+                    <span className="block text-xs text-[#5a6578]">
+                      {o.customerPhone}
+                      <span className="md:hidden">
+                        {" "}
+                        · #{shortRef(o.id)} · {formatDateTimeCl(o.createdAt)}
+                      </span>
+                    </span>
+                  </span>
+                  <ChevronRight aria-hidden className="size-4 shrink-0 text-[#a9b6c4] md:hidden" />
+                </Link>
+              ),
+            },
+            {
+              key: "delivery",
+              header: "Entrega",
+              sortKey: "entrega",
+              cell: (o) => (
+                <>
+                  <p className="max-w-[240px] truncate">{o.customerAddress}</p>
+                  <p className="text-xs text-[#5a6578]">
+                    {o.deliveryCommune ?? o.deliveryZoneName ?? "—"} · {formatDateCl(toDateStr(o.deliveryDate))}
+                  </p>
+                </>
+              ),
+            },
+            {
+              key: "total",
+              header: "Total",
+              sortKey: "total",
+              align: "right",
+              cell: (o) => (
+                <>
+                  <span className="font-medium tabular-nums">{formatClp(o.totalClp)}</span>
+                  <p className="text-xs text-[#5a6578]">{o.items.reduce((s, i) => s + i.quantity, 0)} uds.</p>
+                </>
+              ),
+            },
+            {
+              key: "payment",
+              header: "Pago",
+              cell: (o) => (
+                <>
+                  <PaymentBadge status={o.status} provider={o.paymentProvider} />
+                  {o.webpayStatus ? <p className="mt-0.5 text-[11px] text-[#8a95a6]">{o.webpayStatus}</p> : null}
+                </>
+              ),
+            },
+            {
+              key: "fulfillment",
+              header: "Despacho",
+              cell: (o) => <FulfillmentBadge status={o.fulfillmentStatus} />,
+            },
+            {
+              key: "open",
+              header: <span className="sr-only">Abrir</span>,
+              align: "right",
+              mobile: "hidden",
+              cell: (o) => (
+                <Link
+                  href={`/admin/pedidos/${o.id}`}
+                  aria-label={`Ver pedido ${shortRef(o.id)} de ${o.customerName}`}
+                  className="text-sm font-medium text-[var(--brand)] hover:underline"
+                >
+                  Ver
+                </Link>
+              ),
+            },
+          ]}
+        />
+        {total > 0 ? (
+          <div className="border-t border-[#e8f0f5] bg-[#fafcfd] px-4 py-3">
+            <Pagination
+              page={page}
+              pages={pages}
+              total={total}
+              pageSize={PAGE_SIZE}
+              basePath="/admin/pedidos"
+              params={params}
+              noun="pedidos"
+            />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

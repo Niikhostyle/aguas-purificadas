@@ -73,27 +73,59 @@ export async function logoutAction() {
 }
 
 const productSchema = z.object({
-  name: z.string().min(2).max(120),
-  description: z.string().max(2000).optional(),
-  priceClp: z.coerce.number().int().min(0).max(10_000_000),
+  name: z
+    .string()
+    .trim()
+    .min(2, "El nombre debe tener al menos 2 caracteres.")
+    .max(120, "Máximo 120 caracteres."),
+  description: z.string().max(2000, "Máximo 2000 caracteres.").optional(),
+  priceClp: z.coerce
+    .number({ error: "Ingresa un precio válido." })
+    .int("El precio debe ser un número entero.")
+    .min(0, "El precio no puede ser negativo.")
+    .max(10_000_000, "El precio es demasiado alto."),
   active: z.coerce.boolean().optional(),
-  slug: z.string().max(80).optional(),
+  slug: z
+    .string()
+    .trim()
+    .max(80, "Máximo 80 caracteres.")
+    .regex(/^[a-z0-9-]*$/, "Usa solo minúsculas, números y guiones.")
+    .optional(),
 });
 
-export async function createProductAction(formData: FormData) {
-  const admin = await requireAdmin();
-  if (!admin) redirect("/admin/login");
+export type ProductFormState = {
+  error?: string;
+  fieldErrors?: Partial<Record<"name" | "slug" | "priceClp" | "description" | "image", string>>;
+};
 
-  const parsed = productSchema.safeParse({
+function parseProduct(formData: FormData) {
+  return productSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description") || undefined,
     priceClp: formData.get("priceClp"),
     active: formData.get("active") === "on",
     slug: formData.get("slug") || undefined,
   });
-  if (!parsed.success) {
-    redirect("/admin/productos/nuevo?error=Datos%20inválidos");
+}
+
+function invalid(error: z.ZodError): ProductFormState {
+  const fieldErrors: ProductFormState["fieldErrors"] = {};
+  for (const issue of error.issues) {
+    const key = issue.path[0] as keyof NonNullable<ProductFormState["fieldErrors"]>;
+    fieldErrors[key] ??= issue.message;
   }
+  return { error: "Revisa los campos marcados.", fieldErrors };
+}
+
+export async function createProductAction(
+  _prev: ProductFormState,
+  formData: FormData,
+): Promise<ProductFormState> {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin/login");
+
+  const parsed = parseProduct(formData);
+  if (!parsed.success) return invalid(parsed.error);
 
   const slug = parsed.data.slug?.trim() || slugify(parsed.data.name);
   let imageUrl: string | undefined;
@@ -102,10 +134,8 @@ export async function createProductAction(formData: FormData) {
     try {
       imageUrl = await saveProductImage(admin.tenant.slug, file);
     } catch (e) {
-      redirect(
-        "/admin/productos/nuevo?error=" +
-          encodeURIComponent(e instanceof Error ? e.message : "Error de imagen"),
-      );
+      const message = e instanceof Error ? e.message : "Error de imagen";
+      return { error: message, fieldErrors: { image: message } };
     }
   }
 
@@ -125,29 +155,25 @@ export async function createProductAction(formData: FormData) {
   revalidatePath("/admin/productos");
   revalidatePath("/productos");
   revalidatePath("/");
-  redirect("/admin/productos");
+  redirect(`/admin/productos?ok=${encodeURIComponent(`Producto «${parsed.data.name}» creado.`)}`);
 }
 
-export async function updateProductAction(formData: FormData) {
+export async function updateProductAction(
+  _prev: ProductFormState,
+  formData: FormData,
+): Promise<ProductFormState> {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin/login");
 
   const id = String(formData.get("id") || "");
-  const parsed = productSchema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description") || undefined,
-    priceClp: formData.get("priceClp"),
-    active: formData.get("active") === "on",
-    slug: formData.get("slug") || undefined,
-  });
-  if (!parsed.success || !id) {
-    redirect(`/admin/productos/${id}?error=Datos%20inválidos`);
-  }
+  if (!id) return { error: "Producto no encontrado." };
+  const parsed = parseProduct(formData);
+  if (!parsed.success) return invalid(parsed.error);
 
   const existing = await prisma.product.findFirst({
     where: { id, tenantId: admin.tenantId },
   });
-  if (!existing) redirect("/admin/productos");
+  if (!existing) redirect("/admin/productos?error=Producto%20no%20encontrado");
 
   const slug = parsed.data.slug?.trim() || existing.slug;
   let imageUrl = existing.imageUrl;
@@ -156,10 +182,8 @@ export async function updateProductAction(formData: FormData) {
     try {
       imageUrl = await saveProductImage(admin.tenant.slug, file);
     } catch (e) {
-      redirect(
-        `/admin/productos/${id}?error=` +
-          encodeURIComponent(e instanceof Error ? e.message : "Error de imagen"),
-      );
+      const message = e instanceof Error ? e.message : "Error de imagen";
+      return { error: message, fieldErrors: { image: message } };
     }
   }
 
@@ -180,7 +204,7 @@ export async function updateProductAction(formData: FormData) {
   revalidatePath("/productos");
   revalidatePath(`/productos/${slug}`);
   revalidatePath("/");
-  redirect("/admin/productos");
+  redirect(`/admin/productos?ok=${encodeURIComponent(`Producto «${parsed.data.name}» actualizado.`)}`);
 }
 
 export async function deleteProductAction(formData: FormData) {
@@ -191,12 +215,14 @@ export async function deleteProductAction(formData: FormData) {
   const existing = await prisma.product.findFirst({
     where: { id, tenantId: admin.tenantId },
   });
-  if (existing) {
-    await prisma.product.delete({ where: { id } });
-  }
+  if (!existing) redirect("/admin/productos?error=Producto%20no%20encontrado");
+  await prisma.product.delete({ where: { id } });
 
   revalidatePath("/admin/productos");
   revalidatePath("/productos");
   revalidatePath("/");
-  redirect("/admin/productos");
+  const back = String(formData.get("returnTo") || "");
+  const url = new URL(back.startsWith("/admin/productos") ? back : "/admin/productos", "http://x");
+  url.searchParams.set("ok", `Producto «${existing.name}» eliminado.`);
+  redirect(`${url.pathname}${url.search}`);
 }

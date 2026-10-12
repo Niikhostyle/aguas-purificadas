@@ -1,0 +1,168 @@
+/* Admin UX layer: SweetAlert2 theme, skeletons and motion. Colors come from the
+   Apariencia variables (copied onto .swal2-container by src/lib/alerts.ts). */
+
+.mb-swal {
+  --mb-swal-accent: var(--brand, #00b1e2);
+  --swal2-backdrop: color-mix(in srgb, #06142a 55%, transparent);
+  --swal2-background: #fff;
+  --swal2-color: #3d4a5c;
+  --swal2-border-radius: 1rem;
+  --swal2-width: 28rem;
+  --swal2-padding: 1.5rem 1.5rem 1.25rem;
+  --swal2-outline: 0 0 0 3px color-mix(in srgb, var(--brand, #00b1e2) 35%, transparent);
+  --swal2-timer-progress-bar-background: color-mix(in srgb, var(--brand, #00b1e2) 70%, transparent);
+  --swal2-close-button-color: #7b8aa0;
+  font-family: var(--font-body), "Roboto Condensed", system-ui, sans-serif;
+}
+.mb-swal.mb-swal-tone-danger {
+  --mb-swal-accent: var(--kpi-danger-bg, #dc2626);
+}
+.mb-swal.mb-swal-tone-warning {
+  --mb-swal-accent: var(--kpi-warning-bg, #f59e0b);
+}
+
+.mb-swal .mb-swal-popup {
+  border: 1px solid #dde7ee;
+  box-shadow: 0 24px 60px -20px rgba(6, 20, 42, 0.45);
+}
+.mb-swal .mb-swal-title {
+  color: var(--brand-deep, #12326e);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 0.75rem 0.5rem 0;
+}
+.mb-swal .mb-swal-text {
+  color: #5a6578;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem 0;
+}
+.mb-swal .mb-swal-actions {
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+.mb-swal .mb-swal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7.5rem;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease, background-color 150ms ease;
+}
+.mb-swal .mb-swal-btn:focus-visible {
+  outline: 2px solid var(--mb-swal-accent);
+  outline-offset: 2px;
+}
+.mb-swal .mb-swal-btn-confirm {
+  background: var(--mb-swal-accent);
+  color: #fff;
+  border: 0;
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--mb-swal-accent) 80%, transparent);
+}
+.mb-swal .mb-swal-btn-confirm:hover {
+  filter: brightness(0.92);
+}
+.mb-swal .mb-swal-btn-cancel {
+  background: #fff;
+  color: var(--brand-deep, #12326e);
+  border: 1px solid #d5e3ec;
+}
+.mb-swal .mb-swal-btn-cancel:hover {
+  background: #f4f8fb;
+}
+.mb-swal .swal2-icon.swal2-warning {
+  border-color: color-mix(in srgb, var(--mb-swal-accent) 45%, transparent);
+  color: var(--mb-swal-accent);
+}
+.mb-swal .swal2-icon.swal2-question,
+.mb-swal .swal2-icon.swal2-info {
+  border-color: color-mix(in srgb, var(--brand, #00b1e2) 45%, transparent);
+  color: var(--brand, #00b1e2);
+}
+
+/* Toasts */
+.mb-swal.mb-swal-toast-container {
+  padding-top: 4.75rem;
+}
+.mb-swal .mb-swal-toast {
+  border: 1px solid #dde7ee;
+  border-left: 4px solid var(--brand, #00b1e2);
+  border-radius: 0.8rem;
+  box-shadow: 0 16px 40px -18px rgba(6, 20, 42, 0.45);
+  padding: 0.75rem 0.9rem;
+  width: min(24rem, calc(100vw - 1.5rem));
+}
+.mb-swal .mb-swal-toast-success {
+  border-left-color: var(--kpi-success-bg, #059669);
+}
+.mb-swal .mb-swal-toast-error {
+  border-left-color: var(--kpi-danger-bg, #dc2626);
+}
+.mb-swal .mb-swal-toast-warning {
+  border-left-color: var(--kpi-warning-bg, #f59e0b);
+}
+.mb-swal .mb-swal-toast-title {
+  color: #12233d;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.mb-swal .mb-swal-toast-text {
+  color: #5a6578;
+  font-size: 0.8rem;
+}
+
+[data-kpi-style="filled"] .kpi-card .kpi-trend {
+  background: color-mix(in srgb, var(--kpi-text) 18%, transparent);
+  color: inherit;
+}
+
+/* Skeletons */
+.mb-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #e8f0f5;
+}
+.mb-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: mb-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes mb-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Page enter */
+.mb-page-enter {
+  animation: mb-page-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes mb-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-skeleton::after,
+  .mb-page-enter {
+    animation: none;
+  }
+}

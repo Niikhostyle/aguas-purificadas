@@ -8,16 +8,19 @@ import {
   Package,
   PackageCheck,
   Route as RouteIcon,
+  ShoppingCart,
   Truck,
   Wallet,
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { FulfillmentBadge, PageHeader, PaymentBadge, StatCard, btn } from "@/components/admin/dispatch-ui";
-import { BarChart, Panel, StatsTable } from "@/components/admin/ui";
+import { EmptyState, Panel, StatsTable } from "@/components/admin/ui";
+import { LazySalesChart } from "@/components/admin/ui/sales-chart-lazy";
 import { orderPeriodStats } from "@/lib/admin-stats";
 import { isSuperAdmin, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
+  DISPATCHABLE_PAYMENT,
   addDaysStr,
   dateFromStr,
   formatDateCl,
@@ -40,19 +43,48 @@ export default async function AdminHomePage() {
   const [stats, period] = await Promise.all([getDispatchStats(tenantId), orderPeriodStats({ tenantId })]);
   const today = stats.today;
   const dayStart = startOfDayCl(today);
+  const yesterdayStart = startOfDayCl(addDaysStr(today, -1));
   const weekStart = startOfDayCl(addDaysStr(today, -6));
+  const prevWeekStart = startOfDayCl(addDaysStr(today, -13));
 
-  const [salesToday, salesWeek, pendingPayment, dueSoon, balances, routes, recent, productCount] =
-    await Promise.all([
+  const [
+    salesToday,
+    salesYesterday,
+    salesWeek,
+    salesPrevWeek,
+    deliveredYesterday,
+    pendingPayment,
+    dueSoon,
+    balances,
+    routes,
+    recent,
+    productCount,
+  ] = await Promise.all([
       prisma.order.aggregate({
         where: { tenantId, status: "paid", paidAt: { gte: dayStart } },
         _sum: { totalClp: true },
         _count: true,
       }),
       prisma.order.aggregate({
+        where: { tenantId, status: "paid", paidAt: { gte: yesterdayStart, lt: dayStart } },
+        _sum: { totalClp: true },
+      }),
+      prisma.order.aggregate({
         where: { tenantId, status: "paid", paidAt: { gte: weekStart } },
         _sum: { totalClp: true },
         _count: true,
+      }),
+      prisma.order.aggregate({
+        where: { tenantId, status: "paid", paidAt: { gte: prevWeekStart, lt: weekStart } },
+        _sum: { totalClp: true },
+      }),
+      prisma.order.count({
+        where: {
+          tenantId,
+          status: { in: DISPATCHABLE_PAYMENT },
+          fulfillmentStatus: "entregado",
+          deliveredAt: { gte: yesterdayStart, lt: dayStart },
+        },
       }),
       prisma.order.count({ where: { tenantId, status: "pending" } }),
       prisma.deliveryCustomer.count({
@@ -102,12 +134,43 @@ export default async function AdminHomePage() {
       </PageHeader>
 
       <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Ventas hoy" value={formatClp(salesToday._sum.totalClp ?? 0)} hint={`${salesToday._count} pagos WebPay`} icon={Wallet} tone="emerald" href="/admin/pedidos?pago=paid" />
-        <StatCard label="Ventas 7 días" value={formatClp(salesWeek._sum.totalClp ?? 0)} hint={`${salesWeek._count} pedidos pagados`} icon={CreditCard} tone="navy" href="/admin/pedidos?pago=paid" />
-        <StatCard label="Pedidos hoy" value={stats.hoy} hint={`${stats.creadosHoy} ingresados hoy`} icon={ClipboardList} tone="brand" href="/admin/despacho" />
+        <StatCard
+          label="Ventas hoy"
+          value={formatClp(salesToday._sum.totalClp ?? 0)}
+          hint={`${salesToday._count} pagos WebPay`}
+          icon={Wallet}
+          tone="emerald"
+          href="/admin/pedidos?pago=paid"
+          trend={{ current: salesToday._sum.totalClp ?? 0, previous: salesYesterday._sum.totalClp ?? 0, label: "vs ayer" }}
+        />
+        <StatCard
+          label="Ventas 7 días"
+          value={formatClp(salesWeek._sum.totalClp ?? 0)}
+          hint={`${salesWeek._count} pedidos pagados`}
+          icon={CreditCard}
+          tone="navy"
+          href="/admin/pedidos?pago=paid"
+          trend={{ current: salesWeek._sum.totalClp ?? 0, previous: salesPrevWeek._sum.totalClp ?? 0, label: "vs sem. anterior" }}
+        />
+        <StatCard
+          label="Pedidos hoy"
+          value={stats.hoy}
+          hint={`${stats.creadosHoy} ingresados hoy`}
+          icon={ClipboardList}
+          tone="brand"
+          href="/admin/despacho"
+          trend={{ current: period.orders[0], previous: period.orders[1], label: "vs ayer" }}
+        />
         <StatCard label="Pendientes despacho" value={stats.pendientes} hint="Por asignar o programados" icon={CalendarClock} tone="amber" href="/admin/despacho?fecha=todas&estado=por_asignar" />
-        <StatCard label="En ruta" value={stats.enRuta} icon={Truck} tone="sky" href="/admin/despacho?fecha=todas&estado=en_ruta" />
-        <StatCard label="Entregados hoy" value={stats.entregadosHoy} icon={PackageCheck} tone="emerald" href={`/admin/despacho?fecha=${today}&estado=entregado`} />
+        <StatCard label="En ruta" value={stats.enRuta} hint="Con el chofer ahora" icon={Truck} tone="sky" href="/admin/despacho?fecha=todas&estado=en_ruta" />
+        <StatCard
+          label="Entregados hoy"
+          value={stats.entregadosHoy}
+          icon={PackageCheck}
+          tone="emerald"
+          href={`/admin/despacho?fecha=${today}&estado=entregado`}
+          trend={{ current: stats.entregadosHoy, previous: deliveredYesterday, label: "vs ayer" }}
+        />
         {flags.recordatorios ? (
           <StatCard label="Próximos a reponer" value={dueSoon} hint="Recurrentes · 3 días" icon={BellRing} tone="rose" href="/admin/recordatorios" />
         ) : null}
@@ -126,11 +189,8 @@ export default async function AdminHomePage() {
             ]}
           />
         </Panel>
-        <Panel title="Ventas · últimos 14 días">
-          <BarChart
-            ariaLabel="Ventas pagadas por día, últimos 14 días"
-            data={period.daily.map((d) => ({ label: d.label, value: d.revenue, display: formatClp(d.revenue) }))}
-          />
+        <Panel title="Ventas · últimos 14 días" description="Pasa el cursor o toca una barra para ver el detalle.">
+          <LazySalesChart data={period.daily} />
         </Panel>
       </div>
 
@@ -160,7 +220,21 @@ export default async function AdminHomePage() {
                 </Link>
               </li>
             ))}
-            {recent.length === 0 ? <li className="px-4 py-8 text-center text-sm text-[#5a6578]">Aún no hay pedidos.</li> : null}
+            {recent.length === 0 ? (
+              <li>
+                <EmptyState
+                  compact
+                  icon={<ShoppingCart />}
+                  title="Aún no hay pedidos"
+                  description="Cuando tus clientes compren en la tienda, aparecerán aquí."
+                  action={
+                    <Link href="/" target="_blank" className={btn.outline}>
+                      Ver tienda
+                    </Link>
+                  }
+                />
+              </li>
+            ) : null}
           </ul>
         </section>
 
@@ -192,7 +266,21 @@ export default async function AdminHomePage() {
               );
             })}
             {routes.length === 0 ? (
-              <li className="px-4 py-8 text-center text-sm text-[#5a6578]">Sin rutas para hoy.</li>
+              <li>
+                <EmptyState
+                  compact
+                  icon={<RouteIcon />}
+                  title="Sin rutas para hoy"
+                  description="Agrupa los pedidos del día por sector en un clic."
+                  action={
+                    flags.despacho ? (
+                      <Link href={`/admin/despacho?fecha=${today}`} className={btn.primary}>
+                        Planificar rutas
+                      </Link>
+                    ) : undefined
+                  }
+                />
+              </li>
             ) : null}
           </ul>
         </section>

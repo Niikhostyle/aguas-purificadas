@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
+  Suspense,
   useCallback,
   useEffect,
   useId,
@@ -12,6 +13,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Bell,
   BellRing,
@@ -30,14 +32,20 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  Printer,
   Recycle,
   Search,
+  Smartphone,
   Store,
   Truck,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { logoutAction } from "@/app/admin/actions";
+import { ConfirmSubmitButton } from "../ui/confirm-submit";
+import { FlashToaster } from "../ui/flash-toaster";
+import { CommandPalette, type PaletteAction } from "./command-palette";
+import "../admin-ux.css";
 import {
   PLATFORM_NAV,
   TENANT_NAV,
@@ -211,132 +219,57 @@ function SidebarLink({
   );
 }
 
-function QuickSearch({ groups }: { groups: AdminNavGroup[] }) {
-  const router = useRouter();
-  const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const listId = useId();
-  const close = useCallback(() => setOpen(false), []);
-  const wrapRef = useDismiss(open, close);
-
-  const items = useMemo(() => {
-    const flat = groups.flatMap((g) => g.items.map((i) => ({ ...i, group: g.label })));
-    const needle = q
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    if (!needle) return flat;
-    return flat.filter((i) =>
-      `${i.label} ${i.group}`
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .includes(needle),
-    );
-  }, [groups, q]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        inputRef.current?.focus();
-        setOpen(true);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  const go = (href: string) => {
-    setOpen(false);
-    setQ("");
-    inputRef.current?.blur();
-    router.push(href);
-  };
-
+function PaletteTrigger({ onOpen }: { onOpen: () => void }) {
   return (
-    <div ref={wrapRef} className="relative w-full max-w-md">
-      <label htmlFor={`${listId}-input`} className="sr-only">
-        Buscar sección del panel
-      </label>
-      <Search
-        aria-hidden
-        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#7b8aa0]"
-      />
-      <input
-        ref={inputRef}
-        id={`${listId}-input`}
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-autocomplete="list"
-        aria-activedescendant={open && items[active] ? `${listId}-${active}` : undefined}
-        value={q}
-        placeholder="Buscar sección…"
-        onChange={(e) => {
-          setQ(e.target.value);
-          setActive(0);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setActive((a) => Math.min(a + 1, items.length - 1));
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setActive((a) => Math.max(a - 1, 0));
-          } else if (e.key === "Enter" && items[active]) {
-            e.preventDefault();
-            go(items[active].href);
-          }
-        }}
-        className="h-9 w-full rounded-lg border border-[#d5e3ec] bg-[#f4f8fb] pl-9 pr-14 text-sm text-[#12233d] placeholder:text-[#7b8aa0] focus:border-[var(--brand)] focus:bg-white focus:outline-none focus:ring-3 focus:ring-[var(--brand)]/20"
-      />
-      <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-[#d5e3ec] bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#7b8aa0] sm:block">
-        Ctrl K
-      </kbd>
-      {open ? (
-        <ul
-          id={listId}
-          role="listbox"
-          aria-label="Secciones"
-          className="absolute left-0 right-0 top-11 z-50 max-h-80 overflow-y-auto rounded-xl border border-[#d5e3ec] bg-white p-1.5 shadow-xl"
-        >
-          {items.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-[#5a6578]">Sin resultados</li>
-          ) : (
-            items.map((item, i) => {
-              const Icon = ICONS[item.icon];
-              return (
-                <li
-                  key={item.href}
-                  id={`${listId}-${i}`}
-                  role="option"
-                  aria-selected={i === active}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    go(item.href);
-                  }}
-                  onMouseEnter={() => setActive(i)}
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-                    i === active ? "bg-[#e8f7fc] text-[var(--brand-deep)]" : "text-[#3d4a5c]"
-                  }`}
-                >
-                  <Icon aria-hidden className="size-4 text-[var(--brand)]" />
-                  <span className="flex-1">{item.label}</span>
-                  <span className="text-[11px] text-[#8a96a6]">{item.group}</span>
-                </li>
-              );
-            })
-          )}
-        </ul>
-      ) : null}
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-haspopup="dialog"
+        aria-keyshortcuts="Control+K Meta+K"
+        className="group relative hidden h-9 w-full max-w-md items-center rounded-lg border border-[#d5e3ec] bg-[#f4f8fb] pl-9 pr-14 text-left text-sm text-[#7b8aa0] transition-colors hover:border-[var(--brand)]/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--brand)] sm:flex"
+      >
+        <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+        Buscar sección o acción…
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[#d5e3ec] bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#7b8aa0]">
+          Ctrl K
+        </kbd>
+      </button>
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-haspopup="dialog"
+        aria-label="Buscar sección o acción"
+        className="grid size-9 place-items-center rounded-lg border border-[#d5e3ec] text-[#3d4a5c] hover:bg-[#f4f8fb] sm:hidden"
+      >
+        <Search aria-hidden className="size-[18px]" />
+      </button>
+    </>
   );
+}
+
+function buildActions(variant: Props["variant"], hidden: Set<string>, siteHref: string, siteLabel: string): PaletteAction[] {
+  const list: (PaletteAction & { requires?: string })[] =
+    variant === "platform"
+      ? [
+          { id: "new-tenant", label: "Crear empresa", icon: Plus, href: "/admin/plataforma/nueva", keywords: "nueva cliente alta" },
+          { id: "suspended", label: "Empresas suspendidas", icon: Building2, href: "/admin/plataforma/empresas?estado=suspendidas" },
+          { id: "landing", label: "Editar landing mibidon.cl", icon: LayoutTemplate, href: "/admin/plataforma/landing" },
+        ]
+      : [
+          { id: "new-product", label: "Nuevo producto", icon: Plus, href: "/admin/productos/nuevo", keywords: "crear agregar catalogo" },
+          { id: "pending-pay", label: "Pedidos con pago pendiente", icon: ClipboardList, href: "/admin/pedidos?pago=pending", keywords: "webpay" },
+          { id: "unassigned", label: "Pedidos sin ruta asignada", icon: Truck, href: "/admin/despacho?fecha=todas&estado=por_asignar", requires: "/admin/despacho", keywords: "asignar programar" },
+          { id: "sheets", label: "Hojas de ruta de hoy", icon: Printer, href: "/admin/despacho/hoja", requires: "/admin/despacho", keywords: "imprimir" },
+          { id: "driver", label: "Vista chofer", icon: Smartphone, href: "/admin/despacho/chofer", requires: "/admin/despacho", keywords: "movil entregas" },
+          { id: "due", label: "Clientes por reponer", icon: BellRing, href: "/admin/recordatorios", requires: "/admin/recordatorios", keywords: "whatsapp recordatorio" },
+          { id: "colors", label: "Cambiar colores y logos", icon: Paintbrush, href: "/admin/apariencia", keywords: "apariencia tema marca" },
+        ];
+  return [
+    ...list.filter((a) => !a.requires || !hidden.has(a.requires)),
+    { id: "site", label: siteLabel, icon: Store, href: siteHref, external: true, keywords: "tienda sitio web" },
+    { id: "logout", label: "Cerrar sesión", icon: LogOut, run: "logout", keywords: "salir" },
+  ];
 }
 
 const TONE_DOT: Record<NonNullable<AdminNotification["tone"]>, string> = {
@@ -462,13 +395,16 @@ function UserMenu({
             {siteLabel}
           </a>
           <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+            <ConfirmSubmitButton
+              confirmTitle="¿Cerrar sesión?"
+              confirmText="Tendrás que volver a ingresar para administrar el panel."
+              confirmLabel="Cerrar sesión"
+              tone="primary"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-[var(--brand)] [&>svg]:size-4"
             >
               <LogOut aria-hidden className="size-4" />
               Cerrar sesión
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       ) : null}
@@ -546,8 +482,36 @@ export function AdminShell({
   }, [variant, hiddenKey]);
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const paletteReturnFocus = useRef<HTMLElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const actions = useMemo(
+    () => buildActions(variant, new Set(hiddenKey ? hiddenKey.split("|") : []), siteHref, siteLabel),
+    [variant, hiddenKey, siteHref, siteLabel],
+  );
+
+  const openPalette = useCallback(() => {
+    paletteReturnFocus.current = document.activeElement as HTMLElement | null;
+    setPaletteOpen(true);
+  }, []);
+  const closePalette = useCallback(() => {
+    setPaletteOpen(false);
+    paletteReturnFocus.current?.focus?.();
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (paletteOpen) closePalette();
+        else openPalette();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [paletteOpen, openPalette, closePalette]);
 
   useEffect(() => {
     if (window.localStorage.getItem(COLLAPSE_KEY) === "1") {
@@ -643,19 +607,34 @@ export function AdminShell({
         </div>
       </aside>
 
+      <AnimatePresence>
       {drawerOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
+        <motion.div key="drawer" className="fixed inset-0 z-50 lg:hidden" exit={{ opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.2 }}>
+          <motion.div
             aria-hidden
             onClick={closeDrawer}
             className="absolute inset-0 bg-[#06142a]/60 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
           />
-          <div
+          <motion.div
             ref={drawerRef}
             role="dialog"
             aria-modal="true"
             aria-label="Menú de navegación"
             className="absolute inset-y-0 left-0 flex w-[min(84vw,300px)] flex-col [background:var(--admin-sidebar-fill)] shadow-2xl"
+            initial={reduceMotion ? false : { x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={reduceMotion ? { opacity: 0 } : { x: "-100%" }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 40 }}
+            drag={reduceMotion ? false : "x"}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={{ left: 0.6, right: 0 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -80 || info.velocity.x < -400) closeDrawer();
+            }}
           >
             <div className="flex h-16 items-center justify-between border-b border-white/8 px-5">
               <Brand orgName={orgName} orgSubtitle={orgSubtitle} orgLogoUrl={orgLogoUrl} variant={variant} collapsed={false} />
@@ -674,9 +653,29 @@ export function AdminShell({
               collapsed={false}
               onNavigate={() => setDrawerOpen(false)}
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       ) : null}
+      </AnimatePresence>
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={closePalette}
+        groups={groups}
+        icons={ICONS}
+        actions={actions}
+        searchTargets={
+          variant === "platform"
+            ? [{ label: "Buscar empresas", href: "/admin/plataforma/empresas", icon: Building2 }]
+            : [
+                { label: "Buscar pedidos", href: "/admin/pedidos", icon: ClipboardList },
+                { label: "Buscar productos", href: "/admin/productos", icon: Package },
+              ]
+        }
+      />
+      <Suspense fallback={null}>
+        <FlashToaster />
+      </Suspense>
 
       <div className={`transition-[padding] duration-200 print:!pl-0 ${collapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}>
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[#dde7ee] bg-[var(--admin-topbar-bg)]/95 text-[var(--admin-topbar-text)] px-4 backdrop-blur sm:px-6 print:hidden">
@@ -690,8 +689,8 @@ export function AdminShell({
           >
             <Menu aria-hidden className="size-5" />
           </button>
-          <div className="min-w-0 flex-1">
-            <QuickSearch groups={groups} />
+          <div className="flex min-w-0 flex-1 justify-end sm:justify-start">
+            <PaletteTrigger onOpen={openPalette} />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <Notifications items={notifications} />

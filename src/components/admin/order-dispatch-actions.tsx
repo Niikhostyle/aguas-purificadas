@@ -2,6 +2,7 @@ import { CheckCircle2, Truck, XCircle } from "lucide-react";
 import { markOrdersAction } from "@/app/admin/(panel)/despacho/actions";
 import { btn, field } from "@/components/admin/dispatch-ui";
 import { cn } from "@/lib/utils";
+import { ConfirmSubmitButton } from "./ui/confirm-submit";
 
 export function OrderDispatchActions({
   orderId,
@@ -79,14 +80,16 @@ export function OrderDispatchActions({
             <button type="submit" name="status" value="entregado" className={cn(btn.success, "flex-1 py-1.5 text-xs")}>
               <CheckCircle2 className="size-3.5" /> Confirmar
             </button>
-            <button
-              type="submit"
+            <ConfirmSubmitButton
               name="status"
               value="no_entregado"
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-rose-700 ring-1 ring-rose-200 hover:bg-rose-50"
+              confirmTitle="¿Marcar como no entregado?"
+              confirmText="El pedido vuelve a quedar pendiente para reprogramarlo. Puedes dejar una nota con el motivo."
+              confirmLabel="Marcar no entregado"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-rose-700 ring-1 ring-rose-200 hover:bg-rose-50 [&>svg]:size-3.5"
             >
               <XCircle className="size-3.5" /> No entregado
-            </button>
+            </ConfirmSubmitButton>
           </div>
         </form>
       </details>

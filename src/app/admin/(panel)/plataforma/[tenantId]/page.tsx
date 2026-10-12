@@ -7,7 +7,7 @@ import {
   setTenantActiveAction,
   updateCompanyAction,
 } from "@/app/admin/(panel)/plataforma/manage-actions";
-import { KpiCard, KpiGrid, PageHeader, Panel, StatusBadge, adminButton } from "@/components/admin/ui";
+import { ConfirmSubmitButton, KpiCard, KpiGrid, PageHeader, Panel, StatusBadge, adminButton } from "@/components/admin/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +27,7 @@ export default async function PlatformTenantDetailPage({
   if (!admin) redirect("/admin/login?tenant=plataforma");
 
   const { tenantId } = await params;
-  const { ok, error } = await searchParams;
+  const { error } = await searchParams;
   const tenant = await prisma.tenant.findFirst({
     where: { id: tenantId, slug: { not: "plataforma" } },
     include: {
@@ -72,19 +72,24 @@ export default async function PlatformTenantDetailPage({
               <input type="hidden" name="tenantId" value={tenant.id} />
               <input type="hidden" name="active" value={tenant.active ? "0" : "1"} />
               <input type="hidden" name="returnTo" value={returnTo} />
-              <button type="submit" className={adminButton({ variant: tenant.active ? "danger" : "primary" })}>
+              <ConfirmSubmitButton
+                tone={tenant.active ? "danger" : "primary"}
+                confirmTitle={tenant.active ? `¿Suspender «${tenant.name}»?` : `¿Reactivar «${tenant.name}»?`}
+                confirmText={
+                  tenant.active
+                    ? "Su tienda y su panel quedan fuera de servicio hasta que la reactives."
+                    : "Su tienda y su panel vuelven a estar disponibles."
+                }
+                confirmLabel={tenant.active ? "Suspender" : "Activar"}
+                className={adminButton({ variant: tenant.active ? "danger" : "primary" })}
+              >
                 {tenant.active ? "Suspender" : "Activar"}
-              </button>
+              </ConfirmSubmitButton>
             </form>
           </>
         }
       />
 
-      {ok ? (
-        <p role="status" className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
-          {ok === "1" ? "Cambios guardados." : ok}
-        </p>
-      ) : null}
       {error ? (
         <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
           {error}
