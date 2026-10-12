@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [{ source: "/uploads/:path*", destination: "/api/uploads/:path*" }],
+    };
+  },
   async headers() {
     return [
       {
