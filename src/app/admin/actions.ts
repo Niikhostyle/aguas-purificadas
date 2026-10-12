@@ -41,7 +41,7 @@ export async function loginAction(formData: FormData) {
   const limited = rateLimit(`admin-login:${ip}:${tenantSlug}`, 8, 60_000);
   if (!limited.ok) {
     redirect(
-      `/admin/login?tenant=${encodeURIComponent(tenantSlug)}&error=${encodeURIComponent("Demasiados intentos. Probá en un minuto.")}`,
+      `/admin/login?tenant=${encodeURIComponent(tenantSlug)}&error=${encodeURIComponent("Demasiados intentos. Prueba en un minuto.")}`,
     );
   }
 

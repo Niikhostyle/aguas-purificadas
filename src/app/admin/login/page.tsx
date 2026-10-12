@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  DEMO_TENANT_SLUG,
   getAdminSession,
   isDemoTenantSlug,
   isSuperAdmin,
@@ -36,16 +35,17 @@ export default async function AdminLoginPage({
 }: {
   searchParams: Promise<{ error?: string; tenant?: string }>;
 }) {
+  const { error, tenant: tenantQuery } = await searchParams;
   const session = await getAdminSession();
-  if (session) {
-    redirect(isSuperAdmin(session) ? "/admin/plataforma" : "/admin");
-  }
+  if (isSuperAdmin(session)) redirect("/admin/plataforma");
+  // A store admin (e.g. the open demo) asking for the platform login must be able to switch accounts.
+  if (session && tenantQuery?.toLowerCase() !== "plataforma") redirect("/admin");
 
   if (await getInactiveHostTenant()) redirect(SUSPENDED_PATH);
 
-  const { error, tenant: tenantQuery } = await searchParams;
   const headerSlug = await getTenantSlugFromHeaders();
-  const tenantSlug = (tenantQuery || headerSlug || DEMO_TENANT_SLUG).toLowerCase();
+  // The apex (mibidon.cl) is the platform; stores log in on their own subdomain.
+  const tenantSlug = (tenantQuery || headerSlug || "plataforma").toLowerCase();
   const isPlatform = tenantSlug === "plataforma";
 
   const wantsDemo =
@@ -101,8 +101,8 @@ export default async function AdminLoginPage({
         </p>
         <p className="mt-2 text-sm text-[#5a6578]">
           {isPlatform
-            ? "Super-admin: gestioná empresas y sus administradores."
-            : "Ingresá con el admin de la empresa (slug del tenant)."}
+            ? "Super-admin: gestiona empresas y sus administradores."
+            : "Ingresa con el admin de la empresa (slug del tenant)."}
         </p>
 
         <form
